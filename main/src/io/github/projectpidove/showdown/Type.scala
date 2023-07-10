@@ -1,0 +1,21 @@
+package io.github.projectpidove.showdown
+
+enum Type:
+  case Bug
+  case Dragon
+  case Electric
+  case Fighting
+  case Fire
+  case Flying
+  case Grass
+  case Ground
+  case Ice
+  case Normal
+  case Poison
+  case Psychic
+  case Rock
+  case Water
+  case Dark
+  case Fairy
+  case Ghost
+  case Steel
