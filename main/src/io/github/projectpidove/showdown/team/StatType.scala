@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.team
 
 enum StatType:
   case Health

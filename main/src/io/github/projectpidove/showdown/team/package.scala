@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.team
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*

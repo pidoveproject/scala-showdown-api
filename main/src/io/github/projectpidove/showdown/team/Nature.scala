@@ -1,6 +1,6 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.team
 
-import StatType.*
+import io.github.projectpidove.showdown.team.StatType.*
 
 enum Nature(modifiedStats: Option[(StatType, StatType)] = None):
 
@@ -25,7 +25,7 @@ enum Nature(modifiedStats: Option[(StatType, StatType)] = None):
   case Timid extends Nature(Speed, Attack)
   case Hasty extends Nature(Speed, Defense)
   case Jolly extends Nature(Speed, SpecialAttack)
-  case Naitve extends Nature(Speed, SpecialDefense)
+  case Naive extends Nature(Speed, SpecialDefense)
   case Modest extends Nature(SpecialAttack, Attack)
   case Mild extends Nature(SpecialAttack, Defense)
   case Quiet extends Nature(SpecialAttack, Speed)

@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.team
 
 case class PokemonSet(
     name: Option[String],
