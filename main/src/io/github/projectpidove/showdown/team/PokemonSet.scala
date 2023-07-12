@@ -1,11 +1,11 @@
 package io.github.projectpidove.showdown.team
 
 case class PokemonSet(
-    name: Option[String],
-    species: String,
+    name: Option[Surname],
+    species: SpeciesName,
     gender: Option[Gender],
-    item: Option[String],
-    ability: String,
+    item: Option[ItemName],
+    ability: AbilityName,
     nature: Nature,
     moves: MoveNames,
     ivs: IVS,
