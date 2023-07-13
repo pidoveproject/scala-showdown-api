@@ -1,5 +1,11 @@
 package io.github.projectpidove.showdown.team
 
+import io.github.iltotore.iron.*
+import io.github.iltotore.iron.constraint.all.*
+import io.github.iltotore.iron.zioJson.given
+import zio.json.*
+import io.github.projectpidove.showdown.json.{someOrEmptyEncoder, someOrEmptyDecoder}
+
 case class PokemonSet(
     name: Option[Surname],
     species: SpeciesName,
@@ -18,4 +24,4 @@ case class PokemonSet(
     dynamaxLevel: DynamaxLevel,
     gigantamax: Boolean,
     teraType: Type
-)
+) derives JsonDecoder, JsonEncoder

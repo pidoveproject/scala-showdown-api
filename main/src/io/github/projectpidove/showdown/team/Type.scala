@@ -1,5 +1,7 @@
 package io.github.projectpidove.showdown.team
 
+import zio.json.JsonCodec
+
 enum Type:
   case Bug
   case Dragon
@@ -19,3 +21,10 @@ enum Type:
   case Fairy
   case Ghost
   case Steel
+
+object Type:
+
+  given JsonCodec[Type] = JsonCodec.string.transformOrFail(
+    name => Type.values.find(_.toString == name).toRight(s"Invalid type: $name"),
+    _.toString
+  )
