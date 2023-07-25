@@ -3,12 +3,12 @@ package io.github.projectpidove.showdown.team
 import zio.json.*
 
 enum StatType(val shortName: String):
-  case Health extends StatType("hp")
-  case Attack extends StatType("atk")
-  case Defense extends StatType("def")
-  case SpecialAttack extends StatType("spa")
-  case SpecialDefense extends StatType("spd")
-  case Speed extends StatType("spe")
+  case Health extends StatType("HP")
+  case Attack extends StatType("Atk")
+  case Defense extends StatType("Def")
+  case SpecialAttack extends StatType("SpA")
+  case SpecialDefense extends StatType("SpD")
+  case Speed extends StatType("Spe")
 
 object StatType:
 

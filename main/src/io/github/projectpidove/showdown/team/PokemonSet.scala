@@ -7,21 +7,21 @@ import zio.json.*
 import io.github.projectpidove.showdown.json.{someOrEmptyEncoder, someOrEmptyDecoder}
 
 case class PokemonSet(
-    name: Option[Surname],
+    name: Option[Surname] = None,
     species: SpeciesName,
-    gender: Option[Gender],
-    item: Option[ItemName],
+    gender: Option[Gender] = None,
+    item: Option[ItemName] = None,
     ability: AbilityName,
     nature: Nature,
-    moves: MoveNames,
-    ivs: IVS,
-    evs: EVS,
-    level: Level,
-    shiny: Boolean,
-    happiness: Happiness,
-    pokeball: String,
-    hpType: Option[Type],
-    dynamaxLevel: DynamaxLevel,
-    gigantamax: Boolean,
-    teraType: Type
+    moves: MoveNames = List.empty.assume,
+    ivs: IVS = Map.empty,
+    evs: EVS = Map.empty,
+    level: Level = 100,
+    shiny: Boolean = false,
+    happiness: Happiness = 255,
+    pokeball: String = "",
+    hpType: Option[Type] = None,
+    dynamaxLevel: DynamaxLevel = 10,
+    gigantamax: Boolean = false,
+    teraType: Type = Type.Normal
 ) derives JsonDecoder, JsonEncoder

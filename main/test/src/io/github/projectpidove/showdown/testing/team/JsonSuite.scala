@@ -32,7 +32,7 @@ object JsonSuite extends TestSuite:
         do
           assertEncodeStr(nature, nature.toString)
 
-      test("type")
+      test("type"):
         for
           tpe <- Type.values
         do
