@@ -35,11 +35,13 @@ extension [In, Out, Value](syntax: Syntax[String, In, Out, Value])
 
 val whitespaces = Syntax.whitespace.repeat0.unit(Chunk.from(" "))
 
-val newline = Syntax.charIn("\n\r").unit('\n')
+private def lineBreak(print: String) = (Syntax.string("\u000D\u000A", print) | Syntax.charIn("\u000A\u000B\u000C\u000D\u0085\u2028\u2029").string).unit(print)
+val newline = lineBreak(System.lineSeparator())
+val newlineSpace = lineBreak(" ")
 val endOfLine = newline | Syntax.end
 val lines = Syntax.end | newline.repeat0.autoBacktracking.unit(Chunk.empty)
 
-def nonBlankSyntax[Err, In, Out >: Char](end: Syntax[Err, In, Out, Unit] = Syntax.charIn("\n\r").unit(' ') | Syntax.end) =
+def nonBlankSyntax[Err, In, Out >: Char](end: Syntax[Err, In, Out, Unit] = newlineSpace | Syntax.end) =
   Syntax
     .anyChar
     .repeatUntil(end)

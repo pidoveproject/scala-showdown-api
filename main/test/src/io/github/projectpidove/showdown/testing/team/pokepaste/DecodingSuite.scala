@@ -10,12 +10,23 @@ import zio.parser.*
 object DecodingSuite extends TestSuite:
 
   def assertParse[Value](syntax: Syntax[?, Char, ?, Value], input: String, expected: Value): Unit =
-    assert((syntax <~ Syntax.end).parseString(input) == Right(expected))
+    val r = (syntax <~ Syntax.end).parseString(input)
+    assert(r == Right(expected))
 
   def assertFail(syntax: Syntax[?, Char, ?, ?], input: String): Unit =
     assert((syntax <~ Syntax.end).parseString(input).isLeft)
 
   val tests = Tests:
+
+    test("newline"):
+      test - assertParse(newline, "\u000D\u000A", ())
+      test - assertParse(newline, "\u000A", ())
+      test - assertParse(newline, "\u000B", ())
+      test - assertParse(newline, "\u000C", ())
+      test - assertParse(newline, "\u000D", ())
+      test - assertParse(newline, "\u0085", ())
+      test - assertParse(newline, "\u2028", ())
+      test - assertParse(newline, "\u2029", ())
 
     test("nonBlank"):
       test("valid") - assertParse(nonBlankSyntax(), "Artikuno", SpeciesName("Artikuno"))

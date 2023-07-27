@@ -106,7 +106,7 @@ val abilityLineSyntax = Syntax.string("Ability:", ()) ~> whitespaces ~ abilitySy
 val natureLineSyntax = natureSyntax <~ whitespaces <~ Syntax.string("Nature", ())
 
 val moveLineSyntax = Syntax.char('-') ~> whitespaces ~> moveSyntax
-val moveListSyntax: Syntax[String, Char, Char, MoveNames] = moveLineSyntax.repeatWithSep(endOfLine).transformEither(
+val moveListSyntax: Syntax[String, Char, Char, MoveNames] = moveLineSyntax.repeat.transformEither(
   _.toList.refineEither[MaxLength[4]],
   moves => Right(Chunk.from(moves))
 )
@@ -138,7 +138,7 @@ private val evsSet = evsSyntax.withKey("evs")
 
 private val setSyntax = abilitySet | natureSet | moveSet | shinySet | levelSet | teraTypeSet | ivsSet | evsSet
 
-val pokemonSet = ((firstLineSyntax <~ endOfLine) ~ setSyntax.repeatWithSep0(endOfLine.repeat0.unit(Chunk(())))).transformEither[String, PokemonSet](
+val pokemonSet = (firstLineSyntax ~ setSyntax.repeatWithSep0(endOfLine.repeat0.unit(Chunk(())))).transformEither[String, PokemonSet](
   (species, gender, surname, item, attributes) =>
     val map = attributes.toMap
     for
