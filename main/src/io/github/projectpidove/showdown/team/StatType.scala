@@ -16,8 +16,8 @@ object StatType:
 
   given JsonCodec[StatType] = JsonCodec.string.transformOrFail(
     name => fromShortName(name).toRight(s"Invalid stat name: $name"),
-    _.shortName
+    _.shortName.toLowerCase
   )
 
-  given JsonFieldEncoder[StatType] = JsonFieldEncoder.string.contramap(_.shortName)
+  given JsonFieldEncoder[StatType] = JsonFieldEncoder.string.contramap(_.shortName.toLowerCase)
   given JsonFieldDecoder[StatType] = JsonFieldDecoder.string.mapOrFail(name => fromShortName(name).toRight(s"Invalid stat name: $name"))
