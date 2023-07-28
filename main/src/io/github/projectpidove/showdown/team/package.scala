@@ -31,9 +31,12 @@ type IV = Int :| Interval.Closed[0, 31]
 object IV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 31], IV]
 
 type EV = Int :| Interval.Closed[0, 255]
-
 object EV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 255], EV]
+
+type Tier = String :| Pure
+object Tier extends RefinedTypeOpsImpl[String, Pure, Tier]
 
 type IVS = Map[StatType, IV]
 type EVS = Map[StatType, EV]
 type MoveNames = List[MoveName] :| MaxLength[4]
+type PokemonSets = List[PokemonSet] :| MaxLength[6]
