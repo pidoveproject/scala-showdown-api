@@ -157,3 +157,56 @@ object DecodingSuite extends TestSuite:
       )
 
       assertParse(pokemonSet, set, result)
+
+    test("tier"):
+      test("valid") - assertParse(tierSyntax, "[gen7monotype]", Tier("gen7monotype"))
+      test("missingBrackets") - assertFail(tierSyntax, "gen9ou")
+
+    test("team"):
+      val teamSet =
+        """=== [gen9ou] Articulo ===
+          |
+          |Articuno @ Leftovers
+          |Ability: Pressure
+          |EVs: 252 HP / 252 SpA / 4 SpD
+          |Modest Nature
+          |IVs: 30 SpA / 30 SpD
+          |- Ice Beam
+          |- Hurricane
+          |- Substitute
+          |- Roost
+          |
+          |Ludicolo @ Life Orb
+          |Ability: Swift Swim
+          |EVs: 4 HP / 252 SpA / 252 Spe
+          |Modest Nature
+          |- Surf
+          |- Giga Drain
+          |- Ice Beam
+          |- Rain Dance""".stripMargin
+
+      val result = Team(
+        name = TeamName("Articulo"),
+        tier = Tier("gen9ou"),
+        sets = List(
+          PokemonSet(
+            species = "Articuno",
+            item = Some(ItemName("Leftovers")),
+            ability = AbilityName("Pressure"),
+            nature = Nature.Modest,
+            ivs = Map(StatType.SpecialAttack -> IV(30), StatType.SpecialDefense -> IV(30)),
+            evs = Map(StatType.Health -> EV(252), StatType.SpecialAttack -> EV(252), StatType.SpecialDefense -> EV(4)),
+            moves = List(MoveName("Ice Beam"), MoveName("Hurricane"), MoveName("Substitute"), MoveName("Roost")).assume
+          ),
+          PokemonSet(
+            species = "Ludicolo",
+            item = Some(ItemName("Life Orb")),
+            ability = AbilityName("Swift Swim"),
+            nature = Nature.Modest,
+            evs = Map(StatType.Health -> EV(4), StatType.SpecialAttack -> EV(252), StatType.Speed -> EV(252)),
+            moves = List(MoveName("Surf"), MoveName("Giga Drain"), MoveName("Ice Beam"), MoveName("Rain Dance")).assume
+          )
+        ).assume
+      )
+
+      assertParse(teamSyntax, teamSet, result)

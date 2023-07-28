@@ -33,8 +33,11 @@ object IV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 31], IV]
 type EV = Int :| Interval.Closed[0, 255]
 object EV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 255], EV]
 
-type Tier = String :| Pure
-object Tier extends RefinedTypeOpsImpl[String, Pure, Tier]
+type Tier = String :| Not[Blank]
+object Tier extends RefinedTypeOpsImpl[String, Not[Blank], Tier]
+
+type TeamName = String :| Not[Blank]
+object TeamName extends RefinedTypeOpsImpl[String, Not[Blank], TeamName]
 
 type IVS = Map[StatType, IV]
 type EVS = Map[StatType, EV]
