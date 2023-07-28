@@ -1,6 +1,7 @@
 package io.github.projectpidove.showdown.team
 
 import io.github.projectpidove.showdown.team.StatType.*
+import zio.json.JsonCodec
 
 enum Nature(modifiedStats: Option[(StatType, StatType)] = None):
 
@@ -34,3 +35,10 @@ enum Nature(modifiedStats: Option[(StatType, StatType)] = None):
   case Gentle extends Nature(SpecialDefense, Defense)
   case Sassy extends Nature(SpecialDefense, Speed)
   case Careful extends Nature(SpecialDefense, SpecialAttack)
+
+object Nature:
+
+  given JsonCodec[Nature] = JsonCodec.string.transformOrFail(
+    name => Nature.values.find(_.toString == name).toRight(s"Invalid nature: $name"),
+    _.toString
+  )
