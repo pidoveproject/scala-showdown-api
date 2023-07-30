@@ -19,6 +19,15 @@ object DecodingSuite extends TestSuite:
   def assertFailString[T](decoder: ProtocolDecoder[T], input: String): Unit =
     assertFail(decoder, ProtocolInput.fromInput(input))
 
+  case class Person(name: String, age: Int)
+
+  //Enum cases without parameters cannot have annotation (Scala bug?)
+  enum Msg:
+    @MessageName("resetmoney") case ResetMoney()
+    @MessageName("addmoney") case AddMoney(amount: Int)
+    @MessageName("removemoney") case RemoveMoney(amount: Int)
+    @MessageName("sendmoney") case SendMoney(amount: Int, to: String)
+
   val tests = Tests:
 
     test("string"):
@@ -45,4 +54,18 @@ object DecodingSuite extends TestSuite:
       test("empty") - assertDecodeString(emptyTuple, "", EmptyTuple)
       test("nonEmpty") - assertDecodeString(nonEmptyTuple[String, (Int, Double)], "abcd|1234|1.234", ("abcd", 1234, 1.234))
       
-    
+    test("derivation"):
+      test("product"):
+        val decoder = ProtocolDecoder.derived[Person]
+
+        test("valid") - assertDecodeString(decoder, "totore|19", Person("totore", 19))
+        test("invalidValue") - assertFailString(decoder, "totore|abcd")
+        test("missingValue") - assertFailString(decoder, "totore")
+
+      test("sum"):
+        val decoder = ProtocolDecoder.derived[Msg]
+
+        test("resetMoney") - assertDecodeString(decoder, "resetmoney", Msg.ResetMoney())
+        test("addMoney") - assertDecodeString(decoder, "addmoney|180", Msg.AddMoney(180))
+        test("removeMoney") - assertDecodeString(decoder, "removemoney|40", Msg.RemoveMoney(40))
+        test("sendMoney") - assertDecodeString(decoder, "sendmoney|20|totore", Msg.SendMoney(20, "totore"))

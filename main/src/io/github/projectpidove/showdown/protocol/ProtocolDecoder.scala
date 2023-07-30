@@ -4,11 +4,29 @@ import io.github.projectpidove.showdown.protocol.{ProtocolError, ProtocolInput}
 import zio.Zippable
 import zio.prelude.fx.ZPure
 
+import scala.compiletime.{erasedValue, summonInline}
+import scala.deriving.Mirror
+
 opaque type ProtocolDecoder[T] = ZPure[Nothing, ProtocolInput, ProtocolInput, Any, ProtocolError, T]
 
 object ProtocolDecoder:
 
   def apply[T](program: ZPure[Nothing, ProtocolInput, ProtocolInput, Any, ProtocolError, T]): ProtocolDecoder[T] = program
+
+  inline def derived[T](using m: Mirror.Of[T]): ProtocolDecoder[T] = inline m match
+    case p: Mirror.ProductOf[T] => derivedProduct(p, summonInline[ProtocolDecoder[p.MirroredElemTypes]])
+    case s: Mirror.SumOf[T] => derivedSum(s)
+
+  private inline def derivedProduct[T](m: Mirror.ProductOf[T], decoder: ProtocolDecoder[m.MirroredElemTypes]): ProtocolDecoder[T] =
+    decoder.map(fields => m.fromProduct(fields))
+
+  private inline def summonSumDecoder[T <: Tuple]: ProtocolDecoder[T] = inline erasedValue[T] match
+    case _: EmptyTuple => ZPure.succeed(EmptyTuple).asInstanceOf[ProtocolDecoder[T]]
+    case _: (head *: tail) =>
+      (word(MessageName.getMessageName[head]) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[tail]).asInstanceOf[ProtocolDecoder[T]]
+
+  private inline def derivedSum[T](m: Mirror.SumOf[T]): ProtocolDecoder[T] =
+    summonSumDecoder[m.MirroredElemTypes].asInstanceOf[ProtocolDecoder[T]]
 
   extension[T] (decoder: ProtocolDecoder[T])
 
@@ -16,6 +34,8 @@ object ProtocolDecoder:
       decoder
         .provideState(input)
         .runEither
+
+    def filterOrElse(f: T => Boolean, error: T => ProtocolError): ProtocolDecoder[T] = decoder.filterOrElse(f)(x => ZPure.fail(error(x)))
 
   val next: ProtocolDecoder[String] =
     for
@@ -26,6 +46,10 @@ object ProtocolDecoder:
       result
 
   given string: ProtocolDecoder[String] = next
+
+  def word(value: String): ProtocolDecoder[String] =
+    string
+      .filterOrElse((x: String) => x == value, (x: String) => ProtocolError.InvalidInput(x, s"Expected $value"))
 
   given boolean: ProtocolDecoder[Boolean] =
     for
@@ -66,4 +90,3 @@ object ProtocolDecoder:
       tail <- tailDecoder
     yield
       head *: tail
-
