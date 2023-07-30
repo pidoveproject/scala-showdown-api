@@ -2,7 +2,7 @@ package io.github.projectpidove.showdown.protocol
 
 import scala.collection.mutable.ListBuffer
 
-case class ProtocolInput(raw: String, data: List[(Int, String)], cursor: Int):
+case class MessageInput(raw: String, data: List[(Int, String)], cursor: Int):
   
   def exhausted: Boolean = cursor >= data.size
 
@@ -14,11 +14,11 @@ case class ProtocolInput(raw: String, data: List[(Int, String)], cursor: Int):
 
   def peek: Either[ProtocolError, String] = currentEntry.map(_._2)
 
-  def skip: ProtocolInput = this.copy(cursor = cursor + 1)
+  def skip: MessageInput = this.copy(cursor = cursor + 1)
 
-object ProtocolInput:
+object MessageInput:
 
-  def fromInput(input: String): ProtocolInput =
+  def fromInput(input: String): MessageInput =
     val data = ListBuffer.empty[(Int, String)]
     var builder = StringBuilder()
     var begin = 0
@@ -31,9 +31,9 @@ object ProtocolInput:
       else
         builder += input(cursor)
 
-    ProtocolInput(input, data.toList, 0)
+    MessageInput(input, data.toList, 0)
 
-  def fromList(list: List[String]): ProtocolInput =
+  def fromList(list: List[String]): MessageInput =
     var cursor = 0
     val data =
       for
@@ -43,4 +43,4 @@ object ProtocolInput:
         cursor += element.length
         (elementCursor, element)
 
-    ProtocolInput(list.mkString, data, 0)
+    MessageInput(list.mkString, data, 0)

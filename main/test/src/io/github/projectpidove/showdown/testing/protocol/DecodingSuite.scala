@@ -1,23 +1,23 @@
 package io.github.projectpidove.showdown.testing.protocol
 
 import io.github.projectpidove.showdown.protocol.*
-import ProtocolDecoder.given
+import MessageDecoder.given
 import utest.*
 import zio.prelude.fx.ZPure
 
 object DecodingSuite extends TestSuite:
 
-  def assertDecode[T](decoder: ProtocolDecoder[T], input: ProtocolInput, expected: T): Unit =
+  def assertDecode[T](decoder: MessageDecoder[T], input: MessageInput, expected: T): Unit =
     assert(decoder.decode(input) == Right(expected))
 
-  def assertDecodeString[T](decoder: ProtocolDecoder[T], input: String, expected: T): Unit =
-    assertDecode(decoder, ProtocolInput.fromInput(input), expected)
+  def assertDecodeString[T](decoder: MessageDecoder[T], input: String, expected: T): Unit =
+    assertDecode(decoder, MessageInput.fromInput(input), expected)
 
-  def assertFail[T](decoder: ProtocolDecoder[T], input: ProtocolInput): Unit =
+  def assertFail[T](decoder: MessageDecoder[T], input: MessageInput): Unit =
     assert(decoder.decode(input).isLeft)
 
-  def assertFailString[T](decoder: ProtocolDecoder[T], input: String): Unit =
-    assertFail(decoder, ProtocolInput.fromInput(input))
+  def assertFailString[T](decoder: MessageDecoder[T], input: String): Unit =
+    assertFail(decoder, MessageInput.fromInput(input))
 
   case class Person(name: String, age: Int)
 
@@ -32,7 +32,7 @@ object DecodingSuite extends TestSuite:
     test("string"):
       test("valid") - assertDecodeString(string, "hello", "hello")
       test("empty") - assertDecodeString(string, "", "")
-      test("nothing") - assertFail(string, ProtocolInput.fromList(Nil))
+      test("nothing") - assertFail(string, MessageInput.fromList(Nil))
 
     test("int"):
       test("valid") - assertDecodeString(int, "1234", 1234)
@@ -55,14 +55,14 @@ object DecodingSuite extends TestSuite:
       
     test("derivation"):
       test("product"):
-        val decoder = ProtocolDecoder.derived[Person]
+        val decoder = MessageDecoder.derived[Person]
 
         test("valid") - assertDecodeString(decoder, "totore|19", Person("totore", 19))
         test("invalidValue") - assertFailString(decoder, "totore|abcd")
         test("missingValue") - assertFailString(decoder, "totore")
 
       test("sum"):
-        val decoder = ProtocolDecoder.derived[Msg]
+        val decoder = MessageDecoder.derived[Msg]
 
         test("resetMoney") - assertDecodeString(decoder, "resetmoney", Msg.ResetMoney)
         test("addMoney") - assertDecodeString(decoder, "addmoney|180", Msg.AddMoney(180))

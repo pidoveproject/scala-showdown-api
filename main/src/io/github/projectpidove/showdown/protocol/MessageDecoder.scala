@@ -1,58 +1,58 @@
 package io.github.projectpidove.showdown.protocol
 
-import io.github.projectpidove.showdown.protocol.{ProtocolError, ProtocolInput}
+import io.github.projectpidove.showdown.protocol.{ProtocolError, MessageInput}
 import zio.Zippable
 import zio.prelude.fx.ZPure
 
 import scala.compiletime.{constValue, erasedValue, summonInline}
 import scala.deriving.Mirror
 
-opaque type ProtocolDecoder[T] = ZPure[Nothing, ProtocolInput, ProtocolInput, Any, ProtocolError, T]
+opaque type MessageDecoder[T] = ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]
 
-object ProtocolDecoder:
+object MessageDecoder:
 
-  def apply[T](program: ZPure[Nothing, ProtocolInput, ProtocolInput, Any, ProtocolError, T]): ProtocolDecoder[T] = program
+  def apply[T](program: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]): MessageDecoder[T] = program
 
-  inline def derived[T](using m: Mirror.Of[T]): ProtocolDecoder[T] = inline m match
-    case p: Mirror.ProductOf[T] => derivedProduct(p, summonInline[ProtocolDecoder[p.MirroredElemTypes]])
+  inline def derived[T](using m: Mirror.Of[T]): MessageDecoder[T] = inline m match
+    case p: Mirror.ProductOf[T] => derivedProduct(p, summonInline[MessageDecoder[p.MirroredElemTypes]])
     case s: Mirror.SumOf[T] => derivedSum(s)
 
-  private inline def derivedProduct[T](m: Mirror.ProductOf[T], decoder: ProtocolDecoder[m.MirroredElemTypes]): ProtocolDecoder[T] =
+  private inline def derivedProduct[T](m: Mirror.ProductOf[T], decoder: MessageDecoder[m.MirroredElemTypes]): MessageDecoder[T] =
     decoder.map(fields => m.fromProduct(fields))
 
-  private inline def summonSumDecoder[T <: Tuple]: ProtocolDecoder[T] = inline erasedValue[T] match
-    case _: EmptyTuple => ZPure.succeed(EmptyTuple).asInstanceOf[ProtocolDecoder[T]]
+  private inline def summonSumDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
+    case _: EmptyTuple => ZPure.succeed(EmptyTuple).asInstanceOf[MessageDecoder[T]]
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
-      (word(MessageName.getMessageName[head].getOrElse(name)) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[tail]).asInstanceOf[ProtocolDecoder[T]]
+      (word(MessageName.getMessageName[head].getOrElse(name)) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[tail]).asInstanceOf[MessageDecoder[T]]
 
-  private inline def derivedSum[T](m: Mirror.SumOf[T]): ProtocolDecoder[T] =
-    summonSumDecoder[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]].asInstanceOf[ProtocolDecoder[T]]
+  private inline def derivedSum[T](m: Mirror.SumOf[T]): MessageDecoder[T] =
+    summonSumDecoder[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]].asInstanceOf[MessageDecoder[T]]
 
-  extension[T] (decoder: ProtocolDecoder[T])
+  extension[T] (decoder: MessageDecoder[T])
 
-    def decode(input: ProtocolInput): Either[ProtocolError, T] =
+    def decode(input: MessageInput): Either[ProtocolError, T] =
       decoder
         .provideState(input)
         .runEither
 
-    def filterOrElse(f: T => Boolean, error: T => ProtocolError): ProtocolDecoder[T] = decoder.filterOrElse(f)(x => ZPure.fail(error(x)))
+    def filterOrElse(f: T => Boolean, error: T => ProtocolError): MessageDecoder[T] = decoder.filterOrElse(f)(x => ZPure.fail(error(x)))
 
-  val next: ProtocolDecoder[String] =
+  val next: MessageDecoder[String] =
     for
-      input <- ZPure.get[ProtocolInput]
+      input <- ZPure.get[MessageInput]
       result <- ZPure.fromEither(input.peek)
       _ <- ZPure.set(input.skip)
     yield
       result
 
-  given string: ProtocolDecoder[String] = next
+  given string: MessageDecoder[String] = next
 
-  def word(value: String): ProtocolDecoder[String] =
+  def word(value: String): MessageDecoder[String] =
     string
       .filterOrElse((x: String) => x == value, (x: String) => ProtocolError.InvalidInput(x, s"Expected $value"))
 
-  given boolean: ProtocolDecoder[Boolean] =
+  given boolean: MessageDecoder[Boolean] =
     for
       value <- next
       result <-
@@ -62,30 +62,30 @@ object ProtocolDecoder:
     yield
       result
 
-  given int: ProtocolDecoder[Int] =
+  given int: MessageDecoder[Int] =
     for
       value <- next
       result <- ZPure.fromEither(value.toIntOption.toRight(ProtocolError.InvalidInput(value, "Not a int")))
     yield
       result
 
-  given long: ProtocolDecoder[Long] =
+  given long: MessageDecoder[Long] =
     for
       value <- next
       result <- ZPure.fromEither(value.toLongOption.toRight(ProtocolError.InvalidInput(value, "Not a long")))
     yield
       result
 
-  given double: ProtocolDecoder[Double] =
+  given double: MessageDecoder[Double] =
     for
       value <- next
       result <- ZPure.fromEither(value.toDoubleOption.toRight(ProtocolError.InvalidInput(value, "Not a double")))
     yield
       result
 
-  given emptyTuple: ProtocolDecoder[EmptyTuple] = ZPure.succeed(EmptyTuple)
+  given emptyTuple: MessageDecoder[EmptyTuple] = ZPure.succeed(EmptyTuple)
 
-  given nonEmptyTuple[A, T <: Tuple](using headDecoder: ProtocolDecoder[A], tailDecoder: ProtocolDecoder[T]): ProtocolDecoder[A *: T] =
+  given nonEmptyTuple[A, T <: Tuple](using headDecoder: MessageDecoder[A], tailDecoder: MessageDecoder[T]): MessageDecoder[A *: T] =
     for
       head <- headDecoder
       tail <- tailDecoder
