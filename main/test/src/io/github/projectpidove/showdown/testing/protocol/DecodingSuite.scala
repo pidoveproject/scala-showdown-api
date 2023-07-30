@@ -21,12 +21,11 @@ object DecodingSuite extends TestSuite:
 
   case class Person(name: String, age: Int)
 
-  //Enum cases without parameters cannot have annotation (Scala bug?)
   enum Msg:
-    @MessageName("resetmoney") case ResetMoney()
-    @MessageName("addmoney") case AddMoney(amount: Int)
-    @MessageName("removemoney") case RemoveMoney(amount: Int)
-    @MessageName("sendmoney") case SendMoney(amount: Int, to: String)
+    case ResetMoney
+    case AddMoney(amount: Int)
+    case RemoveMoney(amount: Int)
+    case SendMoney(amount: Int, to: String)
 
   val tests = Tests:
 
@@ -65,7 +64,7 @@ object DecodingSuite extends TestSuite:
       test("sum"):
         val decoder = ProtocolDecoder.derived[Msg]
 
-        test("resetMoney") - assertDecodeString(decoder, "resetmoney", Msg.ResetMoney())
+        test("resetMoney") - assertDecodeString(decoder, "resetmoney", Msg.ResetMoney)
         test("addMoney") - assertDecodeString(decoder, "addmoney|180", Msg.AddMoney(180))
         test("removeMoney") - assertDecodeString(decoder, "removemoney|40", Msg.RemoveMoney(40))
         test("sendMoney") - assertDecodeString(decoder, "sendmoney|20|totore", Msg.SendMoney(20, "totore"))
