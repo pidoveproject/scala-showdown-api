@@ -1,6 +1,7 @@
 package io.github.projectpidove.showdown.protocol
 
-import io.github.projectpidove.showdown.protocol.{ProtocolError, MessageInput}
+import io.github.iltotore.iron.*
+import io.github.projectpidove.showdown.protocol.{MessageInput, ProtocolError}
 import zio.Zippable
 import zio.prelude.fx.ZPure
 
@@ -21,7 +22,10 @@ object MessageDecoder:
     decoder.map(fields => m.fromProduct(fields))
 
   private inline def summonSumDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
-    case _: EmptyTuple => ZPure.succeed(EmptyTuple).asInstanceOf[MessageDecoder[T]]
+    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Invalid enum case")))
+    case _: ((nameType, head) *: EmptyTuple) =>
+      val name = constValue[nameType].toString.toLowerCase
+      (word(MessageName.getMessageName[head].getOrElse(name)) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
       (word(MessageName.getMessageName[head].getOrElse(name)) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[tail]).asInstanceOf[MessageDecoder[T]]
@@ -37,6 +41,12 @@ object MessageDecoder:
         .runEither
 
     def filterOrElse(f: T => Boolean, error: T => ProtocolError): MessageDecoder[T] = decoder.filterOrElse(f)(x => ZPure.fail(error(x)))
+    
+    def map[A](f: T => A): MessageDecoder[A] = decoder.map(f)
+
+    def flatMap[A](f: T => MessageDecoder[A]): MessageDecoder[A] = decoder.flatMap(f)
+    
+    def mapEither[A](f: T => Either[ProtocolError, A]): MessageDecoder[A] = decoder.flatMap(x => ZPure.fromEither(f(x)))
 
   val next: MessageDecoder[String] =
     for
@@ -45,6 +55,11 @@ object MessageDecoder:
       _ <- ZPure.set(input.skip)
     yield
       result
+
+  inline given ironType[A, C](using inline decoder: MessageDecoder[A], constraint: Constraint[A, C]): MessageDecoder[A :| C] =
+    decoder
+      .filterOrElse(constraint.test(_), x => ProtocolError.InvalidInput(x.toString, constraint.message))
+      .map[A :| C](_.assume[C])
 
   given string: MessageDecoder[String] = next
 
