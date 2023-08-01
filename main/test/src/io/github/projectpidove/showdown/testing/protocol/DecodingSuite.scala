@@ -7,18 +7,6 @@ import zio.prelude.fx.ZPure
 
 object DecodingSuite extends TestSuite:
 
-  def assertDecode[T](decoder: MessageDecoder[T], input: MessageInput, expected: T): Unit =
-    assert(decoder.decode(input) == Right(expected))
-
-  def assertDecodeString[T](decoder: MessageDecoder[T], input: String, expected: T): Unit =
-    assertDecode(decoder, MessageInput.fromInput(input), expected)
-
-  def assertFail[T](decoder: MessageDecoder[T], input: MessageInput): Unit =
-    assert(decoder.decode(input).isLeft)
-
-  def assertFailString[T](decoder: MessageDecoder[T], input: String): Unit =
-    assertFail(decoder, MessageInput.fromInput(input))
-
   case class Person(name: String, age: Int)
 
   enum Msg:
@@ -68,3 +56,4 @@ object DecodingSuite extends TestSuite:
         test("addMoney") - assertDecodeString(decoder, "addmoney|180", Msg.AddMoney(180))
         test("removeMoney") - assertDecodeString(decoder, "removemoney|40", Msg.RemoveMoney(40))
         test("sendMoney") - assertDecodeString(decoder, "sendmoney|20|totore", Msg.SendMoney(20, "totore"))
+        test("invalidKey") - assertFailString(decoder, "summonmoney|999")
