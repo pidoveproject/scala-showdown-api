@@ -21,14 +21,18 @@ object MessageDecoder:
   private inline def derivedProduct[T](m: Mirror.ProductOf[T], decoder: MessageDecoder[m.MirroredElemTypes]): MessageDecoder[T] =
     decoder.map(fields => m.fromProduct(fields))
 
+  private inline def namesOrDefault(names: Seq[String], default: String): MessageDecoder[String] =
+    if names.isEmpty then word(default)
+    else oneOf(names: _*)
+
   private inline def summonSumDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
     case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Invalid enum case")))
     case _: ((nameType, head) *: EmptyTuple) =>
       val name = constValue[nameType].toString.toLowerCase
-      (word(MessageName.getMessageName[head].getOrElse(name)) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
+      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
-      (word(MessageName.getMessageName[head].getOrElse(name)) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[tail]).asInstanceOf[MessageDecoder[T]]
+      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[tail]).asInstanceOf[MessageDecoder[T]]
 
   private inline def derivedSum[T](m: Mirror.SumOf[T]): MessageDecoder[T] =
     summonSumDecoder[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]].asInstanceOf[MessageDecoder[T]]
@@ -66,6 +70,10 @@ object MessageDecoder:
   def word(value: String): MessageDecoder[String] =
     string
       .filterOrElse((x: String) => x == value, (x: String) => ProtocolError.InvalidInput(x, s"Expected $value"))
+
+  def oneOf(values: String*): MessageDecoder[String] =
+    string
+      .filterOrElse(values.contains, (x: String) => ProtocolError.InvalidInput(x, s"Expected one of: ${values.mkString(",")}"))
 
   given boolean: MessageDecoder[Boolean] =
     for

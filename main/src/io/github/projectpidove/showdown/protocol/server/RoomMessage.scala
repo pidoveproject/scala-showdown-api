@@ -16,10 +16,10 @@ enum RoomMessage:
   case Html(content: HTML)
   case UHtml(name: String, content: HTML)
   case UHtmlChange(name: String, content: HTML)
-  case Join(user: Username)
-  case Leave(user: Username)
+  @MessageName("join", "j", "J") case Join(user: Username)
+  @MessageName("leave", "l", "L") case Leave(user: Username)
   case Name(newName: Username, oldName: Username)
-  case Chat(user: Username, message: String)
+  @MessageName("chat", "c") case Chat(user: Username, message: String)
   @MessageName("notify") case NotifyHighlight(title: String, message: String, token: HighlightToken) //TODO merge with notify
   case Notify(title: String, message: String)
   @MessageName(":") case Timestamp(time: RoomTimestamp)

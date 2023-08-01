@@ -3,13 +3,13 @@ package io.github.projectpidove.showdown.protocol
 import scala.annotation.StaticAnnotation
 import scala.quoted.*
 
-case class MessageName(name: String) extends StaticAnnotation
+case class MessageName(name: String, aliases: String*) extends StaticAnnotation
 
 object MessageName:
 
-  inline def getMessageName[T]: Option[String] = ${getMessageNameImpl[T]}
+  inline def getMessageNames[T]: Seq[String] = ${getMessageNamesImpl[T]}
 
-  private def getMessageNameImpl[T: Type](using Quotes): Expr[Option[String]] =
+  private def getMessageNamesImpl[T: Type](using Quotes): Expr[Seq[String]] =
     import quotes.reflect.*
 
     val repr = TypeRepr.of[T]
@@ -18,5 +18,5 @@ object MessageName:
     val annotationSymbol = annotationRepr.typeSymbol
 
     typeSymbol.getAnnotation(annotationSymbol).map(_.asExpr) match
-      case Some('{new MessageName($name: String)}) => '{Some($name)}
-      case _ => '{None}
+      case Some('{new MessageName($name: String, $aliases: _*)}) => '{$aliases.prepended($name)}
+      case _ => '{Seq.empty}
