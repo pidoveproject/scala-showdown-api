@@ -7,8 +7,8 @@ import io.github.projectpidove.showdown.user.Username
 import scala.collection.mutable.ListBuffer
 import scala.util.boundary, boundary.break
 
-type RoomTitle = String :| Not[Blank]
-object RoomTitle extends RefinedTypeOpsImpl[String, Not[Blank], RoomTitle]
+type RoomId = String :| Not[Blank]
+object RoomId extends RefinedTypeOpsImpl[String, Not[Blank], RoomId]
 
 type UserList = List[Username] :| Pure
 object UserList extends RefinedTypeOpsImpl[List[Username], Blank, UserList]:
@@ -25,3 +25,12 @@ given userListDecoder(using userDecoder: MessageDecoder[Username]): MessageDecod
         case Left(error) => break(Left(error))
 
     Right(result.toList.assume)
+    
+type HTML = String :| Pure
+object HTML extends RefinedTypeOpsImpl[String, Pure, HTML]
+
+type HighlightToken = String :| Not[Blank]
+object HighlightToken extends RefinedTypeOpsImpl[String, Not[Blank], HighlightToken]
+
+type Timestamp = Long :| Positive
+object Timestamp extends RefinedTypeOpsImpl[Long, Positive, Timestamp]
