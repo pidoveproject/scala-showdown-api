@@ -19,19 +19,23 @@ case class MessageInput(raw: String, data: List[(Int, String)], cursor: Int):
 object MessageInput:
 
   def fromInput(input: String): MessageInput =
+    val str =
+      if input.startsWith("|") then input.tail
+      else input
+
     val data = ListBuffer.empty[(Int, String)]
     var builder = StringBuilder()
     var begin = 0
 
-    for cursor <- 0 to input.length do
-      if cursor == input.length || input(cursor) == '|' then
+    for cursor <- 0 to str.length do
+      if cursor == str.length || str(cursor) == '|' then
         data += ((begin, builder.toString))
         builder = StringBuilder()
-        begin = math.max(cursor+1, input.length)
+        begin = math.max(cursor+1, str.length)
       else
-        builder += input(cursor)
+        builder += str(cursor)
 
-    MessageInput(input, data.toList, 0)
+    MessageInput(str, data.toList, 0)
 
   def fromList(list: List[String]): MessageInput =
     var cursor = 0

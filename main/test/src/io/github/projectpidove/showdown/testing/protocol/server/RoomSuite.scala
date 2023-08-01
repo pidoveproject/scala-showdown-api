@@ -16,16 +16,16 @@ object RoomSuite extends TestSuite:
     val decoder = summon[MessageDecoder[RoomMessage]]
 
     test("init"):
-      test("battle") - assertDecodeString(decoder, "init|battle", RoomMessage.Init(RoomType.Battle))
-      test("chat") - assertDecodeString(decoder, "init|chat", RoomMessage.Init(RoomType.Chat))
-      test("invalid") - assertFailString(decoder, "init|???")
+      test("battle") - assertDecodeString(decoder, "|init|battle", RoomMessage.Init(RoomType.Battle))
+      test("chat") - assertDecodeString(decoder, "|init|chat", RoomMessage.Init(RoomType.Chat))
+      test("invalid") - assertFailString(decoder, "|init|???")
 
-    test("title") - assertDecodeString(decoder, "title|gen9monotype3", RoomMessage.Title(RoomTitle("gen9monotype3")))
+    test("title") - assertDecodeString(decoder, "|title|gen9monotype3", RoomMessage.Title(RoomTitle("gen9monotype3")))
 
     test("users"):
       test("many") - assertDecodeString(
         decoder,
-        "users| Il_totore,*Zarel, LeFanDeMeganium",
+        "|users| Il_totore,*Zarel, LeFanDeMeganium",
         RoomMessage.Users(UserList(
           Username("Il_totore", None),
           Username("Zarel", Some('*')),
