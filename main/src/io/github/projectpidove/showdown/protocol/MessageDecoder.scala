@@ -114,3 +114,6 @@ object MessageDecoder:
       tail <- tailDecoder
     yield
       head *: tail
+      
+  given option[A](using decoder: MessageDecoder[A]): MessageDecoder[Option[A]] = 
+    decoder.map(Some.apply) <> ZPure.succeed(None)

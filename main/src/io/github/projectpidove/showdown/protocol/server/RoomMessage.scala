@@ -20,8 +20,7 @@ enum RoomMessage:
   @MessageName("leave", "l", "L") case Leave(user: Username)
   case Name(newName: Username, oldName: Username)
   @MessageName("chat", "c") case Chat(user: Username, message: String)
-  @MessageName("notify") case NotifyHighlight(title: String, message: String, token: HighlightToken) //TODO merge with notify
-  case Notify(title: String, message: String)
+  case Notify(title: String, message: String, token: Option[HighlightToken])
   @MessageName(":") case Timestamp(time: RoomTimestamp)
   @MessageName("c:") case TimestampChat(time: RoomTimestamp, user: Username, message: String)
   case Battle(room: RoomId, firstUser: Username, secondUser: Username)
