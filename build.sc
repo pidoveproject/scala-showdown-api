@@ -11,8 +11,8 @@ object versions {
 object main extends ProjectModule {
 
   def ivyDeps = Agg(
-    ivy"io.github.iltotore::iron::2.2.0-RC3",
-    ivy"io.github.iltotore::iron-zio-json::2.2.0-RC3",
+    ivy"io.github.iltotore::iron::2.2.0",
+    ivy"io.github.iltotore::iron-zio-json::2.2.0",
     ivy"dev.zio::zio-json::0.6.0",
     ivy"dev.zio::zio-parser::0.1.9",
     ivy"dev.zio::zio-prelude:1.0.0-RC19"
