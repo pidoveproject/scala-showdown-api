@@ -10,21 +10,13 @@ import scala.util.boundary, boundary.break
 type RoomId = String :| Not[Blank]
 object RoomId extends RefinedTypeOpsImpl[String, Not[Blank], RoomId]
 
+opaque type ChatMessage = String :| Not[Blank]
+object ChatMessage extends RefinedTypeOpsImpl[String, Not[Blank], ChatMessage]
+
 type UserList = List[Username] :| Pure
 object UserList extends RefinedTypeOpsImpl[List[Username], Blank, UserList]:
 
   def apply(names: Username*): UserList = List(names: _*).assume
-
-given userListDecoder(using userDecoder: MessageDecoder[Username]): MessageDecoder[UserList] = MessageDecoder.string.mapEither: str =>
-  if str.isBlank then Right(List.empty.assume)
-  else boundary:
-    val result = ListBuffer.empty[Username]
-    for element <- str.split(",") do
-      userDecoder.decode(MessageInput.fromInput(element)) match
-        case Right(value) => result += value
-        case Left(error) => break(Left(error))
-
-    Right(result.toList.assume)
     
 type HTML = String :| Pure
 object HTML extends RefinedTypeOpsImpl[String, Pure, HTML]

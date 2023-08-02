@@ -52,6 +52,13 @@ object MessageDecoder:
     
     def mapEither[A](f: T => Either[ProtocolError, A]): MessageDecoder[A] = decoder.flatMap(x => ZPure.fromEither(f(x)))
 
+    def repeatUntilInput(f: MessageInput => Boolean): MessageDecoder[List[T]] =
+      decoder.zip(ZPure.get[MessageInput]).flatMap: (a, s) =>
+        if f(s) then ZPure.succeed(a :: Nil)
+        else repeatUntilInput(f).map(a :: _)
+
+    def repeatUntilEnd: MessageDecoder[List[T]] = repeatUntilInput(_.exhausted)
+
   val next: MessageDecoder[String] =
     for
       input <- ZPure.get[MessageInput]
