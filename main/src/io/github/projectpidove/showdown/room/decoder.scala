@@ -15,6 +15,26 @@ given chatDecoder: MessageDecoder[ChatMessage] =
     .repeatUntilEnd
     .mapEither(list => ChatMessage.either(list.mkString("|")).left.map(x => ProtocolError.InvalidInput(x, "Blank message")))
 
+given challStrDecoder: MessageDecoder[ChallStr] =
+  MessageDecoder.string
+    .repeatUntilEnd
+    .mapEither(list => ChallStr.either(list.mkString("|")).left.map(x => ProtocolError.InvalidInput(x, "Invalid Challstr")))
+
+given popupDecoder: MessageDecoder[PopupMessage] =
+  MessageDecoder.string
+    .repeatUntilEnd
+    .mapEither: list =>
+
+      val withNewlines =
+        list.map: str =>
+          if str.isEmpty then System.lineSeparator()
+          else str
+
+      PopupMessage
+        .either(withNewlines.mkString(""))
+        .left
+        .map(x => ProtocolError.InvalidInput(x, "Blank message"))
+
 given userListDecoder(using userDecoder: MessageDecoder[Username]): MessageDecoder[UserList] = MessageDecoder.string.mapEither: str =>
   if str.isBlank then Right(List.empty.assume)
   else boundary:

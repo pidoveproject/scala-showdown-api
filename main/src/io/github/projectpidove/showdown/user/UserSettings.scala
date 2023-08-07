@@ -1,6 +1,7 @@
 package io.github.projectpidove.showdown.user
 
-import java.util.Locale
+import io.github.projectpidove.showdown.protocol.MessageDecoder
+import zio.json.*
 
 case class UserSettings(
     blockChallenges: Boolean,
@@ -15,5 +16,9 @@ case class UserSettings(
     hideLogins: Boolean,
     hiddenNextBattle: Boolean,
     inviteOnlyNextBattle: Boolean,
-    language: Locale
-)
+    language: String
+) derives JsonDecoder, JsonEncoder
+
+object UserSettings:
+
+  given MessageDecoder[UserSettings] = MessageDecoder.fromJson

@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.protocol
 import scala.collection.mutable.ListBuffer
 
 case class MessageInput(raw: String, data: List[(Int, String)], cursor: Int):
-  
+
   def exhausted: Boolean = cursor >= data.size
 
   private def currentEntry: Either[ProtocolError, (Int, String)] =
@@ -31,7 +31,7 @@ object MessageInput:
       if cursor == str.length || str(cursor) == '|' then
         data += ((begin, builder.toString))
         builder = StringBuilder()
-        begin = math.max(cursor+1, str.length)
+        begin = math.max(cursor + 1, str.length)
       else
         builder += str(cursor)
 

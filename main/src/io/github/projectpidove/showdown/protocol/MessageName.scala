@@ -7,7 +7,7 @@ case class MessageName(name: String, aliases: String*) extends StaticAnnotation
 
 object MessageName:
 
-  inline def getMessageNames[T]: Seq[String] = ${getMessageNamesImpl[T]}
+  inline def getMessageNames[T]: Seq[String] = ${ getMessageNamesImpl[T] }
 
   private def getMessageNamesImpl[T: Type](using Quotes): Expr[Seq[String]] =
     import quotes.reflect.*
@@ -18,5 +18,5 @@ object MessageName:
     val annotationSymbol = annotationRepr.typeSymbol
 
     typeSymbol.getAnnotation(annotationSymbol).map(_.asExpr) match
-      case Some('{new MessageName($name: String, $aliases: _*)}) => '{$aliases.prepended($name)}
-      case _ => '{Seq.empty}
+      case Some('{ new MessageName($name: String, $aliases*) }) => '{ $aliases.prepended($name) }
+      case _                                                    => '{ Seq.empty }
