@@ -83,6 +83,11 @@ object MessageDecoder:
           head :: tail
 
       concat.catchAll(_ => ZPure.succeed(Nil))
+      
+  extension [R](either: Either[String, R])
+    
+    def toInvalidInput(input: String): Either[ProtocolError, R] =
+      either.left.map(msg => ProtocolError.InvalidInput(input, msg))
 
   val next: MessageDecoder[String] =
     for

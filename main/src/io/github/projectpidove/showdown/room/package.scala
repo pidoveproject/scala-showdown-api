@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.room
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageInput, ProtocolError}
-import io.github.projectpidove.showdown.user.Username
+import io.github.projectpidove.showdown.user.User
 import scala.collection.mutable.ListBuffer
 import scala.util.boundary, boundary.break
 

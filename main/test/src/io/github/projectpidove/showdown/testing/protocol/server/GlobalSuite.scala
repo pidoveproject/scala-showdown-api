@@ -8,7 +8,7 @@ import io.github.projectpidove.showdown.protocol.server.GlobalMessage
 import io.github.projectpidove.showdown.protocol.server.query.{ResponseContent, RoomInfo, Rooms, UserInfo}
 import io.github.projectpidove.showdown.room.*
 import io.github.projectpidove.showdown.testing.protocol.*
-import io.github.projectpidove.showdown.user.{AvatarName, UserList, UserSettings, Username}
+import io.github.projectpidove.showdown.user.*
 import utest.*
 
 object GlobalSuite extends TestSuite:
@@ -24,14 +24,14 @@ object GlobalSuite extends TestSuite:
 
     test("pm"):
       test("noPipe") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|Wanna play?", GlobalMessage.PrivateMessage(
-        Username("Il_totore", None),
-        Username("Zarel", Some('*')),
+        User(Username("Il_totore"), None),
+        User(Username("Zarel"), Some('*')),
         ChatMessage("Wanna play?")
       ))
 
       test("withPipes") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|I like pipes `|`", GlobalMessage.PrivateMessage(
-        Username("Il_totore", None),
-        Username("Zarel", Some('*')),
+        User(Username("Il_totore"), None),
+        User(Username("Zarel"), Some('*')),
         ChatMessage("I like pipes `|`")
       ))
 
@@ -77,8 +77,8 @@ object GlobalSuite extends TestSuite:
 
       assertDecodeString(
         decoder,
-        s"updateuser| Il_totore|1|kimonogirl|$settingsJson",
-        GlobalMessage.UpdateUser(Username("Il_totore", None), true, AvatarName("kimonogirl"), settings)
+        s"|updateuser| Il_totore|1|kimonogirl|$settingsJson",
+        GlobalMessage.UpdateUser(User(Username("Il_totore"), None), true, AvatarName("kimonogirl"), settings)
       )
 
     test("formats") - assertDecodeString(
@@ -86,19 +86,19 @@ object GlobalSuite extends TestSuite:
       "|formats|,1|S/V Singles|[Gen 9] Random Battle,f|[Gen 9] Unrated Random Battle,b|,2|Other Metagames|[Gen 9] Almost Any Ability,e|[Gen 9] Balanced Hackmons,e",
       GlobalMessage.Formats(List(
         FormatCategory(
-          name = "S/V Singles",
+          name = FormatCategoryName("S/V Singles"),
           column = 1,
           formats = List(
-            Format("[Gen 9] Random Battle", random = true),
-            Format("[Gen 9] Unrated Random Battle", random = true)
+            Format(FormatName("[Gen 9] Random Battle"), random = true),
+            Format(FormatName("[Gen 9] Unrated Random Battle"), random = true)
           )
         ),
         FormatCategory(
-          name = "Other Metagames",
+          name = FormatCategoryName("Other Metagames"),
           column = 2,
           formats = List(
-            Format("[Gen 9] Almost Any Ability", random = true),
-            Format("[Gen 9] Balanced Hackmons", random = true),
+            Format(FormatName("[Gen 9] Almost Any Ability"), random = true),
+            Format(FormatName("[Gen 9] Balanced Hackmons"), random = true),
           )
         )
       )

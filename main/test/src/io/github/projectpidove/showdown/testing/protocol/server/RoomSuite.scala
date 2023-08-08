@@ -6,7 +6,7 @@ import io.github.projectpidove.showdown.Timestamp
 import io.github.projectpidove.showdown.protocol.*
 import io.github.projectpidove.showdown.protocol.server.RoomMessage
 import io.github.projectpidove.showdown.room.*
-import io.github.projectpidove.showdown.user.{UserList, Username}
+import io.github.projectpidove.showdown.user.*
 import io.github.projectpidove.showdown.testing.protocol.*
 import utest.*
 
@@ -28,9 +28,9 @@ object RoomSuite extends TestSuite:
         decoder,
         "|users| Il_totore,*Zarel, LeFanDeMeganium",
         RoomMessage.Users(UserList.from(
-          Username("Il_totore", None),
-          Username("Zarel", Some('*')),
-          Username("LeFanDeMeganium", None)
+          User(Username("Il_totore"), None),
+          User(Username("Zarel"), Some('*')),
+          User(Username("LeFanDeMeganium"), None)
         ))
       )
 
@@ -40,19 +40,19 @@ object RoomSuite extends TestSuite:
     test("html") - assertDecodeString(decoder, "|html|<h1>Hello World!</h1>", RoomMessage.Html(HTML("<h1>Hello World!</h1>")))
     test("uhtml") - assertDecodeString(decoder, "|uhtml|poll|<h1>Hello World!</h1>", RoomMessage.UHtml("poll", HTML("<h1>Hello World!</h1>")))
     test("join"):
-      test - assertDecodeString(decoder, "|join| Il_totore", RoomMessage.Join(Username("Il_totore", None)))
-      test - assertDecodeString(decoder, "|j| Il_totore", RoomMessage.Join(Username("Il_totore", None)))
-      test - assertDecodeString(decoder, "|J| Il_totore", RoomMessage.Join(Username("Il_totore", None)))
+      test - assertDecodeString(decoder, "|join| Il_totore", RoomMessage.Join(User(Username("Il_totore"), None)))
+      test - assertDecodeString(decoder, "|j| Il_totore", RoomMessage.Join(User(Username("Il_totore"), None)))
+      test - assertDecodeString(decoder, "|J| Il_totore", RoomMessage.Join(User(Username("Il_totore"), None)))
     test("leave"):
-      test - assertDecodeString(decoder, "|leave| Il_totore", RoomMessage.Leave(Username("Il_totore", None)))
-      test - assertDecodeString(decoder, "|l| Il_totore", RoomMessage.Leave(Username("Il_totore", None)))
-      test - assertDecodeString(decoder, "|L| Il_totore", RoomMessage.Leave(Username("Il_totore", None)))
-    test("name") - assertDecodeString(decoder, "|name| Il_totore| El_totore", RoomMessage.Name(Username("Il_totore", None), Username("El_totore", None)))
+      test - assertDecodeString(decoder, "|leave| Il_totore", RoomMessage.Leave(User(Username("Il_totore"), None)))
+      test - assertDecodeString(decoder, "|l| Il_totore", RoomMessage.Leave(User(Username("Il_totore"), None)))
+      test - assertDecodeString(decoder, "|L| Il_totore", RoomMessage.Leave(User(Username("Il_totore"), None)))
+    test("name") - assertDecodeString(decoder, "|name| Il_totore| El_totore", RoomMessage.Name(User(Username("Il_totore"), None), User(Username("El_totore"), None)))
     test("chat"):
-      test("noPipe") - assertDecodeString(decoder, "|chat| Il_totore|gl hf", RoomMessage.Chat(Username("Il_totore", None), ChatMessage("gl hf")))
-      test("withPipes") - assertDecodeString(decoder, "|chat| Il_totore|gl hf|hello|world", RoomMessage.Chat(Username("Il_totore", None), ChatMessage("gl hf|hello|world")))
+      test("noPipe") - assertDecodeString(decoder, "|chat| Il_totore|gl hf", RoomMessage.Chat(User(Username("Il_totore"), None), ChatMessage("gl hf")))
+      test("withPipes") - assertDecodeString(decoder, "|chat| Il_totore|gl hf|hello|world", RoomMessage.Chat(User(Username("Il_totore"), None), ChatMessage("gl hf|hello|world")))
     test("notify") - assertDecodeString(decoder, "|notify|Friend request|Il_totore invited you", RoomMessage.Notify("Friend request", "Il_totore invited you", None))
     test("notify") - assertDecodeString(decoder, "|notify|Friend request|Il_totore invited you|thisisatoken", RoomMessage.Notify("Friend request", "Il_totore invited you", Some(HighlightToken("thisisatoken"))))
     test("timestamp") - assertDecodeString(decoder, "|:|12345", RoomMessage.Timestamp(Timestamp(12345)))
-    test("timestampChat") - assertDecodeString(decoder, "|c:|12345| Il_totore|Hello", RoomMessage.TimestampChat(Timestamp(12345), Username("Il_totore", None), ChatMessage("Hello")))
-    test("battle") - assertDecodeString(decoder, "|battle|roomid| Il_totore|*Zarel", RoomMessage.Battle(RoomId("roomid"), Username("Il_totore", None), Username("Zarel", Some('*'))))
+    test("timestampChat") - assertDecodeString(decoder, "|c:|12345| Il_totore|Hello", RoomMessage.TimestampChat(Timestamp(12345), User(Username("Il_totore"), None), ChatMessage("Hello")))
+    test("battle") - assertDecodeString(decoder, "|battle|roomid| Il_totore|*Zarel", RoomMessage.Battle(RoomId("roomid"), User(Username("Il_totore"), None), User(Username("Zarel"), Some('*'))))

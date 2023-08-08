@@ -1,11 +1,12 @@
 package io.github.projectpidove.showdown
 
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
+import MessageDecoder.*
 
-case class Format(name: String, random: Boolean = false, searchOnly: Boolean = false, challengeOnly: Boolean = false)
+case class Format(name: FormatName, random: Boolean = false, searchOnly: Boolean = false, challengeOnly: Boolean = false)
 
 object Format:
-
+  
   given MessageDecoder[Format] =
     MessageDecoder
       .string
@@ -30,5 +31,8 @@ object Format:
                 random = true
                 remaining = remaining.tail
 
-          Right(Format(name, random, searchOnly, challengeOnly))
+          for
+            formatName <- FormatName.either(name).toInvalidInput(name)
+          yield
+            Format(formatName, random, searchOnly, challengeOnly)
       }
