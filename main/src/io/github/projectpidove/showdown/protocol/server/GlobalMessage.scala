@@ -1,6 +1,6 @@
 package io.github.projectpidove.showdown.protocol.server
 
-import io.github.projectpidove.showdown.{ChallStr => ChallStrContent, Count, Format, FormatCategory, GameSearch, given}
+import io.github.projectpidove.showdown.{ChallStr as ChallStrContent, Count, Format, FormatCategory, GameSearch, given}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.given
 import io.github.projectpidove.showdown.protocol.server.query.ResponseContent

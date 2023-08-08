@@ -6,7 +6,7 @@ import MessageDecoder.*
 case class Format(name: FormatName, random: Boolean = false, searchOnly: Boolean = false, challengeOnly: Boolean = false)
 
 object Format:
-  
+
   given MessageDecoder[Format] =
     MessageDecoder
       .string
@@ -33,6 +33,5 @@ object Format:
 
           for
             formatName <- FormatName.either(name).toInvalidInput(name)
-          yield
-            Format(formatName, random, searchOnly, challengeOnly)
+          yield Format(formatName, random, searchOnly, challengeOnly)
       }

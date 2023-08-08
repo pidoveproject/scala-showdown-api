@@ -13,5 +13,4 @@ object FormatCategory:
       column <- MessageDecoder.attemptOrElse(columnStr.split(",")(1).toInt, _ => ProtocolError.InvalidInput(columnStr, "Invalid format column"))
       name <- MessageDecoder.string.mapEither(input => FormatCategoryName.either(input).toInvalidInput(input))
       formats <- formatDecoder.repeatUntilCurrent(_.split(",").head.isEmpty)
-    yield
-      FormatCategory(name, column, formats)
+    yield FormatCategory(name, column, formats)
