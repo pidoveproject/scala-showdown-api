@@ -42,3 +42,11 @@ object TournamentSuite extends TestSuite:
       RoomId("battle-gen9doublesou-1919196310")
     ))
     test("scouting") - assertDecodeString(decoder, "|tournament|scouting|allow", TournamentMessage.Scouting(TournamentSetting.Allow()))
+    test("autoStart") :
+      test("on") - assertDecodeString(decoder, "|tournament|autostart|on|1000", TournamentMessage.AutoStart(TournamentAutoStart.On(Timestamp(1000))))
+      test("off") - assertDecodeString(decoder, "|tournament|autostart|off", TournamentMessage.AutoStart(TournamentAutoStart.Off()))
+
+    test("autoDq") :
+      test("on") - assertDecodeString(decoder, "|tournament|autodq|on|1000", TournamentMessage.AutoDq(TournamentAutoDq.On(Timestamp(1000))))
+      test("off") - assertDecodeString(decoder, "|tournament|autodq|off", TournamentMessage.AutoDq(TournamentAutoDq.Off()))
+      test("target") - assertDecodeString(decoder, "|tournament|autodq|target|1000", TournamentMessage.AutoDq(TournamentAutoDq.Target(Timestamp(1000))))
