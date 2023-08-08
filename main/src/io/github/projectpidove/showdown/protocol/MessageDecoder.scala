@@ -97,6 +97,9 @@ object MessageDecoder:
       .filterOrElse(constraint.test(_), x => ProtocolError.InvalidInput(x.toString, constraint.message))
       .map[A :| C](_.assume[C])
 
+  inline given newtype[T](using mirror: RefinedTypeOps.Mirror[T]): MessageDecoder[T] =
+    summonInline[MessageDecoder[mirror.IronType]].asInstanceOf[MessageDecoder[T]]
+
   given string: MessageDecoder[String] = next
 
   def word(value: String): MessageDecoder[String] =
