@@ -5,7 +5,7 @@ import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.protocol.*
 import io.github.projectpidove.showdown.protocol.server.RoomMessage
 import io.github.projectpidove.showdown.room.*
-import io.github.projectpidove.showdown.user.Username
+import io.github.projectpidove.showdown.user.{UserList, Username}
 import io.github.projectpidove.showdown.testing.protocol.*
 import utest.*
 

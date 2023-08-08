@@ -1,11 +1,11 @@
 package io.github.projectpidove.showdown.protocol.server
 
-import io.github.projectpidove.showdown.{Format, FormatCategory, GameSearch}
+import io.github.projectpidove.showdown.{ChallStr => ChallStrContent, Count, Format, FormatCategory, GameSearch, given}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.given
 import io.github.projectpidove.showdown.protocol.server.query.ResponseContent
-import io.github.projectpidove.showdown.room.{ChallStr as ChallStrContent, *, given}
-import io.github.projectpidove.showdown.user.{UserSettings, Username}
+import io.github.projectpidove.showdown.room.{*, given}
+import io.github.projectpidove.showdown.user.{AvatarName, UserSettings, Username}
 
 enum GlobalMessage:
   case Popup(msg: PopupMessage)

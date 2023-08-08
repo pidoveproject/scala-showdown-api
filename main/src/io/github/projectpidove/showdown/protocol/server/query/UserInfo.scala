@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.protocol.server.query
 import io.github.iltotore.iron.constraint.string.*
 import io.github.iltotore.iron.zioJson.given
 import io.github.projectpidove.showdown.protocol.MessageDecoder
-import io.github.projectpidove.showdown.room.AvatarName
+import io.github.projectpidove.showdown.user.AvatarName
 import zio.json.*
 
 @jsonMemberNames(CustomCase(_.toLowerCase))

@@ -1,10 +1,11 @@
 package io.github.projectpidove.showdown.protocol.server
 
+import io.github.projectpidove.showdown.{Timestamp as RoomTimestamp}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.given
-import io.github.projectpidove.showdown.room.{Timestamp as RoomTimestamp, given, *}
+import io.github.projectpidove.showdown.room.{given, *}
 import RoomType.decoder
-import io.github.projectpidove.showdown.user.Username
+import io.github.projectpidove.showdown.user.{UserList, Username, given}
 
 enum RoomMessage:
   // Initialization

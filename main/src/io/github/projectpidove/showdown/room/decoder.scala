@@ -15,11 +15,6 @@ given chatDecoder: MessageDecoder[ChatMessage] =
     .repeatUntilEnd
     .mapEither(list => ChatMessage.either(list.mkString("|")).left.map(x => ProtocolError.InvalidInput(x, "Blank message")))
 
-given challStrDecoder: MessageDecoder[ChallStr] =
-  MessageDecoder.string
-    .repeatUntilEnd
-    .mapEither(list => ChallStr.either(list.mkString("|")).left.map(x => ProtocolError.InvalidInput(x, "Invalid Challstr")))
-
 given popupDecoder: MessageDecoder[PopupMessage] =
   MessageDecoder.string
     .repeatUntilEnd
@@ -34,14 +29,3 @@ given popupDecoder: MessageDecoder[PopupMessage] =
         .either(withNewlines.mkString(""))
         .left
         .map(x => ProtocolError.InvalidInput(x, "Blank message"))
-
-given userListDecoder(using userDecoder: MessageDecoder[Username]): MessageDecoder[UserList] = MessageDecoder.string.mapEither: str =>
-  if str.isBlank then Right(List.empty.assume)
-  else boundary:
-    val result = ListBuffer.empty[Username]
-    for element <- str.split(",") do
-      userDecoder.decode(MessageInput.fromInput(element)) match
-        case Right(value) => result += value
-        case Left(error) => break(Left(error))
-
-    Right(result.toList.assume)

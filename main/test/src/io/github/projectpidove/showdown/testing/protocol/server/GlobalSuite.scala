@@ -2,13 +2,13 @@ package io.github.projectpidove.showdown.testing.protocol.server
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
-import io.github.projectpidove.showdown.{Format, FormatCategory, GameSearch}
+import io.github.projectpidove.showdown.*
 import io.github.projectpidove.showdown.protocol.*
 import io.github.projectpidove.showdown.protocol.server.GlobalMessage
 import io.github.projectpidove.showdown.protocol.server.query.{ResponseContent, RoomInfo, Rooms, UserInfo}
 import io.github.projectpidove.showdown.room.*
 import io.github.projectpidove.showdown.testing.protocol.*
-import io.github.projectpidove.showdown.user.{UserSettings, Username}
+import io.github.projectpidove.showdown.user.{AvatarName, UserList, UserSettings, Username}
 import utest.*
 
 object GlobalSuite extends TestSuite:
