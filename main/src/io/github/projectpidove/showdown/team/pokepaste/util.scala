@@ -8,7 +8,7 @@ import zio.parser.internal.{PUnzippable, PZippable}
 extension [Err, In, Out, Value](syntax: Syntax[Err, In, Out, Value])
 
   private inline def refined[C, T](companion: RefinedTypeOpsImpl[Value, C, T])(using
-                                                                               inline constraint: Constraint[Value, C]
+      inline constraint: Constraint[Value, C]
   ): Syntax[Err | String, In, Out, T] =
     syntax.transformEither(
       companion.either(_),
@@ -16,8 +16,8 @@ extension [Err, In, Out, Value](syntax: Syntax[Err, In, Out, Value])
     )
 
   private def ~~[Err2 >: Err | String, In2 <: In & Char, Out2 >: Out | Char, Value2, ZippedValue](that: => Syntax[Err2, In2, Out2, Value2])(using
-                                                                                                                                            PUnzippable.In[Value, Value2, ZippedValue],
-                                                                                                                                            PZippable.Out[Value, Value2, ZippedValue]
+      PUnzippable.In[Value, Value2, ZippedValue],
+      PZippable.Out[Value, Value2, ZippedValue]
   ): Syntax[Err2, In2, Out2, ZippedValue] =
     (syntax <~ whitespaces) ~ that
 
@@ -26,16 +26,16 @@ extension [Err, In, Out, Value](syntax: Syntax[Err, In, Out, Value])
   private def parenthesized: Syntax[Err | String, In & Char, Out | Char, Value] = Syntax.char('(') ~> syntax <~ Syntax.char(')')
 
 extension [In, Out, Value](syntax: Syntax[String, In, Out, Value])
-
   private def withKey(key: String): Syntax[String, In, Out, (String, ?)] = syntax.transformTo[String, (String, Value), Nothing](
     (key, _),
-    { case (k, value) if k == key => value},
+    { case (k, value) if k == key => value },
     s"Wrong key. Expected $key"
   ).asInstanceOf
 
 val whitespaces = Syntax.whitespace.repeat0.unit(Chunk.from(" "))
 
-private def lineBreak(print: String) = (Syntax.string("\u000D\u000A", print) | Syntax.charIn("\u000A\u000B\u000C\u000D\u0085\u2028\u2029").string).unit(print)
+private def lineBreak(print: String) =
+  (Syntax.string("\u000D\u000A", print) | Syntax.charIn("\u000A\u000B\u000C\u000D\u0085\u2028\u2029").string).unit(print)
 val newline = lineBreak(System.lineSeparator())
 val newlineSpace = lineBreak(" ")
 val endOfLine = newline | Syntax.end

@@ -3,6 +3,7 @@ package io.github.projectpidove.showdown.protocol
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.{MessageInput, ProtocolError}
 import zio.Zippable
+import zio.json.*
 import zio.prelude.fx.ZPure
 
 import scala.compiletime.{constValue, erasedValue, summonInline}
@@ -13,6 +14,17 @@ opaque type MessageDecoder[T] = ZPure[Nothing, MessageInput, MessageInput, Any, 
 object MessageDecoder:
 
   def apply[T](program: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]): MessageDecoder[T] = program
+
+  def fromOption[T](value: Option[T]): MessageDecoder[T] = fromEither(value.toRight(ProtocolError.Miscellaneous("Missing value")))
+
+  def fromEither[T](value: Either[ProtocolError, T]): MessageDecoder[T] = ZPure.fromEither(value)
+
+  def attempt[T](value: => T): MessageDecoder[T] = attemptOrElse(value, ProtocolError.Thrown.apply)
+
+  def attemptOrElse[T](value: => T, error: Throwable => ProtocolError): MessageDecoder[T] =
+    ZPure
+      .attempt(value)
+      .mapError(error)
 
   inline def derived[T](using m: Mirror.Of[T]): MessageDecoder[T] = inline m match
     case p: Mirror.ProductOf[T] => derivedProduct(p, summonInline[MessageDecoder[p.MirroredElemTypes]])
@@ -52,6 +64,31 @@ object MessageDecoder:
     
     def mapEither[A](f: T => Either[ProtocolError, A]): MessageDecoder[A] = decoder.flatMap(x => ZPure.fromEither(f(x)))
 
+    def repeatUntilInput(f: MessageInput => Boolean): MessageDecoder[List[T]] =
+      decoder.zip(ZPure.get[MessageInput]).flatMap: (a, s) =>
+        if f(s) then ZPure.succeed(a :: Nil)
+        else repeatUntilInput(f).map(a :: _)
+
+    def repeatUntilCurrent(f: String => Boolean): MessageDecoder[List[T]] =
+      repeatUntilInput(input => input.peek.forall(f))
+
+    def repeatUntilEnd: MessageDecoder[List[T]] = repeatUntilInput(_.exhausted)
+
+    def repeatUntilFail: MessageDecoder[List[T]] =
+      val concat =
+        for
+          head <- decoder
+          tail <- decoder.repeatUntilFail
+        yield
+          head :: tail
+
+      concat.catchAll(_ => ZPure.succeed(Nil))
+      
+  extension [R](either: Either[String, R])
+    
+    def toInvalidInput(input: String): Either[ProtocolError, R] =
+      either.left.map(msg => ProtocolError.InvalidInput(input, msg))
+
   val next: MessageDecoder[String] =
     for
       input <- ZPure.get[MessageInput]
@@ -65,6 +102,9 @@ object MessageDecoder:
       .filterOrElse(constraint.test(_), x => ProtocolError.InvalidInput(x.toString, constraint.message))
       .map[A :| C](_.assume[C])
 
+  inline given newtype[T](using mirror: RefinedTypeOps.Mirror[T]): MessageDecoder[T] =
+    summonInline[MessageDecoder[mirror.IronType]].asInstanceOf[MessageDecoder[T]]
+
   given string: MessageDecoder[String] = next
 
   def word(value: String): MessageDecoder[String] =
@@ -74,6 +114,9 @@ object MessageDecoder:
   def oneOf(values: String*): MessageDecoder[String] =
     string
       .filterOrElse(values.contains, (x: String) => ProtocolError.InvalidInput(x, s"Expected one of: ${values.mkString(",")}"))
+
+  def fromJson[A : JsonDecoder]: MessageDecoder[A] =
+    string.mapEither(x => x.fromJson[A].left.map(msg => ProtocolError.InvalidInput(x, msg)))
 
   given boolean: MessageDecoder[Boolean] =
     for
@@ -117,3 +160,5 @@ object MessageDecoder:
       
   given option[A](using decoder: MessageDecoder[A]): MessageDecoder[Option[A]] = 
     decoder.map(Some.apply) <> ZPure.succeed(None)
+
+  given list[A](using decoder: MessageDecoder[A]): MessageDecoder[List[A]] = decoder.repeatUntilEnd

@@ -64,13 +64,11 @@ private def parseSpeciesGenderSurname(line: String): Either[String, (SpeciesName
     for
       species <- SpeciesName.either(arr.last.trim)
       surname <- Surname.either(arr.dropRight(1).mkString("(").trim)
-    yield
-      (species, gender, Some(surname))
+    yield (species, gender, Some(surname))
   else
     for
       species <- SpeciesName.either(buffer.trim)
-    yield
-      (species, gender, None)
+    yield (species, gender, None)
 
 private def printSpeciesGenderSurname(species: SpeciesName, genderOption: Option[Gender], surnameOption: Option[Surname]): String =
   val speciesSurname = surnameOption.fold(species)(surname => s"$surname ($species)")
@@ -150,8 +148,8 @@ val pokemonSet = (firstLineSyntax ~ setSyntax.repeatWithSep0(endOfLine.repeat0.u
       ivs = map.getOrElse("ivs", Map.empty).asInstanceOf[IVS]
       evs = map.getOrElse("evs", Map.empty).asInstanceOf[EVS]
       teraType = map.getOrElse("teraType", Type.Normal).asInstanceOf[Type]
-    yield
-      PokemonSet(surname, species, gender, item, ability, nature, moves, ivs, evs, level, shiny, teraType = teraType),
+    yield PokemonSet(surname, species, gender, item, ability, nature, moves, ivs, evs, level, shiny, teraType = teraType)
+  ,
   set =>
     val attributes = Chunk(
       "ability" -> set.ability,
@@ -181,4 +179,3 @@ val teamSyntax = (tripleEqual ~> whitespaces ~ tierSyntax ~ teamNameSyntax ~ (en
   (tier, name, pokemonSets) => Team(name, tier, pokemonSets),
   team => (team.tier, team.name, team.sets)
 )
-

@@ -4,3 +4,4 @@ enum ProtocolError:
   case InputExhausted(data: String, length: Int)
   case InvalidInput(input: String, message: String)
   case Miscellaneous(message: String)
+  case Thrown(cause: Throwable)
