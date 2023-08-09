@@ -18,8 +18,7 @@ object BattleScore:
             score2 <- str2.toIntOption.toRight(ProtocolError.InvalidInput(str2, "Invalid int"))
             user1 <- Score.either(score1).toInvalidInput(str1)
             user2 <- Score.either(score2).toInvalidInput(str2)
-          yield
-            BattleScore(user1, user2)
+          yield BattleScore(user1, user2)
 
         case array => Left(ProtocolError.InvalidInput(array.mkString(","), "Invalid battle score"))
       }
