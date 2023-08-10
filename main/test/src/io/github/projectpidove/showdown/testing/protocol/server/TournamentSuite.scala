@@ -11,11 +11,67 @@ import io.github.projectpidove.showdown.protocol.server.tournament.*
 import io.github.projectpidove.showdown.testing.protocol.assertDecodeString
 import io.github.projectpidove.showdown.user.Username
 import utest.*
+import zio.json.JsonDecoder
 
 object TournamentSuite extends TestSuite:
   val tests = Tests:
 
+    test("tournamentGenerator"):
+
+      val decoder = summon[MessageDecoder[TournamentGenerator]]
+
+      test("roundRobin"):
+        test("noPrefix") - assertDecodeString(decoder, "Round Robin", TournamentGenerator.RoundRobin(Count(1)))
+        test("prefixed") - assertDecodeString(decoder, "Double Round Robin", TournamentGenerator.RoundRobin(Count(2)))
+
+      test("elimination") - assertDecodeString(decoder, "Single Elimination", TournamentGenerator.Elimination(Count(1)))
+
     val decoder = summon[MessageDecoder[TournamentMessage]]
+
+    test("create") - assertDecodeString(decoder, "|tournament|create|gen9monotype|Single Elimination|128", TournamentMessage.Create(
+      FormatName("gen9monotype"),
+      TournamentGenerator.Elimination(Count(1)),
+      Count(128),
+    ))
+    test("update"):
+      test("empty") - assertDecodeString(decoder, "|tournament|update|{}", TournamentMessage.Update(TournamentUpdate()))
+      test("users") - assertDecodeString(decoder, """|tournament|update|{"bracketData":{"type":"Tree","rootNode":null,"users":["KeshBa45","Leeko","Olekpop1","we up"]}}""", TournamentMessage.Update(TournamentUpdate(
+        bracketData = Some(BracketData(
+          bracketType = BracketType.Tree,
+          users = Some(List(Username("KeshBa45"), Username("Leeko"), Username("Olekpop1"), Username("we up")))
+        ))
+      )))
+      test("settings") - assertDecodeString(decoder, """|tournament|update|{"format":"gen9monotype","generator":"Single Elimination","playerCap":128,"isStarted":false,"isJoined":false}""".stripMargin, TournamentMessage.Update(TournamentUpdate(
+        format = Some(FormatName("gen9monotype")),
+        generator= Some(TournamentGenerator.Elimination(Count(1))),
+        playerCap = Some(Count(128)),
+        isStarted = Some(false),
+        isJoined = Some(false),
+      )))
+      test("ingame") - assertDecodeString(decoder, """|tournament|update|{"bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2432"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"inprogress"}],"state":"unavailable"}}}""", TournamentMessage.Update(TournamentUpdate(
+        bracketData = Some(BracketData(
+          bracketType = BracketType.Tree,
+          rootNode = Some(BracketNode.Node(
+            children = List(
+              BracketNode.Node(
+                children = List(
+                  BracketNode.Leaf("Karan Goyal#2432"),
+                  BracketNode.Leaf("Ray22-1")
+                ),
+                state = BattleState.Available
+              ),
+              BracketNode.Node(
+                children = List(
+                  BracketNode.Leaf("Zarel"),
+                  BracketNode.Leaf("Il_totore")
+                ),
+                state = BattleState.InProgress
+              )
+            ),
+            state = BattleState.Unavailable,
+          ))
+        ))
+      )))
 
     test("updateEnd") - assertDecodeString(decoder, "|tournament|updateEnd", TournamentMessage.UpdateEnd())
     test("error") - assertDecodeString(decoder, "|tournament|error|ERROR", TournamentMessage.Error("ERROR"))
@@ -41,6 +97,31 @@ object TournamentSuite extends TestSuite:
       TournamentRecord.Success(),
       RoomId("battle-gen9doublesou-1919196310")
     ))
+    test("end") - assertDecodeString(decoder, """|tournament|end|{"results":[["trichotomy"]],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2431"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}""", TournamentMessage.End(TournamentEnd(
+      List(Username("trichotomy")),
+      FormatName("gen9monotype"),
+      TournamentGenerator.Elimination(Count(1)),
+      BracketData(
+        bracketType = BracketType.Tree,
+        rootNode = Some(BracketNode.Node(
+          children = List(
+            BracketNode.Node(
+              children = List(
+                BracketNode.Leaf("Karan Goyal#2432"),
+                BracketNode.Leaf("Ray22-1")
+              ),
+              state = BattleState.Available
+            ),
+            BracketNode.Node(
+              children = List(
+                BracketNode.Leaf("Zarel"),
+                BracketNode.Leaf("Il_totore")
+              ),
+              state = BattleState.InProgress
+            )
+          ),
+          state = BattleState.Unavailable)))
+    )))
     test("scouting") - assertDecodeString(decoder, "|tournament|scouting|allow", TournamentMessage.Scouting(TournamentSetting.Allow()))
     test("autoStart") :
       test("on") - assertDecodeString(decoder, "|tournament|autostart|on|1000", TournamentMessage.AutoStart(TournamentAutoStart.On(Timestamp(1000))))
