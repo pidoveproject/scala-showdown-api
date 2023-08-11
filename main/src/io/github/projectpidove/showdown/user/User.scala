@@ -16,6 +16,5 @@ object User:
       val name = str.tail
       for
         validName <- Username.either(name).toInvalidInput(name)
-      yield
-        User(validName, rank)
+      yield User(validName, rank)
     else Left(ProtocolError.InvalidInput(str, "Invalid User"))
