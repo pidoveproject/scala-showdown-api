@@ -98,7 +98,7 @@ object TournamentSuite extends TestSuite:
       TournamentRecord.Success(),
       RoomId("battle-gen9doublesou-1919196310")
     ))
-    test("end") - assertDecodeString(decoder, """|tournament|end|{"results":["trichotomy"],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2431"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}}""", TournamentMessage.End(TournamentEnd(
+    test("end") - assertDecodeString(decoder, """|tournament|end|{"results":["trichotomy"],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2432"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}}""", TournamentMessage.End(TournamentEnd(
       List(Username("trichotomy")),
       FormatName("gen9monotype"),
       TournamentGenerator.Elimination(Count(1)),
@@ -123,32 +123,6 @@ object TournamentSuite extends TestSuite:
           ),
           state = BattleState.Unavailable)))
     )))
-      /*println(TournamentMessage.End(TournamentEnd(
-        List(Username("trichotomy")),
-        FormatName("gen9monotype"),
-        TournamentGenerator.Elimination(Count(1)),
-        BracketData(
-          bracketType = BracketType.Tree,
-          rootNode = Some(BracketNode.Node(
-            children = List(
-              BracketNode.Node(
-                children = List(
-                  BracketNode.Leaf("Karan Goyal#2432"),
-                  BracketNode.Leaf("Ray22-1")
-                ),
-                state = BattleState.Available
-              ),
-              BracketNode.Node(
-                children = List(
-                  BracketNode.Leaf("Zarel"),
-                  BracketNode.Leaf("Il_totore")
-                ),
-                state = BattleState.Unavailable
-              )
-            ),
-            state = BattleState.Unavailable))))))
-    println(decoder.decode(MessageInput.fromInput("""|tournament|end|{"results":["trichotomy"],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2431"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}}""")))
-    */
     test("scouting") - assertDecodeString(decoder, "|tournament|scouting|allow", TournamentMessage.Scouting(TournamentSetting.Allow()))
     test("autoStart") :
       test("on") - assertDecodeString(decoder, "|tournament|autostart|on|1000", TournamentMessage.AutoStart(TournamentAutoStart.On(Timestamp(1000))))
