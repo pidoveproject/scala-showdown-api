@@ -5,12 +5,13 @@ import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.room.RoomId
 import io.github.projectpidove.showdown.*
 import io.github.projectpidove.showdown.Count
-import io.github.projectpidove.showdown.protocol.MessageDecoder
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageInput}
 import io.github.projectpidove.showdown.protocol.server.TournamentMessage
 import io.github.projectpidove.showdown.protocol.server.tournament.*
 import io.github.projectpidove.showdown.testing.protocol.assertDecodeString
 import io.github.projectpidove.showdown.user.Username
 import utest.*
+import io.github.iltotore.iron.zioJson.given
 import zio.json.JsonDecoder
 
 object TournamentSuite extends TestSuite:
@@ -117,11 +118,37 @@ object TournamentSuite extends TestSuite:
                 BracketNode.Leaf("Zarel"),
                 BracketNode.Leaf("Il_totore")
               ),
-              state = BattleState.InProgress
+              state = BattleState.Unavailable
             )
           ),
           state = BattleState.Unavailable)))
     )))
+      /*println(TournamentMessage.End(TournamentEnd(
+        List(Username("trichotomy")),
+        FormatName("gen9monotype"),
+        TournamentGenerator.Elimination(Count(1)),
+        BracketData(
+          bracketType = BracketType.Tree,
+          rootNode = Some(BracketNode.Node(
+            children = List(
+              BracketNode.Node(
+                children = List(
+                  BracketNode.Leaf("Karan Goyal#2432"),
+                  BracketNode.Leaf("Ray22-1")
+                ),
+                state = BattleState.Available
+              ),
+              BracketNode.Node(
+                children = List(
+                  BracketNode.Leaf("Zarel"),
+                  BracketNode.Leaf("Il_totore")
+                ),
+                state = BattleState.Unavailable
+              )
+            ),
+            state = BattleState.Unavailable))))))
+    println(decoder.decode(MessageInput.fromInput("""|tournament|end|{"results":["trichotomy"],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2431"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}}""")))
+    */
     test("scouting") - assertDecodeString(decoder, "|tournament|scouting|allow", TournamentMessage.Scouting(TournamentSetting.Allow()))
     test("autoStart") :
       test("on") - assertDecodeString(decoder, "|tournament|autostart|on|1000", TournamentMessage.AutoStart(TournamentAutoStart.On(Timestamp(1000))))
