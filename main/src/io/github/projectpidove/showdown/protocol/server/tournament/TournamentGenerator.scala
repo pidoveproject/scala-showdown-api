@@ -18,7 +18,7 @@ object TournamentGenerator:
     case "Single" => Right(Count(1))
     case "Double" => Right(Count(2))
     case "Triple" => Right(Count(3))
-    case _ => Left("Invalid count name")
+    case _        => Left("Invalid count name")
 
   given JsonDecoder[TournamentGenerator] =
     JsonDecoder
@@ -27,10 +27,10 @@ object TournamentGenerator:
         val separated = raw.split(" ")
 
         separated match
-          case Array("Round", "Robin") => Right(RoundRobin(Count(1)))
+          case Array("Round", "Robin")         => Right(RoundRobin(Count(1)))
           case Array(prefix, "Round", "Robin") => wordToCount(prefix).map(RoundRobin.apply)
-          case Array(prefix, "Elimination") => wordToCount(prefix).map(Elimination.apply)
-          case _ => Left("Invalid tournament generator")
+          case Array(prefix, "Elimination")    => wordToCount(prefix).map(Elimination.apply)
+          case _                               => Left("Invalid tournament generator")
 
   given MessageDecoder[TournamentGenerator] =
     MessageDecoder
@@ -39,7 +39,7 @@ object TournamentGenerator:
         val separated = raw.split(" ")
 
         separated match
-          case Array("Round", "Robin") => Right(RoundRobin(Count(1)))
+          case Array("Round", "Robin")         => Right(RoundRobin(Count(1)))
           case Array(prefix, "Round", "Robin") => wordToCount(prefix).map(RoundRobin.apply).toInvalidInput(prefix)
-          case Array(prefix, "Elimination") => wordToCount(prefix).map(Elimination.apply).toInvalidInput(prefix)
-          case _ => Left(ProtocolError.InvalidInput(raw, "Invalid tournament generator"))
+          case Array(prefix, "Elimination")    => wordToCount(prefix).map(Elimination.apply).toInvalidInput(prefix)
+          case _                               => Left(ProtocolError.InvalidInput(raw, "Invalid tournament generator"))

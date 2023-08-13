@@ -2,7 +2,17 @@ package io.github.projectpidove.showdown.protocol.server
 
 import io.github.projectpidove.showdown.{Count, FormatName}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
-import io.github.projectpidove.showdown.protocol.server.tournament.{BattleResult, BattleScore, TournamentAutoDq, TournamentAutoStart, TournamentEnd, TournamentGenerator, TournamentRecord, TournamentSetting, TournamentUpdate}
+import io.github.projectpidove.showdown.protocol.server.tournament.{
+  BattleResult,
+  BattleScore,
+  TournamentAutoDq,
+  TournamentAutoStart,
+  TournamentEnd,
+  TournamentGenerator,
+  TournamentRecord,
+  TournamentSetting,
+  TournamentUpdate
+}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.given
 import io.github.projectpidove.showdown.room.RoomId
 import io.github.projectpidove.showdown.user.{User, Username}
@@ -27,7 +37,7 @@ enum TournamentMessage:
       recorded: TournamentRecord,
       roomID: RoomId
   )
-  case End(data: TournamentEnd) //TODO test for it
+  case End(data: TournamentEnd) // TODO test for it
   case Scouting(setting: TournamentSetting)
   case AutoStart(state: TournamentAutoStart)
   case AutoDq(state: TournamentAutoDq)
