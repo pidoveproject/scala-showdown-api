@@ -7,7 +7,7 @@ import io.github.projectpidove.showdown.user.Username
 import zio.json.JsonDecoder
 
 case class TournamentEnd(
-    results: List[Username],
+    results: List[List[Username]],
     format: FormatName,
     generator: TournamentGenerator,
     bracketData: BracketData

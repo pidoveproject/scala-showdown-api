@@ -98,8 +98,8 @@ object TournamentSuite extends TestSuite:
       TournamentRecord.Success(),
       RoomId("battle-gen9doublesou-1919196310")
     ))
-    test("end") - assertDecodeString(decoder, """|tournament|end|{"results":["trichotomy"],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2432"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}}""", TournamentMessage.End(TournamentEnd(
-      List(Username("trichotomy")),
+    test("end") - assertDecodeString(decoder, """|tournament|end|{"results":[["trichotomy"]],"format":"gen9monotype","generator":"Single Elimination","bracketData":{"type":"tree","rootNode":{"children":[{"children":[{"team":"Karan Goyal#2432"},{"team":"Ray22-1"}],"state":"available"},{"children":[{"team":"Zarel"},{"team":"Il_totore"}],"state":"unavailable"}],"state":"unavailable"}}}""", TournamentMessage.End(TournamentEnd(
+      List(List(Username("trichotomy"))),
       FormatName("gen9monotype"),
       TournamentGenerator.Elimination(Count(1)),
       BracketData(
