@@ -2,6 +2,7 @@ package io.github.projectpidove.showdown.protocol
 
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.{MessageInput, ProtocolError}
+import io.github.projectpidove.showdown.util.UnionTypeMirror
 import zio.Zippable
 import zio.json.*
 import zio.prelude.fx.ZPure
@@ -51,7 +52,22 @@ object MessageDecoder:
   private inline def derivedSum[T](m: Mirror.SumOf[T]): MessageDecoder[T] =
     summonSumDecoder[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]].asInstanceOf[MessageDecoder[T]]
 
+  private inline def summonUnionDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
+    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
+    case _: (head *: tail) => (summonInline[MessageDecoder[head]] <> summonUnionDecoder[tail]).asInstanceOf[MessageDecoder[T]]
+
+  inline given derivedUnion[T](using m: UnionTypeMirror[T]): MessageDecoder[T] =
+    summonUnionDecoder[m.ElementTypes].asInstanceOf[MessageDecoder[T]]
+
+  extension (value: String)
+    
+    def decode[T](using decoder: MessageDecoder[T]): Either[ProtocolError, T] =
+      decoder.decode(MessageInput.fromInput(value))
+  
   extension [T](decoder: MessageDecoder[T])
+
+    def decodeZPure(input: MessageInput): ZPure[Nothing, Unit, MessageInput, Any, ProtocolError, T] =
+      decoder.provideState(input)
 
     def decode(input: MessageInput): Either[ProtocolError, T] =
       decoder
@@ -84,6 +100,10 @@ object MessageDecoder:
         yield head :: tail
 
       concat.catchAll(_ => ZPure.succeed(Nil))
+
+    def orElse[A](other: MessageDecoder[A]): MessageDecoder[T | A] = decoder.orElse(other)
+
+    def <>[A](other: MessageDecoder[A]): MessageDecoder[T | A] = decoder.orElse(other)
 
   extension [R](either: Either[String, R])
     def toInvalidInput(input: String): Either[ProtocolError, R] =
