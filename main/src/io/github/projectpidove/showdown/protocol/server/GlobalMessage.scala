@@ -2,12 +2,11 @@ package io.github.projectpidove.showdown.protocol.server
 
 import io.github.projectpidove.showdown.{ChallStr as ChallStrContent, Count, Format, FormatCategory, GameSearch, given}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
-import io.github.projectpidove.showdown.protocol.MessageDecoder.given
 import io.github.projectpidove.showdown.protocol.server.query.ResponseContent
-import io.github.projectpidove.showdown.room.{*, given}
+import io.github.projectpidove.showdown.room.{given, *}
 import io.github.projectpidove.showdown.user.{AvatarName, UserSettings, User}
 
-enum GlobalMessage:
+enum GlobalMessage derives MessageDecoder:
   case Popup(msg: PopupMessage)
   @MessageName("pm") case PrivateMessage(sender: User, receiver: User, message: ChatMessage)
   case UserCount(count: Count)
@@ -18,6 +17,3 @@ enum GlobalMessage:
   case UpdateSearch(search: GameSearch)
   case QueryResponse(content: ResponseContent)
 
-object GlobalMessage:
-
-  given MessageDecoder[GlobalMessage] = MessageDecoder.derived[GlobalMessage]

@@ -2,12 +2,10 @@ package io.github.projectpidove.showdown.protocol.server
 
 import io.github.projectpidove.showdown.Timestamp as RoomTimestamp
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
-import io.github.projectpidove.showdown.protocol.MessageDecoder.given
 import io.github.projectpidove.showdown.room.{given, *}
-import RoomType.decoder
 import io.github.projectpidove.showdown.user.{UserList, User, given}
 
-enum RoomMessage:
+enum RoomMessage derives MessageDecoder:
   // Initialization
   case Init(roomType: RoomType)
   case Title(title: String)
@@ -25,7 +23,3 @@ enum RoomMessage:
   @MessageName(":") case Timestamp(time: RoomTimestamp)
   @MessageName("c:") case TimestampChat(time: RoomTimestamp, user: User, message: ChatMessage)
   case Battle(room: RoomId, firstUser: User, secondUser: User)
-
-object RoomMessage:
-
-  given MessageDecoder[RoomMessage] = MessageDecoder.derived[RoomMessage]
