@@ -18,17 +18,14 @@ trait ShowdownClient:
     for
       raw <- getRawMessage.mapError(ProtocolError.Thrown.apply)
       msg <- ZIO.fromEither(raw.decode[ServerMessage])
-    yield
-      msg
+    yield msg
 
   def sendMessage(message: ClientMessage): IO[ProtocolError, Unit] =
     for
       encoded <- ZIO.fromEither(summon[MessageEncoder[ClientMessage]].encode(message))
       raw = "|" + encoded.mkString(" ")
       _ <- sendRawMessage(raw).mapError(ProtocolError.Thrown.apply)
-    yield
-      ()
-
+    yield ()
 
 object ShowdownClient:
 
@@ -36,7 +33,7 @@ object ShowdownClient:
 
   def getRawMessage: ClientIO[Throwable, String] =
     ZIO.serviceWithZIO(_.getRawMessage)
-    
+
   def sendRawMessage(text: String): ClientIO[Throwable, Unit] =
     ZIO.serviceWithZIO(_.sendRawMessage(text))
 
