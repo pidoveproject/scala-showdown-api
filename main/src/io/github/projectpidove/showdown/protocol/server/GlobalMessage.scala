@@ -16,4 +16,3 @@ enum GlobalMessage derives MessageDecoder:
   case Formats(categories: List[FormatCategory])
   case UpdateSearch(search: GameSearch)
   case QueryResponse(content: ResponseContent)
-

@@ -10,13 +10,13 @@ trait UnionTypeMirror[A]:
 
   type ElementTypes <: Tuple
 
-class UnionTypeMirrorImpl[A, T <: Tuple] extends UnionTypeMirror[A]: //A class is more convenient to instantiate using macros
+class UnionTypeMirrorImpl[A, T <: Tuple] extends UnionTypeMirror[A]: // A class is more convenient to instantiate using macros
 
   override type ElementTypes = T
 
 object UnionTypeMirror:
 
-  transparent inline given derived[A]: UnionTypeMirror[A] = ${derivedImpl[A]}
+  transparent inline given derived[A]: UnionTypeMirror[A] = ${ derivedImpl[A] }
 
   private def derivedImpl[A](using Quotes, Type[A]): Expr[UnionTypeMirror[A]] =
     import quotes.reflect.*
@@ -33,18 +33,18 @@ object UnionTypeMirror:
     def rec(tpe: TypeRepr): TypeRepr =
       tpe.dealias match
         case OrType(left, right) => concatTypes(rec(left), rec(right))
-        case t => prependTypes(t, TypeRepr.of[EmptyTuple])
+        case t                   => prependTypes(t, TypeRepr.of[EmptyTuple])
 
     val tupled =
       TypeRepr.of[A].dealias match
         case or: OrType => rec(or).asType.asInstanceOf[Type[Elems]]
-        case tpe => report.errorAndAbort(s"${tpe.show} is not a union type")
+        case tpe        => report.errorAndAbort(s"${tpe.show} is not a union type")
 
     type Elems
 
     given Type[Elems] = tupled
 
-    Apply( //Passing the type using quotations causes the type to not be inlined
+    Apply( // Passing the type using quotations causes the type to not be inlined
       TypeApply(
         Select.unique(
           New(

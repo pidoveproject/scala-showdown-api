@@ -108,14 +108,13 @@ object MessageDecoder:
     summonSumDecoder[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]].asInstanceOf[MessageDecoder[T]]
 
   private inline def summonUnionDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
-    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
+    case _: EmptyTuple     => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
     case _: (head *: tail) => (summonInline[MessageDecoder[head]] <> summonUnionDecoder[tail]).asInstanceOf[MessageDecoder[T]]
 
   inline given derivedUnion[T](using m: UnionTypeMirror[T]): MessageDecoder[T] =
     summonUnionDecoder[m.ElementTypes].asInstanceOf[MessageDecoder[T]]
 
   extension (value: String)
-    
     def decode[T](using decoder: MessageDecoder[T]): Either[ProtocolError, T] =
       decoder.decode(MessageInput.fromInput(value))
 
