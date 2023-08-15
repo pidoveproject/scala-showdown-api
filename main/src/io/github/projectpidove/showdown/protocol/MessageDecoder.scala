@@ -10,22 +10,77 @@ import zio.prelude.fx.ZPure
 import scala.compiletime.{constValue, erasedValue, summonInline}
 import scala.deriving.Mirror
 
-opaque type MessageDecoder[T] = ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]
+class MessageDecoder[+T](zpure: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]):
+
+  def toZPure: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T] = zpure
+
+  def decodeZPure(input: MessageInput): ZPure[Nothing, Unit, MessageInput, Any, ProtocolError, T] =
+    zpure.provideState(input)
+
+  def decode(input: MessageInput): Either[ProtocolError, T] =
+    zpure
+      .provideState(input)
+      .runEither
+
+  def filterOrElse(f: T => Boolean, error: T => ProtocolError): MessageDecoder[T] =
+    MessageDecoder(zpure.filterOrElse(f)(x => ZPure.fail(error(x))))
+
+  def map[A](f: T => A): MessageDecoder[A] = MessageDecoder(zpure.map(f))
+
+  def flatMap[A](f: T => MessageDecoder[A]): MessageDecoder[A] = MessageDecoder(zpure.flatMap(x => f(x).toZPure))
+
+  def *>[A](other: => MessageDecoder[A]): MessageDecoder[A] = flatMap(_ => other)
+
+  def mapEither[A](f: T => Either[ProtocolError, A]): MessageDecoder[A] = flatMap(x => MessageDecoder.fromEither(f(x)))
+
+  def repeatUntilInput(f: MessageInput => Boolean): MessageDecoder[List[T]] =
+
+    def rec(): ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, List[T]] =
+      zpure.zip(ZPure.get[MessageInput]).flatMap: (a, s) =>
+        if f(s) then ZPure.succeed(a :: Nil)
+        else rec().map(a :: _)
+
+    MessageDecoder(rec())
+
+  def repeatUntilCurrent(f: String => Boolean): MessageDecoder[List[T]] =
+    repeatUntilInput(input => input.peek.forall(f))
+
+  def repeatUntilEnd: MessageDecoder[List[T]] = repeatUntilInput(_.exhausted)
+
+  def repeatUntilFail: MessageDecoder[List[T]] =
+
+    def rec(): ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, List[T]] =
+      val concat =
+        for
+          head <- zpure
+          tail <- rec()
+        yield head :: tail
+
+      concat.catchAll(_ => ZPure.succeed(Nil))
+
+    MessageDecoder(rec())
+
+  def orElse[A](other: MessageDecoder[A]): MessageDecoder[T | A] = MessageDecoder(zpure.orElse(other.toZPure))
+
+  def <>[A](other: MessageDecoder[A]): MessageDecoder[T | A] = orElse(other)
 
 object MessageDecoder:
 
-  def apply[T](program: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]): MessageDecoder[T] = program
+  def succeed[T](value: T): MessageDecoder[T] = MessageDecoder(ZPure.succeed(value))
+
+  def fail(error: ProtocolError): MessageDecoder[Nothing] = MessageDecoder(ZPure.fail(error))
 
   def fromOption[T](value: Option[T]): MessageDecoder[T] = fromEither(value.toRight(ProtocolError.Miscellaneous("Missing value")))
 
-  def fromEither[T](value: Either[ProtocolError, T]): MessageDecoder[T] = ZPure.fromEither(value)
+  def fromEither[T](value: Either[ProtocolError, T]): MessageDecoder[T] = MessageDecoder(ZPure.fromEither(value))
 
   def attempt[T](value: => T): MessageDecoder[T] = attemptOrElse(value, ProtocolError.Thrown.apply)
 
   def attemptOrElse[T](value: => T, error: Throwable => ProtocolError): MessageDecoder[T] =
-    ZPure
-      .attempt(value)
-      .mapError(error)
+    MessageDecoder:
+      ZPure
+        .attempt(value)
+        .mapError(error)
 
   inline def derived[T](using m: Mirror.Of[T]): MessageDecoder[T] = inline m match
     case p: Mirror.ProductOf[T] => derivedProduct(p, summonInline[MessageDecoder[p.MirroredElemTypes]])
@@ -63,58 +118,18 @@ object MessageDecoder:
     
     def decode[T](using decoder: MessageDecoder[T]): Either[ProtocolError, T] =
       decoder.decode(MessageInput.fromInput(value))
-  
-  extension [T](decoder: MessageDecoder[T])
-
-    def decodeZPure(input: MessageInput): ZPure[Nothing, Unit, MessageInput, Any, ProtocolError, T] =
-      decoder.provideState(input)
-
-    def decode(input: MessageInput): Either[ProtocolError, T] =
-      decoder
-        .provideState(input)
-        .runEither
-
-    def filterOrElse(f: T => Boolean, error: T => ProtocolError): MessageDecoder[T] = decoder.filterOrElse(f)(x => ZPure.fail(error(x)))
-
-    def map[A](f: T => A): MessageDecoder[A] = decoder.map(f)
-
-    def flatMap[A](f: T => MessageDecoder[A]): MessageDecoder[A] = decoder.flatMap(f)
-
-    def mapEither[A](f: T => Either[ProtocolError, A]): MessageDecoder[A] = decoder.flatMap(x => ZPure.fromEither(f(x)))
-
-    def repeatUntilInput(f: MessageInput => Boolean): MessageDecoder[List[T]] =
-      decoder.zip(ZPure.get[MessageInput]).flatMap: (a, s) =>
-        if f(s) then ZPure.succeed(a :: Nil)
-        else repeatUntilInput(f).map(a :: _)
-
-    def repeatUntilCurrent(f: String => Boolean): MessageDecoder[List[T]] =
-      repeatUntilInput(input => input.peek.forall(f))
-
-    def repeatUntilEnd: MessageDecoder[List[T]] = repeatUntilInput(_.exhausted)
-
-    def repeatUntilFail: MessageDecoder[List[T]] =
-      val concat =
-        for
-          head <- decoder
-          tail <- decoder.repeatUntilFail
-        yield head :: tail
-
-      concat.catchAll(_ => ZPure.succeed(Nil))
-
-    def orElse[A](other: MessageDecoder[A]): MessageDecoder[T | A] = decoder.orElse(other)
-
-    def <>[A](other: MessageDecoder[A]): MessageDecoder[T | A] = decoder.orElse(other)
 
   extension [R](either: Either[String, R])
     def toInvalidInput(input: String): Either[ProtocolError, R] =
       either.left.map(msg => ProtocolError.InvalidInput(input, msg))
 
   val next: MessageDecoder[String] =
-    for
-      input <- ZPure.get[MessageInput]
-      result <- ZPure.fromEither(input.peek)
-      _ <- ZPure.set(input.skip)
-    yield result
+    MessageDecoder:
+      for
+        input <- ZPure.get[MessageInput]
+        result <- ZPure.fromEither(input.peek)
+        _ <- ZPure.set(input.skip)
+      yield result
 
   inline given ironType[A, C](using inline decoder: MessageDecoder[A], constraint: Constraint[A, C]): MessageDecoder[A :| C] =
     decoder
@@ -141,30 +156,30 @@ object MessageDecoder:
     for
       value <- next
       result <-
-        if value == "1" then ZPure.succeed(true)
-        else if value == "0" then ZPure.succeed(false)
-        else ZPure.fromEither(value.toBooleanOption.toRight(ProtocolError.InvalidInput(value, "Not a boolean")))
+        if value == "1" then MessageDecoder.succeed(true)
+        else if value == "0" then MessageDecoder.succeed(false)
+        else MessageDecoder.fromEither(value.toBooleanOption.toRight(ProtocolError.InvalidInput(value, "Not a boolean")))
     yield result
 
   given int: MessageDecoder[Int] =
     for
       value <- next
-      result <- ZPure.fromEither(value.toIntOption.toRight(ProtocolError.InvalidInput(value, "Not a int")))
+      result <- MessageDecoder.fromEither(value.toIntOption.toRight(ProtocolError.InvalidInput(value, "Not a int")))
     yield result
 
   given long: MessageDecoder[Long] =
     for
       value <- next
-      result <- ZPure.fromEither(value.toLongOption.toRight(ProtocolError.InvalidInput(value, "Not a long")))
+      result <- MessageDecoder.fromEither(value.toLongOption.toRight(ProtocolError.InvalidInput(value, "Not a long")))
     yield result
 
   given double: MessageDecoder[Double] =
     for
       value <- next
-      result <- ZPure.fromEither(value.toDoubleOption.toRight(ProtocolError.InvalidInput(value, "Not a double")))
+      result <- MessageDecoder.fromEither(value.toDoubleOption.toRight(ProtocolError.InvalidInput(value, "Not a double")))
     yield result
 
-  given emptyTuple: MessageDecoder[EmptyTuple] = ZPure.succeed(EmptyTuple)
+  given emptyTuple: MessageDecoder[EmptyTuple] = MessageDecoder.succeed(EmptyTuple)
 
   given nonEmptyTuple[A, T <: Tuple](using headDecoder: MessageDecoder[A], tailDecoder: MessageDecoder[T]): MessageDecoder[A *: T] =
     for
@@ -173,6 +188,6 @@ object MessageDecoder:
     yield head *: tail
 
   given option[A](using decoder: MessageDecoder[A]): MessageDecoder[Option[A]] =
-    decoder.map(Some.apply) <> ZPure.succeed(None)
+    decoder.map(Some.apply) <> MessageDecoder.succeed(None)
 
   given list[A](using decoder: MessageDecoder[A]): MessageDecoder[List[A]] = decoder.repeatUntilEnd
