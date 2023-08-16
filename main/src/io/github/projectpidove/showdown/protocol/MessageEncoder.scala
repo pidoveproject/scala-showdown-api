@@ -1,9 +1,12 @@
 package io.github.projectpidove.showdown.protocol
 
 import io.github.iltotore.iron.*
+import scala.collection.mutable.ListBuffer
 import scala.compiletime.{constValue, erasedValue, summonInline}
 import scala.deriving.Mirror
 import scala.reflect.TypeTest
+import scala.util.boundary
+import scala.util.boundary.break
 
 trait MessageEncoder[-A]:
 
@@ -15,8 +18,7 @@ trait MessageEncoder[-A]:
     for
       resultA <- encode(a)
       resultB <- other.encode(b)
-    yield
-      resultA ++ resultB
+    yield resultA ++ resultB
 
 object MessageEncoder:
 
@@ -26,12 +28,12 @@ object MessageEncoder:
 
   inline def derived[A](using m: Mirror.Of[A]): MessageEncoder[A] = inline m match
     case p: Mirror.ProductOf[A & Product] => derivedProduct(p, summonInline[MessageEncoder[p.MirroredElemTypes]]).asInstanceOf[MessageEncoder[A]]
-    case s: Mirror.SumOf[A] => derivedSum(s)
+    case s: Mirror.SumOf[A]               => derivedSum(s)
 
   private inline def genGetProductFields[A <: Product, T <: Tuple](n: Int = 0): A => T = inline erasedValue[T] match
     case _: EmptyTuple => _ => EmptyTuple.asInstanceOf[T]
     case _: (head *: tail) =>
-      val getTailFields = genGetProductFields[A, tail](n+1)
+      val getTailFields = genGetProductFields[A, tail](n + 1)
       (value: A) => (value.productElement(n) *: getTailFields(value)).asInstanceOf[T]
 
   private inline def derivedProduct[A <: Product](m: Mirror.ProductOf[A], decoder: MessageEncoder[m.MirroredElemTypes]): MessageEncoder[A] =
@@ -56,10 +58,8 @@ object MessageEncoder:
 
       encoder.encode(value)
 
-  inline given ironType[A, C](using encoder: MessageEncoder[A]): MessageEncoder[A :| C] = encoder.asInstanceOf[MessageEncoder[A :| C]]
-
   inline given newtype[A](using mirror: RefinedTypeOps.Mirror[A]): MessageEncoder[A] =
-    summonInline[mirror.IronType].asInstanceOf[MessageEncoder[A]]
+    summonInline[MessageEncoder[mirror.IronType]].asInstanceOf[MessageEncoder[A]]
 
   given string: MessageEncoder[String] = value => Right(List(value))
 
@@ -69,6 +69,22 @@ object MessageEncoder:
 
   given double: MessageEncoder[Double] = string.contramap(_.toString)
 
+  given boolean: MessageEncoder[Boolean] = string.contramap {
+    case true  => "on"
+    case false => "off"
+  }
+
+  given list[A](using encoder: MessageEncoder[A]): MessageEncoder[List[A]] =
+    elements =>
+      boundary:
+        val buffer = ListBuffer.empty[String]
+        for element <- elements do
+          encoder.encode(element) match
+            case Right(value) => buffer ++= value
+            case left         => break(left)
+
+        Right(buffer.toList)
+
   given emptyTuple: MessageEncoder[EmptyTuple] = _ => Right(Nil)
 
   given nonEmptyTuple[A, T <: Tuple](using headEncoder: MessageEncoder[A], tailEncoder: MessageEncoder[T]): MessageEncoder[A *: T] = {
@@ -76,6 +92,10 @@ object MessageEncoder:
       for
         headResult <- headEncoder.encode(head)
         tailResult <- tailEncoder.encode(tail)
-      yield
-        headResult ++ tailResult
+      yield headResult ++ tailResult
+  }
+
+  given option[A](using encoder: MessageEncoder[A]): MessageEncoder[Option[A]] = {
+    case Some(value: A) => encoder.encode(value)
+    case None           => Right(Nil)
   }
