@@ -14,3 +14,11 @@ def assertFail[T](decoder: MessageDecoder[T], input: MessageInput): Unit =
 
 def assertFailString[T](decoder: MessageDecoder[T], input: String): Unit =
   assertFail(decoder, MessageInput.fromInput(input))
+
+def assertEncode[T](encoder: MessageEncoder[T], input: T, expected: List[String]): Unit =
+  val result = encoder.encode(input)
+  assert(
+    result == Right(expected),
+    s"""Expected: $expected
+      |Result: $result""".stripMargin
+  )
