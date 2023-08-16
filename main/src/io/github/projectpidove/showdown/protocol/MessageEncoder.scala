@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown.protocol
 
+import io.github.iltotore.iron.*
 import scala.compiletime.{constValue, erasedValue, summonInline}
 import scala.deriving.Mirror
 import scala.reflect.TypeTest
@@ -54,6 +55,11 @@ object MessageEncoder:
         }.getOrElse(MessageEncoder.fail(ProtocolError.InvalidInput(value.toString, s"No suitable case found")))
 
       encoder.encode(value)
+
+  inline given ironType[A, C](using encoder: MessageEncoder[A]): MessageEncoder[A :| C] = encoder.asInstanceOf[MessageEncoder[A :| C]]
+
+  inline given newtype[A](using mirror: RefinedTypeOps.Mirror[A]): MessageEncoder[A] =
+    summonInline[mirror.IronType].asInstanceOf[MessageEncoder[A]]
 
   given string: MessageEncoder[String] = value => Right(List(value))
 
