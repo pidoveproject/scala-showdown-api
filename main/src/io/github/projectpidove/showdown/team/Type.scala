@@ -3,7 +3,10 @@ package io.github.projectpidove.showdown.team
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import zio.json.JsonCodec
 
-enum Type derives MessageEncoder:
+/**
+ * The pokemon types.
+ */
+enum Type: // TODO convert it to a case class since the data can be dynamic
   case Bug
   case Dragon
   case Electric

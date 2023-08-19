@@ -5,21 +5,122 @@ import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
 import io.github.projectpidove.showdown.room.{given, *}
 import io.github.projectpidove.showdown.user.{UserList, User, given}
 
+/**
+ * A message bound to a room
+ */
 enum RoomMessage derives MessageDecoder:
   // Initialization
+
+  /**
+   * Initialization message. Sent first when entering a room.
+   *
+   * @param roomType the type of the room. Either battle or chat.
+   */
   case Init(roomType: RoomType)
+
+  /**
+   * An update on the title of the room.
+   *
+   * @param title the current title of the room
+   */
   case Title(title: String)
+
+  /**
+   * The users in the room when joining.
+   *
+   * @param users the current list of users who joined the room
+   */
   case Users(users: UserList)
 
+  /**
+   * A chat message sent by the server
+   *
+   * @param content the raw content of the message
+   */
   @MessageName("") case Message(content: String) // TODO support `MESSAGE` format
+
+  /**
+   * An HTML message sent by the server
+   *
+   * @param content the content of the message
+   */
   case Html(content: HTML)
+
+  /**
+   * A named HTML message sent by the server
+   *
+   * @param name the name of this message, used to update it later
+   */
   case UHtml(name: String, content: HTML)
+
+  /**
+   * An update on a previously sent [[UHtml]] message
+   *
+   * @param name the name of the message to update
+   * @param content the new content of the message
+   */
   case UHtmlChange(name: String, content: HTML)
+
+  /**
+   * A user joined the room.
+   *
+   * @param user the user who joined the room
+   */
   @MessageName("join", "j", "J") case Join(user: User)
+
+  /**
+   * A user left the room.
+   *
+   * @param user the who lef the room
+   */
   @MessageName("leave", "l", "L") case Leave(user: User)
+
+  /**
+   * A user changed their name
+   *
+   * @param newName the new name of the user
+   * @param oldName the old name of the user
+   */
   case Name(newName: User, oldName: User)
+
+  /**
+   * A user sent a message in the room.
+   *
+   * @param user the user who sent the message
+   * @param message the content of he message
+   */
   @MessageName("chat", "c") case Chat(user: User, message: ChatMessage)
-  case Notify(title: String, message: String, token: Option[HighlightToken])
+
+  /**
+   * A notification was sent in the room.
+   *
+   * @param title the title of the notification
+   * @param content the content of the notification
+   * @param token the (optional) highlight token of this notification
+   */
+  case Notify(title: String, content: String, token: Option[HighlightToken]) // TODO make content optional
+
+  /**
+   * An update on the current time of the room.
+   *
+   * @param time the current timestamp of the room (UNIX format)
+   */
   @MessageName(":") case Timestamp(time: RoomTimestamp)
+
+  /**
+   * A chat message with a timestamp attached.
+   *
+   * @param time the timestamp of the message
+   * @param user    the user who sent the message
+   * @param message the content of he message
+   */
   @MessageName("c:") case TimestampChat(time: RoomTimestamp, user: User, message: ChatMessage)
+
+  /**
+   * A battle started.
+   *
+   * @param room the id of the battle room
+   * @param firstUser the first battle participant
+   * @param secondUser the second battle participant
+   */
   case Battle(room: RoomId, firstUser: User, secondUser: User)

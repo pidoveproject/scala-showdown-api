@@ -6,6 +6,12 @@ import io.github.projectpidove.showdown.protocol.MessageDecoder
 import MessageDecoder.*
 import io.github.projectpidove.showdown.protocol.ProtocolError
 
+/**
+ * Represents a public user as seen from others.
+ *
+ * @param name this user's name
+ * @param rank this user's rank if exists
+ */
 case class User(name: Username, rank: Option[Char])
 
 object User:

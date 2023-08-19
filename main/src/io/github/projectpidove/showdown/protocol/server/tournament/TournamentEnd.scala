@@ -6,6 +6,14 @@ import io.github.projectpidove.showdown.protocol.MessageDecoder
 import io.github.projectpidove.showdown.user.Username
 import zio.json.JsonDecoder
 
+/**
+ * A tournament ending.
+ *
+ * @param results the winner of the tournament
+ * @param format the format of the tournament
+ * @param generator the bracket generator of the tournament
+ * @param bracketData the final bracket of the tournament
+ */
 case class TournamentEnd(
     results: List[List[Username]],
     format: FormatName,

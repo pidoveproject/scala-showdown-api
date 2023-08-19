@@ -1,3 +1,11 @@
 package io.github.projectpidove.showdown.user
 
-case class LoggedUser(name: String, avatar: String, isGuest: Boolean, settings: UserSettings)
+/**
+ * Represent a logged-in user. Typically the current user when connecting to Showdown.
+ *
+ * @param name the name of the user
+ * @param avatar the avatar representing this user
+ * @param isGuest whether this user is a guest or has a registered account
+ * @param settings this user's settings
+ */
+case class LoggedUser(name: Username, avatar: AvatarName, isGuest: Boolean, settings: UserSettings)

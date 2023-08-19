@@ -170,11 +170,17 @@ private val tripleEqual = Syntax.string("===", "===").unit("===")
 val tierSyntax = Syntax.char('[') ~> nonBlankSyntax(Syntax.char(']')).refined(Tier)
 def teamNameSyntax = nonBlankSyntax(tripleEqual | Syntax.end).refined(TeamName)
 
+/**
+ * The PokePaste syntax for a single pokemon set.
+ */
 val pokemonSetsSyntax: Syntax[String, Char, Char, PokemonSets] = pokemonSet.repeatWithSep0(endOfLine.repeat0.unit(Chunk(()))).transformEither(
   _.toList.refineEither[MaxLength[6]],
   sets => Right(Chunk.from(sets))
 )
 
+/**
+ * The PokePaste syntax for a team (sets + format + name).
+ */
 val teamSyntax = (tripleEqual ~> whitespaces ~ tierSyntax ~ teamNameSyntax ~ (endOfLine.repeat0.unit(Chunk()) ~> pokemonSetsSyntax)).transform(
   (tier, name, pokemonSets) => Team(name, tier, pokemonSets),
   team => (team.tier, team.name, team.sets)
