@@ -7,7 +7,7 @@ import zio.Zippable
 import zio.json.*
 import zio.prelude.fx.ZPure
 
-import scala.compiletime.{constValue, erasedValue, summonInline}
+import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
 class MessageDecoder[+T](zpure: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]):
@@ -93,19 +93,44 @@ object MessageDecoder:
     if names.isEmpty then word(default)
     else oneOf(names*)
 
-  private inline def summonSumDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
-    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Invalid enum case")))
-    case _: ((nameType, head) *: EmptyTuple) =>
-      val name = constValue[nameType].toString.toLowerCase
-      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
+//  private inline def summonSumDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
+//    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Invalid enum case")))
+//    case _: ((nameType, head) *: EmptyTuple) =>
+//      val name = constValue[nameType].toString.toLowerCase
+//      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
+//    case _: ((nameType, head) *: tail) =>
+//      val name = constValue[nameType].toString.toLowerCase
+//      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[
+//        tail
+//      ]).asInstanceOf[MessageDecoder[T]]
+
+  private inline def summonDecoderMap[A, T <: Tuple]: Map[MessageDecoder[?], MessageDecoder[A]] = inline erasedValue[T] match
+    case _: EmptyTuple => Map.empty
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
-      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[
-        tail
-      ]).asInstanceOf[MessageDecoder[T]]
+      val keyDecoder = namesOrDefault(MessageName.getMessageNames[head], name)
+      val caseDecoder = derived[head](using summonInline[Mirror.Of[head]]).asInstanceOf[MessageDecoder[A]]
+      Map(keyDecoder -> caseDecoder) ++ summonDecoderMap[A, tail]
 
   private inline def derivedSum[T](m: Mirror.SumOf[T]): MessageDecoder[T] =
-    summonSumDecoder[Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]].asInstanceOf[MessageDecoder[T]]
+    val casesMap = summonDecoderMap[T, Tuple.Zip[m.MirroredElemLabels, m.MirroredElemTypes]]
+
+    val decoder =
+      for
+        input <- ZPure.get[MessageInput]
+        decoderOption =casesMap.collectFirst(Function.unlift: (keyDecoder, caseDecoder) =>
+            val result = keyDecoder.toZPure.runAll(input)
+            result match
+              case (_, Right((newInput, _))) => Some(caseDecoder.toZPure.provideState(newInput))
+              case (_, Left(_)) => None
+        )
+        result <-
+          decoderOption
+            .getOrElse(ZPure.fail(input.peek.map(in => ProtocolError.InvalidInput(in, "No suitable case found")).merge))
+      yield
+        result
+
+    MessageDecoder(decoder)
 
   private inline def summonUnionDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
     case _: EmptyTuple     => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))

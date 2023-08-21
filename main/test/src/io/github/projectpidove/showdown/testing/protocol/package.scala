@@ -4,7 +4,12 @@ import io.github.projectpidove.showdown.protocol.*
 
 def assertDecode[T](decoder: MessageDecoder[T], input: MessageInput, expected: T): Unit =
   val result = decoder.decode(input)
-  assert(result == Right(expected))
+  assert(
+    result == Right(expected),
+    s"""Decoding failed.
+      |Input: $input
+      |Result: $result""".stripMargin
+  )
 
 def assertDecodeString[T](decoder: MessageDecoder[T], input: String, expected: T): Unit =
   assertDecode(decoder, MessageInput.fromInput(input), expected)
