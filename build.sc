@@ -13,17 +13,26 @@ object main extends ProjectModule {
   def ivyDeps = Agg(
     ivy"io.github.iltotore::iron::2.2.0",
     ivy"io.github.iltotore::iron-zio-json::2.2.0",
-    ivy"dev.zio::zio::2.0.15",
-    ivy"dev.zio::zio-streams::2.0.15",
     ivy"dev.zio::zio-json::0.6.0",
     ivy"dev.zio::zio-parser::0.1.9",
-    ivy"dev.zio::zio-prelude::1.0.0-RC19",
-    ivy"com.softwaremill.sttp.client3::zio::3.9.0"
+    ivy"dev.zio::zio-prelude::1.0.0-RC19"
   )
 
   object js extends JSCrossModule
 
   object test extends Tests
+}
+
+object zio extends ProjectModule {
+
+  def moduleDeps = Seq(main)
+
+  def ivyDeps = main.ivyDeps() ++ Agg(
+    ivy"dev.zio::zio::2.0.15",
+    ivy"dev.zio::zio-streams::2.0.15",
+    ivy"com.softwaremill.sttp.client3::core::3.9.0",
+    ivy"com.softwaremill.sttp.client3::zio::3.9.0"
+  )
 }
 
 //Internals
@@ -61,6 +70,8 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
     def scalaVersion = outer.scalaVersion
 
     def ivyDeps = outer.ivyDeps
+
+    def moduleDeps = outer.moduleDeps
 
     def artifactName = outer.artifactName
 
