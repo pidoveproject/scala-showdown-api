@@ -1,8 +1,9 @@
 package io.github.projectpidove.showdown.team
 
+import io.github.projectpidove.showdown.protocol.MessageEncoder
 import zio.json.JsonCodec
 
-enum Type:
+enum Type derives MessageEncoder:
   case Bug
   case Dragon
   case Electric

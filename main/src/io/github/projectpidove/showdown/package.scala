@@ -17,3 +17,6 @@ object FormatName extends RefinedTypeOpsImpl[String, Not[Blank], FormatName]
 
 opaque type FormatCategoryName = String :| Not[Blank]
 object FormatCategoryName extends RefinedTypeOpsImpl[String, Not[Blank], FormatCategoryName]
+
+opaque type Generation = Int :| Positive
+object Generation extends RefinedTypeOpsImpl[Int, Positive, Generation]

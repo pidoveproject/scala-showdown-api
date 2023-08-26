@@ -16,8 +16,8 @@ enum OptionCommand derives MessageEncoder:
   case DoNotDisturb()
   case Back()
   case TimeStamps(target: TimestampTarget, timeInterval: TimeInterval)
-  case ShowJoins(room: RoomId) // SAME
-  case HideJoins(room: RoomId) // SAME
+  case ShowJoins(room: Option[RoomId])
+  case HideJoins(room: Option[RoomId])
   case BlockChallenges()
   case UnblockChallenges()
   @MessageName("blockpms") case BlockPrivateMessages(exeptGroup: Option[PmGroup]) // SAME
