@@ -17,7 +17,7 @@ enum DataCommand derives MessageEncoder:
   case Learn(ruleset: Option[Generation | FormatName], pokemon: SpeciesName, moves: List[MoveName])
   case StatCalc(level: Option[Level], baseStat: Int :| Positive, iv: Option[IV], ev: Option[EVBoost], modifier: Option[Modifier])
   case Effectiveness(attacker: MoveName | Type, defender: SpeciesName | Type)
-  case Weakness(typesOrPokemon: SpeciesName | (Type, Type))
+  case Weakness(typesOrPokemon: SpeciesName | (Type, Type) | Type)
   case Coverage(moves: List[MoveName])
   case RandomMove(criteria: Option[String])
   case RandomPokemon(criteria: Option[String])

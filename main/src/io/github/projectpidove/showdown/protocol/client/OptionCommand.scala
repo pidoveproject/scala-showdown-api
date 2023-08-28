@@ -10,14 +10,14 @@ enum OptionCommand derives MessageEncoder:
   case Avatar(user: AvatarName)
   case Ignore(user: Username)
   case Status(note: String)
-  case ClearStatus()
-  case Away()
-  case Busy()
-  case DoNotDisturb()
-  case Back()
-  case TimeStamps(target: TimestampTarget, timeInterval: TimeInterval)
+  case ClearStatus
+  case Away
+  case Busy
+  case DoNotDisturb
+  case Back
+  case Timestamps(target: TimestampTarget, timeInterval: TimeInterval)
   case ShowJoins(room: Option[RoomId])
   case HideJoins(room: Option[RoomId])
-  case BlockChallenges()
-  case UnblockChallenges()
-  @MessageName("blockpms") case BlockPrivateMessages(exeptGroup: Option[PmGroup]) // SAME
+  case BlockChallenges
+  case UnblockChallenges
+  @MessageName("blockpms") case BlockPrivateMessages(exceptGroup: Option[PmGroup]) // SAME

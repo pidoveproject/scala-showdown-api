@@ -6,12 +6,12 @@ import io.github.projectpidove.showdown.room.{ChatMessage, RoomId, given}
 import io.github.projectpidove.showdown.user.{Username, given}
 
 enum BattleRoomCommand derives MessageEncoder:
-  case SaveReplay()
-  case SecretRoom()
+  case SaveReplay
+  case SecretRoom
   case HideRoom(isOn: Boolean)
-  case PublicRoom()
+  case PublicRoom
   case InviteOnly(isOn: Boolean)
-  case InviteOnlyNext(isOn: Option[Boolean])
-  case Invite(user: Option[Username], roomName: Option[RoomId]) // Say roomName in the docs check it before implement
+  case InviteOnlyNext(isOn: Boolean)
+  case Invite(user: Option[Username], roomName: Option[RoomId])
   case Timer(isOn: Boolean)
-  case Forfeit()
+  case Forfeit
