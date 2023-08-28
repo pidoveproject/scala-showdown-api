@@ -6,7 +6,7 @@ import zio.json.JsonCodec
 /**
  * The pokemon types.
  */
-enum Type: // TODO convert it to a case class since the data can be dynamic
+enum Type derives MessageEncoder: // TODO convert it to a case class since the data can be dynamic
   case Bug
   case Dragon
   case Electric
