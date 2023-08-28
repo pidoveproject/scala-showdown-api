@@ -1,9 +1,10 @@
 package io.github.projectpidove.showdown.team
 
+import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.team.StatType.*
 import zio.json.JsonCodec
 
-enum Nature(modifiedStats: Option[(StatType, StatType)] = None):
+enum Nature(modifiedStats: Option[(StatType, StatType)] = None) derives MessageEncoder:
 
   def this(increased: StatType, decreased: StatType) = this(Some((increased, decreased)))
 
