@@ -29,4 +29,4 @@ object OptionSuite extends TestSuite:
     test("hideJoins") - assertEncode(encoder, OptionCommand.HideJoins(Some(RoomId("lobby"))), List("hidejoins", "lobby"))
     test("blockChallenges") - assertEncode(encoder, OptionCommand.BlockChallenges, List("blockchallenges"))
     test("unblockChallenges") - assertEncode(encoder, OptionCommand.UnblockChallenges, List("unblockchallenges"))
-    test("blockPMs") - assertEncode(encoder, OptionCommand.BlockPrivateMessages(Some(PmGroup.Friends)), List("blockpms", "friends"))
+    test("blockPMs") - assertEncode(encoder, OptionCommand.BlockPrivateMessages(Some(PrivateMessageGroup.Friends)), List("blockpms", "friends"))
