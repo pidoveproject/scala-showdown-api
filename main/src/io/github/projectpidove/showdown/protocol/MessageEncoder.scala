@@ -10,12 +10,37 @@ import scala.reflect.TypeTest
 import scala.util.boundary
 import scala.util.boundary.break
 
+/**
+ * A message encoder.
+ *
+ * @tparam A the type to serialize
+ */
 trait MessageEncoder[-A]:
 
+  /**
+   * Encode a value.
+   *
+   * @param value the value to encode
+   * @return either an error or the result as a list of arguments
+   */
   def encode(value: A): Either[ProtocolError, List[String]]
 
+  /**
+   * Map the input of this encoder.
+   *
+   * @param f the function to apply to the input value
+   * @tparam B the new type to serialize
+   * @return a new encoder 
+   */
   def contramap[B](f: B => A): MessageEncoder[B] = value => encode(f(value))
 
+  /**
+   * Zip this encoder with another one/
+   *
+   * @param other the encoder to zip with
+   * @tparam B the type to zip with [[A]]
+   * @return an encoder taking a tuple `(A, B)` and concatenating the results
+   */
   def zip[B](other: => MessageEncoder[B]): MessageEncoder[(A, B)] = (a, b) =>
     for
       resultA <- encode(a)
@@ -24,10 +49,30 @@ trait MessageEncoder[-A]:
 
 object MessageEncoder:
 
+  /**
+   * Create an always-succeeding encoder.
+   *
+   * @param value the result of the encoder
+   * @tparam A the input type
+   * @return a encoder that always succeeds with the passed value
+   */
   def succeed[A](value: String): MessageEncoder[A] = _ => Right(List(value))
 
+  /**
+   * Create an always-failing encoder.
+   *
+   * @param error the error of the encoder
+   * @return a encoder that always fail with the passed error
+   */
   def fail(error: ProtocolError): MessageEncoder[Any] = _ => Left(error)
 
+  /**
+   * Derive an encoder from a case class or an enum.
+   *
+   * @param m the mirror representing the result type
+   * @tparam A the result type
+   * @return a encoder automatically generated for the type `A`
+   */
   inline def derived[A](using m: Mirror.Of[A]): MessageEncoder[A] = inline m match
     case p: Mirror.ProductOf[A & Product] => derivedProduct(p, summonInline[MessageEncoder[p.MirroredElemTypes]]).asInstanceOf[MessageEncoder[A]]
     case s: Mirror.SumOf[A]               => derivedSum(s)
@@ -68,6 +113,13 @@ object MessageEncoder:
 
       (test, encoder) :: genUnionTypeTests[A, tail]
 
+  /**
+   * Derive an encoder from an union type.
+   *
+   * @param m the mirror representing the union type
+   * @tparam A the result type (union)
+   * @return an encoder automatically generated for the type `A`
+   */
   inline given derivedUnion[A](using m: UnionTypeMirror[A]): MessageEncoder[A] =
     val tests = genUnionTypeTests[A, m.ElementTypes]
 
@@ -80,6 +132,7 @@ object MessageEncoder:
 
         encoder.encode(value)
 
+  inline given ironType[A, C](using encoder: MessageEncoder[A]): MessageEncoder[A :| C] = encoder.asInstanceOf[MessageEncoder[A :| C]]
 
   inline given newtype[A](using mirror: RefinedTypeOps.Mirror[A]): MessageEncoder[A] =
     summonInline[MessageEncoder[mirror.IronType]].asInstanceOf[MessageEncoder[A]]

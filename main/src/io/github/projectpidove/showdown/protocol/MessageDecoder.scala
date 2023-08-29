@@ -10,6 +10,12 @@ import zio.prelude.fx.ZPure
 import scala.compiletime.{constValue, erasedValue, error, summonInline}
 import scala.deriving.Mirror
 
+/**
+ * A message decoder.
+ *
+ * @param zpure the internal logic for decoding a message
+ * @tparam T the type to deserialize
+ */
 class MessageDecoder[+T](zpure: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T]):
 
   def toZPure: ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, T] = zpure
@@ -66,22 +72,73 @@ class MessageDecoder[+T](zpure: ZPure[Nothing, MessageInput, MessageInput, Any, 
 
 object MessageDecoder:
 
+  /**
+   * Create an always-succeeding decoder.
+   *
+   * @param value the result of the decoder
+   * @tparam T the result type
+   * @return a decoder that always succeeds with the passed value
+   */
   def succeed[T](value: T): MessageDecoder[T] = MessageDecoder(ZPure.succeed(value))
 
+  /**
+   * Create an always-failing decoder.
+   *
+   * @param error the error of the decoder
+   * @return a decoder that always fail with the passed error
+   */
   def fail(error: ProtocolError): MessageDecoder[Nothing] = MessageDecoder(ZPure.fail(error))
 
+  /**
+   * Create a decoder from an optional value.
+   *
+   * @param value the optional value to pass if exists.
+   * @tparam T the result type of the decoder
+   * @return a decoder succeeding with the current value or failing if the passed value is `None`
+   */
   def fromOption[T](value: Option[T]): MessageDecoder[T] = fromEither(value.toRight(ProtocolError.Miscellaneous("Missing value")))
 
+  /**
+   * Create a decoder from an either.
+   *
+   * @param value the error or succeeding result
+   * @tparam T the result type
+   * @return a decoder succeeding with the right result or failing with the left error
+   */
   def fromEither[T](value: Either[ProtocolError, T]): MessageDecoder[T] = MessageDecoder(ZPure.fromEither(value))
 
+  /**
+   * A decoder attempting to evaluate the given result.
+   *
+   * @param value the result to evaluate
+   * @tparam T the result type
+   * @return a decoder succeeding with the passed result or failing if the result evaluation failed
+   * @see [[attemptOrElse]]
+   */
   def attempt[T](value: => T): MessageDecoder[T] = attemptOrElse(value, ProtocolError.Thrown.apply)
 
+  /**
+   * A decoder attempting to evaluate the given result.
+   *
+   * @param value the result to evaluate
+   * @param error the function to transform the thrown error into a [[ProtocolError]]
+   * @tparam T the result type
+   * @return a decoder succeeding with the passed result or failing with the given error if the result evaluation failed
+   * @see [[attempt]]
+   */
   def attemptOrElse[T](value: => T, error: Throwable => ProtocolError): MessageDecoder[T] =
     MessageDecoder:
       ZPure
         .attempt(value)
         .mapError(error)
 
+  /**
+   * Derive a decoder from a case class or an enum.
+   *
+   * @param m the mirror representing the result type
+   * @tparam T the result type
+   * @return a decoder automatically generated for the type `T`
+   */
   inline def derived[T](using m: Mirror.Of[T]): MessageDecoder[T] = inline m match
     case p: Mirror.ProductOf[T] => derivedProduct(p, summonInline[MessageDecoder[p.MirroredElemTypes]])
     case s: Mirror.SumOf[T]     => derivedSum(s)
@@ -136,14 +193,29 @@ object MessageDecoder:
     case _: EmptyTuple     => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
     case _: (head *: tail) => (summonInline[MessageDecoder[head]] <> summonUnionDecoder[tail]).asInstanceOf[MessageDecoder[T]]
 
+  /**
+   * Derive a decoder from an union type.
+   *
+   * @param m the mirror representing the union type
+   * @tparam T the result type (union)
+   * @return a decoder automatically generated for the type `T`
+   */
   inline given derivedUnion[T](using m: UnionTypeMirror[T]): MessageDecoder[T] =
     summonUnionDecoder[m.ElementTypes].asInstanceOf[MessageDecoder[T]]
 
   extension (value: String)
+    /**
+     * Decode the value.
+     *
+     * @return either a succeeding result or an error if the decoding failed
+     */
     def decode[T](using decoder: MessageDecoder[T]): Either[ProtocolError, T] =
       decoder.decode(MessageInput.fromInput(value))
 
   extension [R](either: Either[String, R])
+    /**
+     * Transforms the error message of this Either to a ProtocolError
+     */
     def toInvalidInput(input: String): Either[ProtocolError, R] =
       either.left.map(msg => ProtocolError.InvalidInput(input, msg))
 
@@ -165,14 +237,29 @@ object MessageDecoder:
 
   given string: MessageDecoder[String] = next
 
+  /**
+   * A decoder accepting a keyword.
+   *
+   * @param value the keyword to decode
+   * @return a decoder resulting in the passed keyword as String
+   */
   def word(value: String): MessageDecoder[String] =
     string
       .filterOrElse((x: String) => x == value, (x: String) => ProtocolError.InvalidInput(x, s"Expected $value"))
 
+  /**
+   * A decoder accepting one of the given keywords.
+   *
+   * @param values the accepted keywords
+   * @return a decoder resulting in the parsed keyword
+   */
   def oneOf(values: String*): MessageDecoder[String] =
     string
       .filterOrElse(values.contains, (x: String) => ProtocolError.InvalidInput(x, s"Expected one of: ${values.mkString(",")}"))
 
+  /**
+   * Create a decoder from a [[JsonDecoder]]
+   */
   def fromJson[A: JsonDecoder]: MessageDecoder[A] =
     string.mapEither(x => x.fromJson[A].left.map(msg => ProtocolError.InvalidInput(x, msg)))
 

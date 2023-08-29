@@ -8,7 +8,16 @@ import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.{given, *}
 import zio.json.JsonDecoder
 
+/**
+ * The generator for a tournament bracket.
+ */
 enum TournamentGenerator:
+
+  /**
+   * Elimination BO tree.
+   *
+   * @param maxLoss the max number of loss before loosing a BO
+   */
   case Elimination(maxLoss: Count)
   case RoundRobin(maxEncounter: Count)
 

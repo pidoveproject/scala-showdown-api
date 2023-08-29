@@ -4,6 +4,10 @@ import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.team.StatType.*
 import zio.json.JsonCodec
 
+/**
+ * The nature of a pokemon.
+ * @param modifiedStats the stats bonus and malus of the nature. `None` if the nature is neutral.
+ */
 enum Nature(modifiedStats: Option[(StatType, StatType)] = None) derives MessageEncoder:
 
   def this(increased: StatType, decreased: StatType) = this(Some((increased, decreased)))

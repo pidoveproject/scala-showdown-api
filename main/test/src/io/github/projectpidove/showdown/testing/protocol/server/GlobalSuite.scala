@@ -115,7 +115,7 @@ object GlobalSuite extends TestSuite:
         decoder,
         """|updatesearch|{"searching":["gen9unratedrandombattle"],"games":{"battle-gen9unratedrandombattle-1917286443":"[Gen 9] Unrated Random Battle"}}""",
         GlobalMessage.UpdateSearch(GameSearch(
-          searching = List("gen9unratedrandombattle"),
+          searching = List(FormatName("gen9unratedrandombattle")),
           games = Map("battle-gen9unratedrandombattle-1917286443" -> "[Gen 9] Unrated Random Battle")
         ))
       )

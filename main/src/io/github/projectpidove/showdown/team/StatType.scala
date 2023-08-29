@@ -2,6 +2,11 @@ package io.github.projectpidove.showdown.team
 
 import zio.json.*
 
+/**
+ * One of the six stat types.
+ *
+ * @param shortName the short name of this stat type
+ */
 enum StatType(val shortName: String):
   case Health extends StatType("HP")
   case Attack extends StatType("Atk")
@@ -12,6 +17,12 @@ enum StatType(val shortName: String):
 
 object StatType:
 
+  /**
+   * Get a stat type from its short name.
+   *
+   * @param shortName the short name of the stat type
+   * @return the corresponding [[StatType]]
+   */
   def fromShortName(shortName: String): Option[StatType] = StatType.values.find(_.shortName.equalsIgnoreCase(shortName))
 
   given JsonCodec[StatType] = JsonCodec.string.transformOrFail(

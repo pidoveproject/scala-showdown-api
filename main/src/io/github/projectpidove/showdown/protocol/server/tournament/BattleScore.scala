@@ -3,6 +3,12 @@ package io.github.projectpidove.showdown.protocol.server.tournament
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.*
 
+/**
+ * The scores of a battle. A point = a pokemon alive
+ *
+ * @param user1 the score of the first participant
+ * @param user2 the score of the second participant
+ */
 case class BattleScore(user1: Score, user2: Score)
 
 object BattleScore:

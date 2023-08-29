@@ -1,9 +1,16 @@
 package io.github.projectpidove.showdown
 
+import io.github.iltotore.iron.zioJson.given
 import io.github.projectpidove.showdown.protocol.MessageDecoder
 import zio.json.*
 
-case class GameSearch(searching: List[String], games: Map[String, String]) derives JsonDecoder
+/**
+ * Informations about the current search.
+ *
+ * @param searching the searched formats
+ * @param games the found games
+ */
+case class GameSearch(searching: List[FormatName], games: Map[String, String]) derives JsonDecoder
 
 object GameSearch:
 
