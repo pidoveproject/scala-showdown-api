@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown.testing.protocol.client
 
+import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.protocol.client.*
 import io.github.projectpidove.showdown.testing.protocol.*
