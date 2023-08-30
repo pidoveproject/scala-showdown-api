@@ -13,8 +13,6 @@ import sttp.ws.{WebSocket, WebSocketFrame}
 import zio.*
 import zio.json.*
 
-private type ProtocolTask[A] = IO[ProtocolError, A]
-
 class ZIOShowdownConnection(
                              backend: SttpBackend[Task, ZioStreams & WebSockets],
                              socket: WebSocket[Task],
@@ -81,3 +79,13 @@ class ZIOShowdownConnection(
   private def stateSubscription(message: ServerMessage): ProtocolTask[Unit] = message match
     case GlobalMessage.ChallStr(content) => challstrRef.set(Some(content))
     case _ => ZIO.unit
+
+object ZIOShowdownConnection:
+
+  def withHandler(backend: SttpBackend[Task, ZioStreams & WebSockets], handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit])(socket: WebSocket[Task]): Task[ZIOShowdownConnection] =
+    for
+      challStrRef <- Ref.make[Option[ChallStr]](None)
+      connection = ZIOShowdownConnection(backend, socket, challStrRef)
+      result <- handler(connection)
+    yield
+      connection
