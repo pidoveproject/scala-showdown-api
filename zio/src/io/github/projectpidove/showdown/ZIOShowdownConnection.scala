@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown
 
-import io.github.projectpidove.showdown.protocol.{Channel, LoginResponse, MessageDecoder, MessageInput, ProtocolError}
-import io.github.projectpidove.showdown.protocol.client.ClientMessage
+import io.github.projectpidove.showdown.protocol.{Channel, LoginResponse, MessageDecoder, MessageEncoder, MessageInput, ProtocolError}
+import io.github.projectpidove.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, ServerMessage}
 import io.github.projectpidove.showdown.user.Username
 import sttp.capabilities.WebSockets
@@ -21,7 +21,12 @@ class ZIOShowdownConnection(
 
   override def sendRawMessage(frame: WebSocketFrame): ProtocolTask[Unit] = socket.send(frame).mapError(ProtocolError.Thrown.apply)
 
-  override def sendMessage(message: ClientMessage): ProtocolTask[Unit] = ???
+  override def sendMessage(message: ClientMessage): ProtocolTask[Unit] =
+    for
+      parts <- ZIO.fromEither(MessageEncoder.derivedUnion[ClientMessage].encode(message))
+      _ <- sendRawMessage(WebSocketFrame.text(parts.mkString("/", ",", "")))
+    yield
+      ()
 
   override def disconnect(): ProtocolTask[Unit] = sendRawMessage(WebSocketFrame.close)
 
@@ -70,7 +75,7 @@ class ZIOShowdownConnection(
       body = response.body.merge.tail
       _ <- Console.printLine(s"Response = $body").toProtocolZIO
       data <- ZIO.fromEither(body.fromJson[LoginResponse]).mapError(msg => ProtocolError.InvalidInput(body, msg))
-      _ <- sendRawMessage(WebSocketFrame.text(s"|/trn $name,0,${data.assertion}"))
+      _ <- sendMessage(AuthCommand.Trn(name, 0, data.assertion))
     yield
       data
 
