@@ -32,7 +32,7 @@ class ZIOShowdownConnection(
         _ <- Console.printLine(frame.toString).toProtocolZIO
         message <- frame match
           case WebSocketFrame.Text(text, _, _) =>
-            ZIO.foreach(text.split("\n")): msg =>
+            ZIO.foreach(text.split(raw"(\r\n|\r|\n)")): msg =>
               (for
                 message <-
                   MessageDecoder
