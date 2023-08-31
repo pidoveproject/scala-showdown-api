@@ -71,7 +71,8 @@ class ZIOShowdownConnection(
           )
           .send(backend)
           .toProtocolZIO
-      body = response.body.merge.tail
+      prefixedBody <- ZIO.fromEither(response.body).mapError(ProtocolError.AuthentificationFailed.apply)
+      body = prefixedBody.tail
       data <- ZIO.fromEither(body.fromJson[LoginResponse]).mapError(msg => ProtocolError.InvalidInput(body, msg))
       _ <- sendMessage(AuthCommand.Trn(name, 0, data.assertion))
     yield
@@ -90,7 +91,7 @@ class ZIOShowdownConnection(
           )
           .send(backend)
           .toProtocolZIO
-      assertion = response.body.merge
+      assertion <- ZIO.fromEither(response.body).mapError(ProtocolError.AuthentificationFailed.apply)
       _ <- sendMessage(AuthCommand.Trn(name, 0, assertion))
     yield
       assertion

@@ -34,3 +34,8 @@ enum ProtocolError(message: String) extends Throwable(message):
    * The connection has been closed.
    */
   case ConnectionClosed extends ProtocolError("Connection closed")
+
+  /**
+   * The authentification process failed.
+   */
+  case AuthentificationFailed(message: String) extends ProtocolError(s"Authentification failed: $message")
