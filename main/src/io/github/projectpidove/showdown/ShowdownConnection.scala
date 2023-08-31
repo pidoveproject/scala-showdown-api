@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown
 
 import io.github.projectpidove.showdown.protocol.LoginResponse
-import io.github.projectpidove.showdown.protocol.client.ClientMessage
+import io.github.projectpidove.showdown.protocol.client.{ClientMessage, GlobalCommand}
 import io.github.projectpidove.showdown.protocol.server.ServerMessage
 import io.github.projectpidove.showdown.user.Username
 
