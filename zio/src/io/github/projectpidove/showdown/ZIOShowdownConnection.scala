@@ -14,7 +14,7 @@ import zio.json.*
 class ZIOShowdownConnection(
                              backend: SttpBackend[Task, ZioStreams & WebSockets],
                              socket: WebSocket[Task],
-                             infoRef: Ref[ShowdownData]
+                             stateRef: Ref[ShowdownData]
                            ) extends ShowdownConnection[WebSocketFrame, ProtocolTask]:
 
   override def sendRawMessage(frame: WebSocketFrame): ProtocolTask[Unit] = socket.send(frame).mapError(ProtocolError.Thrown.apply)
@@ -59,7 +59,7 @@ class ZIOShowdownConnection(
 
   override def login(name: Username, password: String): ProtocolTask[LoginResponse] =
     for
-      challstr <- infoRef.get.map(_.challStr).someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
+      challstr <- stateRef.get.map(_.challStr).someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
       response <-
         basicRequest
           .post(uri"https://play.pokemonshowdown.com/action.php")
@@ -80,7 +80,7 @@ class ZIOShowdownConnection(
 
   override def loginGuest(name: Username): ProtocolTask[String] =
     for
-      challstr <- infoRef.get.map(_.challStr).someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
+      challstr <- stateRef.get.map(_.challStr).someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
       response <-
         basicRequest
           .post(uri"https://play.pokemonshowdown.com/action.php")
@@ -96,8 +96,10 @@ class ZIOShowdownConnection(
     yield
       assertion
 
+  override def currentState: ProtocolTask[ShowdownData] = stateRef.get
+
   private def stateSubscription(message: ServerMessage): ProtocolTask[Unit] =
-    infoRef.update(_.update(message))
+    stateRef.update(_.update(message))
 
 object ZIOShowdownConnection:
 
