@@ -53,4 +53,4 @@ trait ShowdownConnection[Frame, Cmd[_]]:
    * 
    * @param name the name to take in game
    */
-  def loginGuest(name: Username): Cmd[Unit]
+  def loginGuest(name: Username): Cmd[String]

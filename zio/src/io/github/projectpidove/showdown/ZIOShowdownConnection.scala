@@ -1,14 +1,12 @@
 package io.github.projectpidove.showdown
 
-import io.github.projectpidove.showdown.protocol.{Channel, LoginResponse, MessageDecoder, MessageEncoder, MessageInput, ProtocolError}
 import io.github.projectpidove.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, ServerMessage}
+import io.github.projectpidove.showdown.protocol.*
 import io.github.projectpidove.showdown.user.Username
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.*
-import sttp.client3.httpclient.zio.HttpClientZioBackend
-import sttp.model.Uri
 import sttp.ws.{WebSocket, WebSocketFrame}
 import zio.*
 import zio.json.*
@@ -24,7 +22,8 @@ class ZIOShowdownConnection(
   override def sendMessage(message: ClientMessage): ProtocolTask[Unit] =
     for
       parts <- ZIO.fromEither(MessageEncoder.derivedUnion[ClientMessage].encode(message))
-      _ <- sendRawMessage(WebSocketFrame.text(parts.mkString("/", ",", "")))
+      command = parts.mkString("|/", ",", "").replaceFirst(",", " ")
+      _ <- sendRawMessage(WebSocketFrame.text(command))
     yield
       ()
 
@@ -73,13 +72,28 @@ class ZIOShowdownConnection(
           .send(backend)
           .toProtocolZIO
       body = response.body.merge.tail
-      _ <- Console.printLine(s"Response = $body").toProtocolZIO
       data <- ZIO.fromEither(body.fromJson[LoginResponse]).mapError(msg => ProtocolError.InvalidInput(body, msg))
       _ <- sendMessage(AuthCommand.Trn(name, 0, data.assertion))
     yield
       data
 
-  override def loginGuest(name: Username): ProtocolTask[Unit] = ???
+  override def loginGuest(name: Username): ProtocolTask[String] =
+    for
+      challstr <- challstrRef.get.someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
+      response <-
+        basicRequest
+          .post(uri"https://play.pokemonshowdown.com/action.php")
+          .body(
+            "act" -> "getassertion",
+            "userid" -> name.toString,
+            "challstr" -> challstr.toString
+          )
+          .send(backend)
+          .toProtocolZIO
+      assertion = response.body.merge
+      _ <- sendMessage(AuthCommand.Trn(name, 0, assertion))
+    yield
+      assertion
 
   private def stateSubscription(message: ServerMessage): ProtocolTask[Unit] = message match
     case GlobalMessage.ChallStr(content) => challstrRef.set(Some(content))
