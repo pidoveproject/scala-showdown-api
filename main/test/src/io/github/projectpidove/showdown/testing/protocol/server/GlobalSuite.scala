@@ -26,13 +26,13 @@ object GlobalSuite extends TestSuite:
       test("noPipe") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|Wanna play?", GlobalMessage.PrivateMessage(
         User(Username("Il_totore"), None),
         User(Username("Zarel"), Some('*')),
-        ChatMessage("Wanna play?")
+        ChatContent("Wanna play?")
       ))
 
       test("withPipes") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|I like pipes `|`", GlobalMessage.PrivateMessage(
         User(Username("Il_totore"), None),
         User(Username("Zarel"), Some('*')),
-        ChatMessage("I like pipes `|`")
+        ChatContent("I like pipes `|`")
       ))
 
     test("usercount") - assertDecodeString(decoder, "|usercount|21838", GlobalMessage.UserCount(Count(21838)))

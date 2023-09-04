@@ -4,7 +4,7 @@ import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.{FormatName, Generation}
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.protocol.client.*
-import io.github.projectpidove.showdown.room.{ChatMessage, RoomId}
+import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.team.{SpeciesName, Tier}
 import io.github.projectpidove.showdown.testing.protocol.*
 import io.github.projectpidove.showdown.user.Username

@@ -3,8 +3,10 @@ package io.github.projectpidove.showdown
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 
-opaque type Timestamp = Long :| Positive
-object Timestamp extends RefinedTypeOpsImpl[Long, Positive, Timestamp]
+opaque type Timestamp = Long :| GreaterEqual[0]
+object Timestamp extends RefinedTypeOpsImpl[Long, GreaterEqual[0], Timestamp]:
+  
+  def zero: Timestamp = 0
 
 opaque type Count = Int :| Positive
 object Count extends RefinedTypeOpsImpl[Int, Positive, Count]

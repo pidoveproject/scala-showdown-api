@@ -2,6 +2,7 @@ package io.github.projectpidove.showdown.protocol
 
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.{MessageInput, ProtocolError}
+import io.github.projectpidove.showdown.room.RoomId
 import io.github.projectpidove.showdown.util.UnionTypeMirror
 import zio.Zippable
 import zio.json.*
@@ -241,6 +242,13 @@ object MessageDecoder:
         result <- ZPure.fromEither(input.peek)
         _ <- ZPure.set(input.skip)
       yield result
+      
+  val currentRoom: MessageDecoder[RoomId] =
+    MessageDecoder:
+      for
+        input <- ZPure.get[MessageInput]
+      yield
+        input.roomId
 
   inline given ironType[A, C](using inline decoder: MessageDecoder[A], constraint: Constraint[A, C]): MessageDecoder[A :| C] =
     decoder
