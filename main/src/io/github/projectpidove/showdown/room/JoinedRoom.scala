@@ -21,24 +21,10 @@ case class JoinedRoom(
   roomType: Option[RoomType],
   currentTime: Timestamp,
   users: Set[User],
-  messages: List[ChatMessage] :| MaxLength[100]
+  chat: RoomChat
 ):
-  
-  /**
-   * Add a chat message to this room.
-   * 
-   * @param message the message to add
-   * @return a new room containing the given message
-   * @note if this room already has 100 messages, the returned copy will not contain the oldest one 
-   */
-  def withChatMessage(message: ChatMessage): JoinedRoom =
-    val withNewMessage = messages.prepended(message)
-    val size = withNewMessage.size
-    val result =
-      if size > 100 then withNewMessage.dropRight(size - 100)
-      else withNewMessage
 
-    this.copy(messages = result.assume)
+  def withChatMessage(message: ChatMessage): JoinedRoom = this.copy(chat = chat.withChatMessage(message))
 
   /**
    * Update this room according to the passed server event/message.
@@ -54,16 +40,8 @@ case class JoinedRoom(
     case RoomMessage.Leave(user) => this.copy(users = users - user)
     case RoomMessage.Name(newName, oldName) => this.copy(users = users - oldName + newName)
     case RoomMessage.Timestamp(time) => this.copy(currentTime = time)
-    case RoomMessage.Message(content) => this.withChatMessage(ChatMessage.Server(content))
-    case RoomMessage.Chat(user, content) => this.withChatMessage(ChatMessage.Sent(user, content))
-    case RoomMessage.TimestampChat(_, user, content) => this.withChatMessage(ChatMessage.Sent(user, content))
-    case RoomMessage.Html(content) => this.withChatMessage(ChatMessage.Html(content))
-    case RoomMessage.UHtml(name, content) =>
-      val result = messages.collect:
-        case ChatMessage.UHtml(n, _) if n == name => ChatMessage.UHtml(name, content)
-        case message => message
-
-      this.copy(messages = result.assume)
+    case msg: (RoomMessage.Message | RoomMessage.Html | RoomMessage.UHtml | RoomMessage.UHtmlChange | RoomMessage.TimestampChat) =>
+      this.copy(chat = chat.update(msg))
     case _ => this
 
 object JoinedRoom:
@@ -81,5 +59,5 @@ object JoinedRoom:
     roomType = None,
     currentTime = Timestamp.zero,
     users = Set.empty,
-    messages = List.empty.assume
+    chat = RoomChat.empty
   )
