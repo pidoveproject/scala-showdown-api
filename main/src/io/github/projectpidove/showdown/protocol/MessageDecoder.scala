@@ -39,6 +39,8 @@ class MessageDecoder[+T](zpure: ZPure[Nothing, MessageInput, MessageInput, Any, 
 
   def mapEither[A](f: T => Either[ProtocolError, A]): MessageDecoder[A] = flatMap(x => MessageDecoder.fromEither(f(x)))
 
+  def mapError(f: ProtocolError => ProtocolError): MessageDecoder[T] = MessageDecoder(zpure.mapError(f))
+
   def repeatUntilInput(f: MessageInput => Boolean): MessageDecoder[List[T]] =
 
     def rec(): ZPure[Nothing, MessageInput, MessageInput, Any, ProtocolError, List[T]] =
@@ -67,6 +69,9 @@ class MessageDecoder[+T](zpure: ZPure[Nothing, MessageInput, MessageInput, Any, 
     MessageDecoder(rec())
 
   def orElse[A](other: MessageDecoder[A]): MessageDecoder[T | A] = MessageDecoder(zpure.orElse(other.toZPure))
+
+  def recoverWith[A](f: ProtocolError => MessageDecoder[A]): MessageDecoder[T | A] =
+    MessageDecoder(zpure.catchAll(f(_).toZPure))
 
   def <>[A](other: MessageDecoder[A]): MessageDecoder[T | A] = orElse(other)
 
@@ -191,7 +196,17 @@ object MessageDecoder:
 
   private inline def summonUnionDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
     case _: EmptyTuple     => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
-    case _: (head *: tail) => (summonInline[MessageDecoder[head]] <> summonUnionDecoder[tail]).asInstanceOf[MessageDecoder[T]]
+    case _: (head *: tail) =>
+      val headDecoder = summonInline[MessageDecoder[head]]
+      val tailDecoder = summonUnionDecoder[tail]
+
+      val resultDecoder =
+        headDecoder.recoverWith: err =>
+          tailDecoder.mapError:
+            case ProtocolError.Multiple(errors) => ProtocolError.Multiple(errors :+ err)
+            case other => ProtocolError.Multiple(List(other, err))
+
+      resultDecoder.asInstanceOf[MessageDecoder[T]]
 
   /**
    * Derive a decoder from an union type.

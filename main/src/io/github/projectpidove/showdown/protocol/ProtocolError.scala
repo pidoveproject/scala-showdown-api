@@ -39,3 +39,8 @@ enum ProtocolError(message: String) extends Throwable(message):
    * The authentification process failed.
    */
   case AuthentificationFailed(message: String) extends ProtocolError(s"Authentification failed: $message")
+
+  /**
+   * An aggregation of multiple errors.
+   */
+  case Multiple(errors: List[ProtocolError]) extends ProtocolError(s"Errors: \n${errors.mkString("\n- ")}")
