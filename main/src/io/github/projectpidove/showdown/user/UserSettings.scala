@@ -33,7 +33,7 @@ case class UserSettings(
     hideLogins: Boolean,
     hiddenNextBattle: Boolean,
     inviteOnlyNextBattle: Boolean,
-    language: String
+    language: Option[String]
 ) derives JsonDecoder, JsonEncoder
 
 object UserSettings:
