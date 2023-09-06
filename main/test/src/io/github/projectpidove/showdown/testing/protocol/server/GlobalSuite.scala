@@ -56,7 +56,7 @@ object GlobalSuite extends TestSuite:
           hideLogins = false,
           hiddenNextBattle = false,
           inviteOnlyNextBattle = false,
-          language = "fr"
+          language = Some("fr")
         )
 
       val settingsJson =
