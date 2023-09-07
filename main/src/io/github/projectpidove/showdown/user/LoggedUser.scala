@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown.user
 
+import io.github.projectpidove.showdown.FormatName
 import io.github.projectpidove.showdown.protocol.server.ServerMessage
 import io.github.projectpidove.showdown.room.RoomChat
 
@@ -16,9 +17,16 @@ case class LoggedUser(
   avatar: AvatarName,
   isGuest: Boolean,
   settings: UserSettings,
-  privateMessages: Map[User, RoomChat]
+  privateMessages: Map[User, RoomChat],
+  challenges: Map[User, FormatName]
 ):
   
   def getPrivateChat(user: User): RoomChat = privateMessages.getOrElse(user, RoomChat.empty)
 
   def withPrivateChat(user: User, chat: RoomChat): LoggedUser = this.copy(privateMessages = privateMessages.updated(user, chat))
+
+  def getChallenge(opponent: User): Option[FormatName] = challenges.get(opponent)
+
+  def withChallenge(opponent: User, format: FormatName): LoggedUser = this.copy(challenges = challenges.updated(opponent, format))
+  
+  def removeChallenge(opponent: User): LoggedUser = this.copy(challenges = challenges.removed(opponent))

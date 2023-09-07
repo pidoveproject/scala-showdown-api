@@ -15,7 +15,9 @@ opaque type ChallStr = String :| FixedLength[258]
 object ChallStr extends RefinedTypeOpsImpl[String, FixedLength[258], ChallStr]
 
 opaque type FormatName = String :| Not[Blank]
-object FormatName extends RefinedTypeOpsImpl[String, Not[Blank], FormatName]
+object FormatName extends RefinedTypeOpsImpl[String, Not[Blank], FormatName]:
+
+  def unapply(value: String): Option[FormatName] = this.option(value)
 
 opaque type FormatCategoryName = String :| Not[Blank]
 object FormatCategoryName extends RefinedTypeOpsImpl[String, Not[Blank], FormatCategoryName]

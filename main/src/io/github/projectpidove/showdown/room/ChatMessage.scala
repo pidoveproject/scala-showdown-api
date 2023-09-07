@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown.room
 
+import io.github.projectpidove.showdown.FormatName
 import io.github.projectpidove.showdown.user.User
 
 /**
@@ -50,3 +51,11 @@ enum ChatMessage:
    * @param user the user who left the room
    */
   case Leave(user: User)
+
+  /**
+   * A challenge request.
+   *
+   * @param opponent the opponent from the point of view of the current user
+   * @param format the format of the battle
+   */
+  case Challenge(opponent: User, format: FormatName)

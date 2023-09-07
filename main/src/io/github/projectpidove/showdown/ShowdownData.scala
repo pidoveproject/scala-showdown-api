@@ -4,7 +4,7 @@ import io.github.projectpidove.showdown.protocol.server.query.ResponseContent.Us
 import io.github.projectpidove.showdown.protocol.server.query.{ResponseContent, UserInfo}
 import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, ServerMessage}
 import io.github.projectpidove.showdown.room.{ChatContent, ChatMessage, JoinedRoom, RoomId}
-import io.github.projectpidove.showdown.user.{LoggedUser, Username}
+import io.github.projectpidove.showdown.user.{LoggedUser, User, Username}
 
 /**
  * The state of the Showdown connection.
@@ -24,7 +24,7 @@ case class ShowdownData(
     gameSearch: GameSearch,
     formatCategories: List[FormatCategory],
     joinedRooms: Map[RoomId, JoinedRoom],
-    userDetails: Map[String, UserInfo]
+    userDetails: Map[String, UserInfo],
 ):
 
   /**
@@ -63,7 +63,7 @@ case class ShowdownData(
     case GlobalMessage.UpdateUser(user, named, avatar, settings) =>
       val result = loggedUser match
         case Some(value) => value.copy(name = user.name, avatar = avatar, isGuest = !named, settings = settings)
-        case None => LoggedUser(user.name, avatar, !named, settings, Map.empty)
+        case None => LoggedUser(user.name, avatar, !named, settings, Map.empty, Map.empty)
 
       this.copy(loggedUser = Some(result))
     case GlobalMessage.PrivateMessage(sender, receiver, message) if isLoggedAs(sender.name) || isLoggedAs(receiver.name) =>
@@ -72,9 +72,15 @@ case class ShowdownData(
         else sender
 
       val user = loggedUser.get
-      val updatedChat = user.getPrivateChat(key).withChatMessage(ChatMessage.Sent(sender, message))
 
-      this.copy(loggedUser = Some(user.withPrivateChat(key, updatedChat)))
+      message.value match
+        case "/challenge" => this.copy(loggedUser = Some(user.removeChallenge(key)))
+        case s"/challenge ${FormatName(format)}|$_|||" =>
+          val updatedChat = user.getPrivateChat(key).withChatMessage(ChatMessage.Challenge(key, format))
+          this.copy(loggedUser = Some(user.withPrivateChat(key, updatedChat).withChallenge(key, format)))
+        case _ =>
+          val updatedChat = user.getPrivateChat(key).withChatMessage(ChatMessage.Sent(sender, message))
+          this.copy(loggedUser = Some(user.withPrivateChat(key, updatedChat)))
     case GlobalMessage.UpdateSearch(search) => this.copy(gameSearch = search)
     case GlobalMessage.Formats(categories) => this.copy(formatCategories = categories)
     case GlobalMessage.QueryResponse(ResponseContent.UserDetails(info)) => this.copy(userDetails = userDetails.updated(info.id, info))
