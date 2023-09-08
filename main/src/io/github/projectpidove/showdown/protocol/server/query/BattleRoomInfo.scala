@@ -10,4 +10,4 @@ import zio.json.*
  * @param p2 the second battle participant
  * @param minElo the min elo of the match
  */
-case class RoomInfo(p1: String, p2: String, minElo: Int) derives JsonDecoder
+case class BattleRoomInfo(p1: String, p2: String, minElo: Int) derives JsonDecoder
