@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown
 
 import io.github.projectpidove.showdown.protocol.server.query.ResponseContent.UserDetails
-import io.github.projectpidove.showdown.protocol.server.query.{ResponseContent, UserInfo}
+import io.github.projectpidove.showdown.protocol.server.query.{BattleRoomInfo, BattleRooms, ChatRoomInfo, ChatRooms, ResponseContent, UserInfo}
 import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, ServerMessage}
 import io.github.projectpidove.showdown.room.{ChatContent, ChatMessage, JoinedRoom, RoomId}
 import io.github.projectpidove.showdown.user.{LoggedUser, User, Username}
@@ -10,21 +10,27 @@ import io.github.projectpidove.showdown.user.{LoggedUser, User, Username}
  * The state of the Showdown connection.
  *
  * @param userCount the number of online users
+ * @param battleCount the number of currently-playing battles
  * @param challStr the challstr of the session
  * @param loggedUser the currently logged-in user
  * @param gameSearch the current state of game matchmaking
  * @param formatCategories the formats and categories available on the connected server
  * @param joinedRooms the room the logged user is currently connected to
+ * @param battleRooms the currently-playing battle rooms
+ * @param chatRooms the available chat rooms
  * @param userDetails the details of other users
  */
 case class ShowdownData(
     userCount: Option[Count],
+    battleCount: Option[Count],
     challStr: Option[ChallStr],
     loggedUser: Option[LoggedUser],
     gameSearch: GameSearch,
     formatCategories: List[FormatCategory],
     joinedRooms: Map[RoomId, JoinedRoom],
-    userDetails: Map[String, UserInfo],
+    battleRooms: Map[String, BattleRoomInfo],
+    chatRooms: Map[String, ChatRoomInfo],
+    userDetails: Map[String, UserInfo]
 ):
 
   /**
@@ -84,6 +90,10 @@ case class ShowdownData(
     case GlobalMessage.UpdateSearch(search) => this.copy(gameSearch = search)
     case GlobalMessage.Formats(categories) => this.copy(formatCategories = categories)
     case GlobalMessage.QueryResponse(ResponseContent.UserDetails(info)) => this.copy(userDetails = userDetails.updated(info.id, info))
+    case GlobalMessage.QueryResponse(ResponseContent.BattleRoomList(BattleRooms(rooms))) => this.copy(battleRooms = rooms)
+    case GlobalMessage.QueryResponse(ResponseContent.ChatRoomList(ChatRooms(rooms, sectionTitles, userCount, battleCount))) =>
+      val roomMap = rooms.map(room => (room.title, room)).toMap
+      this.copy(chatRooms = roomMap, userCount = Some(userCount), battleCount = Some(battleCount))
     case RoomBoundMessage(id, message) => this.copy(joinedRooms = joinedRooms.updated(id, getJoinedRoomOrEmpty(id).update(message)))
     case _ => this
 
@@ -94,10 +104,13 @@ object ShowdownData:
    */
   val empty: ShowdownData = ShowdownData(
     userCount = None,
+    battleCount = None,
     challStr = None,
     loggedUser = None,
     gameSearch = GameSearch.empty,
     formatCategories = List.empty,
     joinedRooms = Map.empty,
+    battleRooms = Map.empty,
+    chatRooms = Map.empty,
     userDetails = Map.empty
   )
