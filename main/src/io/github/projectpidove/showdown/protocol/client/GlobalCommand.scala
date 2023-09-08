@@ -2,7 +2,7 @@ package io.github.projectpidove.showdown.protocol.client
 
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.FormatName
-import io.github.projectpidove.showdown.room.{ChatMessage, RoomId, given}
+import io.github.projectpidove.showdown.room.{ChatContent, RoomId, given}
 import io.github.projectpidove.showdown.user.{Username, given}
 
 /**
@@ -24,14 +24,14 @@ enum GlobalCommand derives MessageEncoder:
    * @param user the recipient of the message
    * @param message the message to send
    */
-  case Msg(user: Username, message: ChatMessage)
+  case Msg(user: Username, message: ChatContent)
 
   /**
    * Reply to the last private discussion.
    *
    * @param message the message to send
    */
-  case Reply(message: ChatMessage)
+  case Reply(message: ChatContent)
 
   /**
    * Log out from the current account.

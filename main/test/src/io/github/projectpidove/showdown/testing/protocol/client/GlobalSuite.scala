@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.testing.protocol.client
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.protocol.client.*
-import io.github.projectpidove.showdown.room.{ChatMessage, RoomId}
+import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.FormatName
 import io.github.projectpidove.showdown.testing.protocol.*
 import io.github.projectpidove.showdown.user.Username
@@ -23,11 +23,11 @@ object GlobalSuite extends TestSuite:
 
     test("msg") - assertEncode(
       encoder,
-      GlobalCommand.Msg(Username("LeFanDeMeganium"), ChatMessage("Wanna rematch?")),
+      GlobalCommand.Msg(Username("LeFanDeMeganium"), ChatContent("Wanna rematch?")),
       List("msg", "LeFanDeMeganium", "Wanna rematch?")
     )
 
-    test("reply") - assertEncode(encoder, GlobalCommand.Reply(ChatMessage("Sure I'll challenge you")), List("reply", "Sure I'll challenge you"))
+    test("reply") - assertEncode(encoder, GlobalCommand.Reply(ChatContent("Sure I'll challenge you")), List("reply", "Sure I'll challenge you"))
     test("logOut") - assertEncode(encoder, GlobalCommand.LogOut, List("logout"))
     test("challenge") - assertEncode(
       encoder,

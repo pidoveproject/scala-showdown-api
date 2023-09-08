@@ -5,7 +5,7 @@ import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.*
 import io.github.projectpidove.showdown.protocol.*
 import io.github.projectpidove.showdown.protocol.server.GlobalMessage
-import io.github.projectpidove.showdown.protocol.server.query.{ResponseContent, RoomInfo, Rooms, UserInfo}
+import io.github.projectpidove.showdown.protocol.server.query.{BattleRoomInfo, BattleRooms, ChatRoomInfo, ChatRooms, ResponseContent, UserInfo}
 import io.github.projectpidove.showdown.room.*
 import io.github.projectpidove.showdown.testing.protocol.*
 import io.github.projectpidove.showdown.user.*
@@ -26,13 +26,13 @@ object GlobalSuite extends TestSuite:
       test("noPipe") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|Wanna play?", GlobalMessage.PrivateMessage(
         User(Username("Il_totore"), None),
         User(Username("Zarel"), Some('*')),
-        ChatMessage("Wanna play?")
+        ChatContent("Wanna play?")
       ))
 
       test("withPipes") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|I like pipes `|`", GlobalMessage.PrivateMessage(
         User(Username("Il_totore"), None),
         User(Username("Zarel"), Some('*')),
-        ChatMessage("I like pipes `|`")
+        ChatContent("I like pipes `|`")
       ))
 
     test("usercount") - assertDecodeString(decoder, "|usercount|21838", GlobalMessage.UserCount(Count(21838)))
@@ -124,9 +124,27 @@ object GlobalSuite extends TestSuite:
       test("roomlist") - assertDecodeString(
         decoder,
         """|queryresponse|roomlist|{"rooms":{"battle-gen9randombattle-1918543121":{"p1":"mynameisjeeeef","p2":"xartumax","minElo":1045},"battle-gen9randombattle-1918543120":{"p1":"Szakallo90","p2":"Juancrub14","minElo":1420}}}""",
-        GlobalMessage.QueryResponse(ResponseContent.RoomList(Rooms.from(
-          "battle-gen9randombattle-1918543121" -> RoomInfo("mynameisjeeeef", "xartumax", 1045),
-          "battle-gen9randombattle-1918543120" -> RoomInfo("Szakallo90", "Juancrub14", 1420)
+        GlobalMessage.QueryResponse(ResponseContent.BattleRoomList(BattleRooms.from(
+          "battle-gen9randombattle-1918543121" -> BattleRoomInfo("mynameisjeeeef", "xartumax", 1045),
+          "battle-gen9randombattle-1918543120" -> BattleRoomInfo("Szakallo90", "Juancrub14", 1420)
+        )))
+      )
+
+      test("rooms") - assertDecodeString(
+        decoder,
+        """|queryresponse|rooms|{"chat":[{"title":"Lobby","desc":"Main room.","userCount":845,"section":"Official"}],"sectionTitles":["Official","Battle formats","Languages"],"userCount":17115,"battleCount":2950}""",
+        GlobalMessage.QueryResponse(ResponseContent.ChatRoomList(ChatRooms(
+          rooms = List(
+            ChatRoomInfo(
+              title = "Lobby",
+              description = "Main room.",
+              userCount = Count(845),
+              section = Some("Official")
+            )
+          ),
+          sectionTitles = List("Official", "Battle formats", "Languages"),
+          userCount = Count(17115),
+          battleCount = Count(2950)
         )))
       )
 

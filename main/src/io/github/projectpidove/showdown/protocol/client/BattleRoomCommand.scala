@@ -2,7 +2,7 @@ package io.github.projectpidove.showdown.protocol.client
 
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.FormatName
-import io.github.projectpidove.showdown.room.{ChatMessage, RoomId, given}
+import io.github.projectpidove.showdown.room.{ChatContent, RoomId, given}
 import io.github.projectpidove.showdown.user.{Username, given}
 
 /**

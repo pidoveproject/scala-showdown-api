@@ -10,8 +10,8 @@ import scala.util.boundary, boundary.break
 opaque type RoomId = String :| Not[Blank]
 object RoomId extends RefinedTypeOpsImpl[String, Not[Blank], RoomId]
 
-opaque type ChatMessage = String :| Not[Blank]
-object ChatMessage extends RefinedTypeOpsImpl[String, Not[Blank], ChatMessage]
+opaque type ChatContent = String :| Not[Blank]
+object ChatContent extends RefinedTypeOpsImpl[String, Not[Blank], ChatContent]
 
 opaque type PopupMessage = String :| Not[Blank]
 object PopupMessage extends RefinedTypeOpsImpl[String, Not[Blank], PopupMessage]

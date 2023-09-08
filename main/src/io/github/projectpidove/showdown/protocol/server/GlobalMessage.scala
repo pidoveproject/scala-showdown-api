@@ -25,7 +25,7 @@ enum GlobalMessage derives MessageDecoder:
    * @param receiver the user who received this PM
    * @param message the content of this PM
    */
-  @MessageName("pm") case PrivateMessage(sender: User, receiver: User, message: ChatMessage)
+  @MessageName("pm") case PrivateMessage(sender: User, receiver: User, message: ChatContent)
 
   /**
    * An update of the number of users on the server

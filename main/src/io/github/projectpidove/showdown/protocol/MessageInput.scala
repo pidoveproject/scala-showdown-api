@@ -1,5 +1,8 @@
 package io.github.projectpidove.showdown.protocol
 
+import io.github.iltotore.iron.*
+import io.github.projectpidove.showdown.room.RoomId
+
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -9,7 +12,7 @@ import scala.collection.mutable.ListBuffer
  * @param data the input separated in indexed parts
  * @param cursor the next part index to consume
  */
-case class MessageInput(raw: String, data: List[(Int, String)], cursor: Int):
+case class MessageInput(raw: String, data: List[(Int, String)], cursor: Int, roomId: RoomId):
 
   /**
    * Check if this input is exhausted.
@@ -51,7 +54,7 @@ object MessageInput:
    * @param input the raw textual input
    * @return a MessageInput resulting from the parsed raw String
    */
-  def fromInput(input: String): MessageInput =
+  def fromInput(input: String, roomId: RoomId = RoomId("lobby")): MessageInput =
     val str =
       if input.startsWith("|") then input.tail
       else input
@@ -68,7 +71,7 @@ object MessageInput:
       else
         builder += str(cursor)
 
-    MessageInput(str, data.toList, 0)
+    MessageInput(str, data.toList, 0, roomId)
 
   /**
    * Create a MessageInput from the a list of parts.
@@ -76,7 +79,7 @@ object MessageInput:
    * @param list the list of textual parts of a message
    * @return a new MessageInput with the given parts, indexed
    */
-  def fromList(list: List[String]): MessageInput =
+  def fromList(list: List[String], roomId: RoomId = RoomId("lobby")): MessageInput =
     var cursor = 0
     val data =
       for
@@ -86,4 +89,4 @@ object MessageInput:
         cursor += element.length
         (elementCursor, element)
 
-    MessageInput(list.mkString, data, 0)
+    MessageInput(list.mkString, data, 0, roomId)

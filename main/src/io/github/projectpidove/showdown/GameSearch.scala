@@ -20,3 +20,5 @@ object GameSearch:
       .map(_.getOrElse(Map.empty))
 
   given MessageDecoder[GameSearch] = MessageDecoder.fromJson
+  
+  val empty: GameSearch = GameSearch(List.empty, Map.empty)

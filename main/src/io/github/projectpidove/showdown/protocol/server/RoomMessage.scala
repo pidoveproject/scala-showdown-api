@@ -37,7 +37,7 @@ enum RoomMessage derives MessageDecoder:
    *
    * @param content the raw content of the message
    */
-  @MessageName("") case Message(content: String) // TODO support `MESSAGE` format
+  @MessageName("") case Message(content: ChatContent) // TODO support `MESSAGE` format
 
   /**
    * An HTML message sent by the server
@@ -89,7 +89,7 @@ enum RoomMessage derives MessageDecoder:
    * @param user the user who sent the message
    * @param message the content of he message
    */
-  @MessageName("chat", "c") case Chat(user: User, message: ChatMessage)
+  @MessageName("chat", "c") case Chat(user: User, message: ChatContent)
 
   /**
    * A notification was sent in the room.
@@ -114,7 +114,7 @@ enum RoomMessage derives MessageDecoder:
    * @param user    the user who sent the message
    * @param message the content of he message
    */
-  @MessageName("c:") case TimestampChat(time: RoomTimestamp, user: User, message: ChatMessage)
+  @MessageName("c:") case TimestampChat(time: RoomTimestamp, user: User, message: ChatContent)
 
   /**
    * A battle started.

@@ -14,7 +14,7 @@ import zio.json.*
 class ZIOShowdownConnection(
                              backend: SttpBackend[Task, ZioStreams & WebSockets],
                              socket: WebSocket[Task],
-                             challstrRef: Ref[Option[ChallStr]]
+                             stateRef: Ref[ShowdownData]
                            ) extends ShowdownConnection[WebSocketFrame, ProtocolTask]:
 
   override def sendRawMessage(frame: WebSocketFrame): ProtocolTask[Unit] = socket.send(frame).mapError(ProtocolError.Thrown.apply)
@@ -59,7 +59,7 @@ class ZIOShowdownConnection(
 
   override def login(name: Username, password: String): ProtocolTask[LoginResponse] =
     for
-      challstr <- challstrRef.get.someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
+      challstr <- stateRef.get.map(_.challStr).someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
       response <-
         basicRequest
           .post(uri"https://play.pokemonshowdown.com/action.php")
@@ -80,7 +80,7 @@ class ZIOShowdownConnection(
 
   override def loginGuest(name: Username): ProtocolTask[String] =
     for
-      challstr <- challstrRef.get.someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
+      challstr <- stateRef.get.map(_.challStr).someOrFail(ProtocolError.Miscellaneous("A challstr is needed to login"))
       response <-
         basicRequest
           .post(uri"https://play.pokemonshowdown.com/action.php")
@@ -96,16 +96,17 @@ class ZIOShowdownConnection(
     yield
       assertion
 
-  private def stateSubscription(message: ServerMessage): ProtocolTask[Unit] = message match
-    case GlobalMessage.ChallStr(content) => challstrRef.set(Some(content))
-    case _ => ZIO.unit
+  override def currentState: ProtocolTask[ShowdownData] = stateRef.get
+
+  private def stateSubscription(message: ServerMessage): ProtocolTask[Unit] =
+    stateRef.update(_.update(message))
 
 object ZIOShowdownConnection:
 
   def withHandler(backend: SttpBackend[Task, ZioStreams & WebSockets], handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit])(socket: WebSocket[Task]): Task[ZIOShowdownConnection] =
     for
-      challStrRef <- Ref.make[Option[ChallStr]](None)
-      connection = ZIOShowdownConnection(backend, socket, challStrRef)
+      infoRef <- Ref.make(ShowdownData.empty)
+      connection = ZIOShowdownConnection(backend, socket, infoRef)
       result <- handler(connection)
     yield
       connection
