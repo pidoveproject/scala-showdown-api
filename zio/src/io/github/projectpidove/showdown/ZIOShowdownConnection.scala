@@ -3,6 +3,7 @@ package io.github.projectpidove.showdown
 import io.github.projectpidove.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, ServerMessage}
 import io.github.projectpidove.showdown.protocol.*
+import io.github.projectpidove.showdown.room.RoomId
 import io.github.projectpidove.showdown.user.Username
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
@@ -18,6 +19,14 @@ class ZIOShowdownConnection(
                            ) extends ShowdownConnection[WebSocketFrame, ProtocolTask]:
 
   override def sendRawMessage(frame: WebSocketFrame): ProtocolTask[Unit] = socket.send(frame).mapError(ProtocolError.Thrown.apply)
+
+  override def sendMessage(room: RoomId, message: ClientMessage): ProtocolTask[Unit] =
+    for
+      parts <- ZIO.fromEither(MessageEncoder.derivedUnion[ClientMessage].encode(message))
+      command = parts.mkString(s"$room|/", ",", "").replaceFirst(",", " ")
+      _ <- sendRawMessage(WebSocketFrame.text(command))
+    yield
+      ()
 
   override def sendMessage(message: ClientMessage): ProtocolTask[Unit] =
     for
