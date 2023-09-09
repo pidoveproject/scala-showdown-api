@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown
 import io.github.projectpidove.showdown.protocol.LoginResponse
 import io.github.projectpidove.showdown.protocol.client.{ClientMessage, GlobalCommand}
 import io.github.projectpidove.showdown.protocol.server.ServerMessage
-import io.github.projectpidove.showdown.room.RoomId
+import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.user.Username
 
 /**
@@ -35,6 +35,15 @@ trait ShowdownConnection[Frame, Cmd[_]]:
    * @param message the message to send
    */
   def sendMessage(message: ClientMessage): Cmd[Unit]
+
+  /**
+   * Send a private message to another player.
+   *
+   * @param recipient the recipient of the message
+   * @param message the message to send
+   */
+  def sendPrivateMessage(recipient: Username, message: ChatContent): Cmd[Unit] =
+    sendMessage(GlobalCommand.Msg(recipient, message))
 
   /**
    * Disconnect from the server.
