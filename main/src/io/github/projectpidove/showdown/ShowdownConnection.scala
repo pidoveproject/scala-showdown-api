@@ -45,8 +45,6 @@ trait ShowdownConnection[Frame, Cmd[_]]:
   def sendPrivateMessage(recipient: Username, message: ChatContent): Cmd[Unit] =
     sendMessage(GlobalCommand.Msg(recipient, message))
 
-
-
   /**
    * Disconnect the user
    */
@@ -127,7 +125,7 @@ trait ShowdownConnection[Frame, Cmd[_]]:
 
   /**
    * Login as guest.
-   * 
+   *
    * @param name the name to take in game
    */
   def loginGuest(name: Username): Cmd[String]
