@@ -101,3 +101,10 @@ enum GlobalCommand derives MessageEncoder:
    * @param room the room to leave of the current one if `None`
    */
   case RoomAuth(room: RoomId)
+
+  /**
+   * Query miscellaneous informations to the server.
+   *
+   * @param request the request to make to the server
+   */
+  case Query(request: QueryRequest)
