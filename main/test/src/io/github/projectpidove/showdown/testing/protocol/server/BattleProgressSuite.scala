@@ -15,7 +15,7 @@ object BattleProgressSuite extends TestSuite:
   val tests = Tests:
 
     val decoder = summon[MessageDecoder[BattleProgressMessage]]
-    
+
     test("timerMessage") - assertDecodeString(decoder, "inactive|foo", BattleProgressMessage.TimerMessage(ChatContent("foo")))
     test("timerDisabled") - assertDecodeString(decoder, "inactiveoff|foo", BattleProgressMessage.TimerDisabled(ChatContent("foo")))
     test("turn") - assertDecodeString(decoder, "turn|1", BattleProgressMessage.Turn(TurnNumber(1)))
