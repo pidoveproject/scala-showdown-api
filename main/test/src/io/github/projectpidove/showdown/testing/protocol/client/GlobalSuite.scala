@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown.testing.protocol.client
 
 import io.github.iltotore.iron.*
-import io.github.projectpidove.showdown.protocol.MessageEncoder
+import io.github.projectpidove.showdown.protocol.{MessageEncoder, MessageName}
 import io.github.projectpidove.showdown.protocol.client.*
 import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.FormatName
@@ -43,3 +43,7 @@ object GlobalSuite extends TestSuite:
     test("leave") - assertEncode(encoder, GlobalCommand.Leave(Some(RoomId("gen9ou1234"))), List("leave", "gen9ou1234"))
     test("join") - assertEncode(encoder, GlobalCommand.UserAuth(Username("Il_totore")), List("userauth", "Il_totore"))
     test("roomAuth") - assertEncode(encoder, GlobalCommand.RoomAuth(RoomId("gen9ou1234")), List("roomauth", "gen9ou1234"))
+    test("query"):
+      test("userDetails") - assertEncode(encoder, GlobalCommand.Query(QueryRequest.UserDetails(Username("Il_totore"))), List("query", "userdetails", "Il_totore"))
+      test("battleRooms") - assertEncode(encoder, GlobalCommand.Query(QueryRequest.BattleRooms()), List("query", "roomlist"))
+      test("chatRooms") - assertEncode(encoder, GlobalCommand.Query(QueryRequest.ChatRooms()), List("query", "rooms"))
