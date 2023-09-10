@@ -54,6 +54,11 @@ enum GlobalCommand derives MessageEncoder:
   case Search(format: FormatName)
 
   /**
+   * Cancel battle search.
+   */
+  case CancelSearch
+
+  /**
    * Get the rating of a user in the current battle.
    *
    * @param user the user to check or the current one if `None`
