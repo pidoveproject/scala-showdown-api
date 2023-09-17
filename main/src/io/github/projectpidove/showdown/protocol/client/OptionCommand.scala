@@ -1,6 +1,6 @@
 package io.github.projectpidove.showdown.protocol.client
 
-import io.github.projectpidove.showdown.protocol.{MessageEncoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageEncoder, messageName}
 import io.github.projectpidove.showdown.FormatName
 import io.github.projectpidove.showdown.room.{ChatContent, RoomId, given}
 import io.github.projectpidove.showdown.user.{AvatarName, Username, given}
@@ -100,4 +100,4 @@ enum OptionCommand derives MessageEncoder:
    * 
    * @param exceptGroup the groups still allowed to PM the current user
    */
-  @MessageName("blockpms") case BlockPrivateMessages(exceptGroup: Option[PrivateMessageGroup])
+  @messageName("blockpms") case BlockPrivateMessages(exceptGroup: Option[PrivateMessageGroup])

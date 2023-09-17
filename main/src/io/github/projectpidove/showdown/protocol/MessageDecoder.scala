@@ -160,10 +160,10 @@ object MessageDecoder:
 //    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Invalid enum case")))
 //    case _: ((nameType, head) *: EmptyTuple) =>
 //      val name = constValue[nameType].toString.toLowerCase
-//      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
+//      (namesOrDefault(messageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
 //    case _: ((nameType, head) *: tail) =>
 //      val name = constValue[nameType].toString.toLowerCase
-//      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[
+//      (namesOrDefault(messageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[
 //        tail
 //      ]).asInstanceOf[MessageDecoder[T]]
 
@@ -171,7 +171,7 @@ object MessageDecoder:
     case _: EmptyTuple => Map.empty
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
-      val keyDecoder = namesOrDefault(MessageName.getMessageNames[head], name)
+      val keyDecoder = namesOrDefault(messageName.getMessageNames[head], name)
       val caseDecoder = derived[head](using summonInline[Mirror.Of[head]]).asInstanceOf[MessageDecoder[A]]
       Map(keyDecoder -> caseDecoder) ++ summonDecoderMap[A, tail]
 

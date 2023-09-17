@@ -89,7 +89,7 @@ object MessageEncoder:
   private inline def genCaseTypeTests[A, T <: Tuple]: List[(TypeTest[A, ? <: A], MessageEncoder[A])] = inline erasedValue[T] match
     case _: EmptyTuple => Nil
     case _: ((nameType, head) *: tail) =>
-      val name = MessageName.getMessageNames[head].headOption.getOrElse(constValue[nameType].toString.toLowerCase)
+      val name = messageName.getMessageNames[head].headOption.getOrElse(constValue[nameType].toString.toLowerCase)
       val test = summonInline[TypeTest[A, head]].asInstanceOf[TypeTest[A, ? <: A]]
       val encoder = derived[head](using summonInline[Mirror.Of[head]]).asInstanceOf[MessageEncoder[A]]
 

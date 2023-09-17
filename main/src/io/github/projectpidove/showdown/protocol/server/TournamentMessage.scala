@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown.protocol.server
 
 import io.github.projectpidove.showdown.protocol.server.tournament.*
-import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, messageName}
 import io.github.projectpidove.showdown.room.RoomId
 import io.github.projectpidove.showdown.user.{User, Username}
 import io.github.projectpidove.showdown.{Count, FormatName}
@@ -29,7 +29,7 @@ enum TournamentMessage:
   /**
    * End of the tournament update.
    */
-  @MessageName("updateEnd") case UpdateEnd()
+  @messageName("updateEnd") case UpdateEnd()
 
   /**
    * A tournament-bound error occurred.

@@ -1,6 +1,6 @@
 package io.github.projectpidove.showdown.protocol.client
 
-import io.github.projectpidove.showdown.protocol.{MessageEncoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageEncoder, messageName}
 
 /**
  * Target for timestamp-related commands.
@@ -20,4 +20,4 @@ enum TimestampTarget derives MessageEncoder:
   /**
    * Private messages
    */
-  @MessageName("pms") case PrivateMessages
+  @messageName("pms") case PrivateMessages
