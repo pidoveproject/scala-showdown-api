@@ -86,10 +86,16 @@ object MessageEncoder:
   private inline def derivedProduct[A <: Product](m: Mirror.ProductOf[A], decoder: MessageEncoder[m.MirroredElemTypes]): MessageEncoder[A] =
     decoder.contramap(genGetProductFields[A, m.MirroredElemTypes]())
 
+  private inline def nameOrDefault[T](default: String): String =
+    val prefix = messagePrefix.getMessagePrefix[T].getOrElse("")
+    val name = messageName.getMessageNames[T].headOption.getOrElse(default)
+
+    prefix + name
+
   private inline def genCaseTypeTests[A, T <: Tuple]: List[(TypeTest[A, ? <: A], MessageEncoder[A])] = inline erasedValue[T] match
     case _: EmptyTuple => Nil
     case _: ((nameType, head) *: tail) =>
-      val name = messageName.getMessageNames[head].headOption.getOrElse(constValue[nameType].toString.toLowerCase)
+      val name = nameOrDefault[head](constValue[nameType].toString.toLowerCase)
       val test = summonInline[TypeTest[A, head]].asInstanceOf[TypeTest[A, ? <: A]]
       val encoder = derived[head](using summonInline[Mirror.Of[head]]).asInstanceOf[MessageEncoder[A]]
 
