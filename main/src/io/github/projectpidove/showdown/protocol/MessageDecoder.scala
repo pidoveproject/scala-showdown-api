@@ -259,6 +259,10 @@ object MessageDecoder:
     summonInline[MessageDecoder[mirror.IronType]].asInstanceOf[MessageDecoder[T]]
 
   given string: MessageDecoder[String] = next
+  
+  given char: MessageDecoder[Char] = string.mapEither:
+    case chr if chr.length == 1 => Right(chr.head)
+    case value => Left(ProtocolError.InvalidInput(value, "Not a single char"))
 
   /**
    * A decoder accepting a keyword.
