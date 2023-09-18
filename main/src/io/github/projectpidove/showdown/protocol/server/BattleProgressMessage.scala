@@ -62,3 +62,8 @@ enum BattleProgressMessage derives MessageDecoder:
    * @param timestamp the current timestamp of the battle
    */
   @messageName("t:") case Timestamp(timestamp: TimestampValue)
+
+  /**
+   * The selected choice cannot be performed.
+   */
+  case Error(error: ChoiceError)
