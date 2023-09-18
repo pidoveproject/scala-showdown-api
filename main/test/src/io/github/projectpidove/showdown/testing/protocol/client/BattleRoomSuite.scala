@@ -1,6 +1,7 @@
 package io.github.projectpidove.showdown.testing.protocol.client
 
 import io.github.iltotore.iron.*
+import io.github.projectpidove.showdown.battle.{MoveSlot, TeamSlot}
 import io.github.projectpidove.showdown.protocol.MessageEncoder
 import io.github.projectpidove.showdown.protocol.client.*
 import io.github.projectpidove.showdown.room.RoomId
@@ -23,3 +24,6 @@ object BattleRoomSuite extends TestSuite:
     test("invite") - assertEncode(encoder, BattleRoomCommand.Invite(Some(Username("Il_totore")), Some(RoomId("gen9ou1234"))), List("invite", "Il_totore", "gen9ou1234"))
     test("timer") - assertEncode(encoder, BattleRoomCommand.Timer(true), List("timer", "on"))
     test("forfeit") - assertEncode(encoder, BattleRoomCommand.Forfeit, List("forfeit"))
+    test("choice"):
+      test("switch") - assertEncode(encoder, BattleRoomCommand.Choose(BattleChoice.Switch(TeamSlot(1))), List("choose", "switch", "1"))
+      test("move") - assertEncode(encoder, BattleRoomCommand.Choose(BattleChoice.Move(MoveSlot(1), None, None)), List("choose", "move", "1"))

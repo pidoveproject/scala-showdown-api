@@ -33,6 +33,12 @@ object PokemonSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 2], Pokemo
     case 'c' => Right(2)
     case _   => Left(ProtocolError.InvalidInput(value.toString, "Invalid slot"))
 
+opaque type TeamSlot = Int :| Interval.Closed[1, 6]
+object TeamSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 6], TeamSlot]
+
+opaque type MoveSlot = Int :| Interval.Closed[1, 4]
+object MoveSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 4], MoveSlot]
+
 opaque type Health = Int :| Positive
 object Health extends RefinedTypeOpsImpl[Int, Positive, Health]:
 

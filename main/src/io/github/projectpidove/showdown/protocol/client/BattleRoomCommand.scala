@@ -69,3 +69,8 @@ enum BattleRoomCommand derives MessageEncoder:
    * Forfeit the current battle.
    */
   case Forfeit
+
+  /**
+   * Select a choice.
+   */
+  case Choose(choice: BattleChoice)
