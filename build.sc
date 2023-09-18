@@ -52,6 +52,10 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
       )
     )
 
+  def scalacOptions = super.scalacOptions() ++ Seq(
+    "-Xmax-inlines", "64"
+  )
+
   trait Tests extends ScalaTests with ScalafmtModule {
 
     def testFramework = "utest.runner.Framework"
