@@ -36,7 +36,7 @@ object BattleMajorActionSuite:
           level = Some(Level(84)),
           gender = Some(Gender.Male)
         ),
-        healthStatus = HealthStatus(Health(55), Some(Status.Poison))
+        healthStatus = HealthStatus(Health(55), Some(StatusEffect.Poison))
       )
     )
 

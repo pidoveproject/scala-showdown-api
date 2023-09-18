@@ -160,7 +160,7 @@ object MessageDecoder:
     case _: EmptyTuple => Map.empty
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
-      val keyDecoder = namesOrDefault(messagePrefix.getMessagePrefix[head].getOrElse(""), messageName.getMessageNames[head], name)
+      val keyDecoder = namesOrDefault(messagePrefix.getMessagePrefix[A].getOrElse(""), messageName.getMessageNames[head], name)
       val caseDecoder = derived[head](using summonInline[Mirror.Of[head]]).asInstanceOf[MessageDecoder[A]]
       Map(keyDecoder -> caseDecoder) ++ summonDecoderMap[A, tail]
 

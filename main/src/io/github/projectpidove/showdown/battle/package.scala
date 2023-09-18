@@ -51,11 +51,37 @@ object Health extends RefinedTypeOpsImpl[Int, Positive, Health]:
       yield
         validHealth
 
-opaque type Status = String :| Not[Blank]
-object Status extends RefinedTypeOpsImpl[String, Not[Blank], Status]:
+opaque type StatusEffect = String :| Not[Blank]
+object StatusEffect extends RefinedTypeOpsImpl[String, Not[Blank], StatusEffect]:
 
-  val Burn: Status = "brn"
-  val Freeze: Status = "frz"
-  val Paralysis: Status = "par"
-  val Poison: Status = "psn"
-  val Sleep: Status = "slp"
+  val Burn: StatusEffect = "brn"
+  val Freeze: StatusEffect = "frz"
+  val Paralysis: StatusEffect = "par"
+  val Poison: StatusEffect = "psn"
+  val Sleep: StatusEffect = "slp"
+
+opaque type Effect = String :| Not[Blank]
+object Effect extends RefinedTypeOpsImpl[String, Not[Blank], Effect]
+
+opaque type StatBoost = Int :| Interval.Closed[-6, 6]
+object StatBoost extends RefinedTypeOpsImpl[Int, Interval.Closed[-6, 6], StatBoost]
+
+opaque type Weather = String :| Not[Blank]
+object Weather extends RefinedTypeOpsImpl[String, Not[Blank], Weather]:
+
+  val DesolateLand: Weather = "desolate land"
+  val Hail: Weather = "hail"
+  val PrimordialSea: Weather = "primordial sea"
+  val Rain: Weather = "rain"
+  val Sandstorm: Weather = "sandstorm"
+  val Snow: Weather = "snow"
+  val Sun: Weather = "sun"
+  
+opaque type FieldEffect = String :| Not[Blank]
+object FieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], FieldEffect]
+
+opaque type SideFieldEffect = String :| Not[Blank]
+object SideFieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], SideFieldEffect]
+
+opaque type VolatileStatus = String :| Not[Blank]
+object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]
