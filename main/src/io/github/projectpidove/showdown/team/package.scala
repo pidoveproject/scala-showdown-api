@@ -3,40 +3,40 @@ package io.github.projectpidove.showdown.team
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 
-type Surname = String :| Not[Blank]
+opaque type Surname = String :| Not[Blank]
 object Surname extends RefinedTypeOpsImpl[String, Not[Blank], Surname]
 
-type SpeciesName = String :| Not[Blank]
+opaque type SpeciesName = String :| Not[Blank]
 object SpeciesName extends RefinedTypeOpsImpl[String, Not[Blank], SpeciesName]
 
-type AbilityName = String :| Not[Blank]
+opaque type AbilityName = String :| Not[Blank]
 object AbilityName extends RefinedTypeOpsImpl[String, Not[Blank], AbilityName]
 
-type MoveName = String :| Not[Blank]
+opaque type MoveName = String :| Not[Blank]
 object MoveName extends RefinedTypeOpsImpl[String, Not[Blank], MoveName]
 
-type ItemName = String :| Not[Blank]
+opaque type ItemName = String :| Not[Blank]
 object ItemName extends RefinedTypeOpsImpl[String, Not[Blank], ItemName]
 
-type Level = Int :| Interval.Closed[0, 100]
+opaque type Level = Int :| Interval.Closed[0, 100]
 object Level extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 100], Level]
 
-type DynamaxLevel = Int :| Interval.Closed[0, 10]
+opaque type DynamaxLevel = Int :| Interval.Closed[0, 10]
 object DynamaxLevel extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 10], DynamaxLevel]
 
-type Happiness = Int :| Interval.Closed[0, 255]
+opaque type Happiness = Int :| Interval.Closed[0, 255]
 object Happiness extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 255], Happiness]
 
-type IV = Int :| Interval.Closed[0, 31]
+opaque type IV = Int :| Interval.Closed[0, 31]
 object IV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 31], IV]
 
-type EV = Int :| Interval.Closed[0, 255]
+opaque type EV = Int :| Interval.Closed[0, 255]
 object EV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 255], EV]
 
-type Tier = String :| Not[Blank]
+opaque type Tier = String :| Not[Blank]
 object Tier extends RefinedTypeOpsImpl[String, Not[Blank], Tier]
 
-type TeamName = String :| Not[Blank]
+opaque type TeamName = String :| Not[Blank]
 object TeamName extends RefinedTypeOpsImpl[String, Not[Blank], TeamName]
 
 type IVS = Map[StatType, IV]

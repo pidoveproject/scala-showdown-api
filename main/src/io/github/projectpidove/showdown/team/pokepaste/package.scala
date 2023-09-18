@@ -71,7 +71,7 @@ private def parseSpeciesGenderSurname(line: String): Either[String, (SpeciesName
     yield (species, gender, None)
 
 private def printSpeciesGenderSurname(species: SpeciesName, genderOption: Option[Gender], surnameOption: Option[Surname]): String =
-  val speciesSurname = surnameOption.fold(species)(surname => s"$surname ($species)")
+  val speciesSurname = surnameOption.fold(species.value)(surname => s"$surname ($species)")
   genderOption.fold(speciesSurname)(gender => s"$speciesSurname (${gender.shortName})")
 
 def speciesSurnameGenderSyntax[Err, In, Out >: Char](end: Syntax[Err, In, Out, Unit] = Syntax.end) =
