@@ -39,6 +39,9 @@ object Tier extends RefinedTypeOpsImpl[String, Not[Blank], Tier]
 opaque type TeamName = String :| Not[Blank]
 object TeamName extends RefinedTypeOpsImpl[String, Not[Blank], TeamName]
 
+opaque type Stat = Int :| Positive
+object Stat extends RefinedTypeOpsImpl[Int, Positive, Stat]
+
 type IVS = Map[StatType, IV]
 type EVS = Map[StatType, EV]
 type MoveNames = List[MoveName] :| MaxLength[4]

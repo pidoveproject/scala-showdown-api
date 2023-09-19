@@ -5,13 +5,17 @@ import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.battle.*
 import io.github.projectpidove.showdown.battle.PokemonPosition.pos
 import io.github.projectpidove.showdown.protocol.MessageDecoder
-import io.github.projectpidove.showdown.protocol.server.{BattleProgressMessage, ChoiceError}
+import io.github.projectpidove.showdown.protocol.server.BattleProgressMessage
 import io.github.projectpidove.showdown.room.ChatContent
 import io.github.projectpidove.showdown.testing.protocol.*
 import io.github.projectpidove.showdown.user.Username
 import io.github.projectpidove.showdown.Timestamp
+import io.github.projectpidove.showdown.protocol.server.choice.{ActiveChoice, ChoiceError, ChoiceRequest, MoveChoice, MoveRange, PokemonChoice, TeamChoice}
 import io.github.projectpidove.showdown.team.*
 import utest.*
+
+import scala.io.Source
+import scala.util.Using
 
 object BattleProgressSuite extends TestSuite:
 
@@ -36,3 +40,95 @@ object BattleProgressSuite extends TestSuite:
         "|error|[Unavailable choice] bar",
         BattleProgressMessage.Error(ChoiceError.Unavailable(ChatContent("bar")))
       )
+
+    test("request"):
+      Using.resource(Source.fromFile("main/test/resources/choice_request.json")): source =>
+        val request = source.getLines().mkString
+        val result =
+          ChoiceRequest(
+            active = List(ActiveChoice(
+              moves = List(
+                MoveChoice(
+                  name = MoveName("Light Screen"),
+                  id = "lightscreen",
+                  pp = PP(48),
+                  maxPP = PP(48),
+                  range = MoveRange.AllySide,
+                  disabled = false
+                ),
+                MoveChoice(
+                  name = MoveName("U-turn"),
+                  id = "uturn",
+                  pp = PP(32),
+                  maxPP = PP(32),
+                  range = MoveRange.Normal,
+                  disabled = false
+                )
+              )
+            )),
+            team = TeamChoice(
+              name = Username("Zarel"),
+              player = PlayerNumber(2),
+              pokemon = List(
+                PokemonChoice(
+                  id = TeamPosition(PlayerNumber(2), Surname("Ledian")),
+                  details = PokemonDetails(
+                    species = SpeciesName("Ledian"),
+                    level = Some(Level(83)),
+                    gender = Some(Gender.Male)
+                  ),
+                  condition = HealthStatus(Health(227, 227)),
+                  active = true,
+                  stats = Map(
+                    StatType.Attack -> Stat(106),
+                    StatType.Defense -> Stat(131),
+                    StatType.SpecialAttack -> Stat(139),
+                    StatType.SpecialDefense -> Stat(230),
+                    StatType.Speed -> Stat(189)
+                  ),
+                  moves = List(
+                    MoveName("lightscreen"),
+                    MoveName("uturn")
+                  ).assume,
+                  item = ItemName("leftovers"),
+                  pokeball = "pokeball",
+                  baseAbility = AbilityName("swarm"),
+                  ability = AbilityName("swarm")
+                ),
+                PokemonChoice(
+                  id = TeamPosition(PlayerNumber(2), Surname("Pyukumuku")),
+                  details = PokemonDetails(
+                    species = SpeciesName("Pyukumuku"),
+                    level = Some(Level(83)),
+                    gender = Some(Gender.Female)
+                  ),
+                  condition = HealthStatus(Health(227, 227)),
+                  active = false,
+                  stats = Map(
+                    StatType.Attack -> Stat(104),
+                    StatType.Defense -> Stat(263),
+                    StatType.SpecialAttack -> Stat(97),
+                    StatType.SpecialDefense -> Stat(263),
+                    StatType.Speed -> Stat(56)
+                  ),
+                  moves = List(
+                    MoveName("recover"),
+                    MoveName("counter"),
+                    MoveName("lightscreen"),
+                    MoveName("reflect")
+                  ).assume,
+                  item = ItemName("lightclay"),
+                  pokeball = "pokeball",
+                  baseAbility = AbilityName("innardsout"),
+                  ability = AbilityName("innardsout")
+                )
+              )
+            ),
+            requestId = Some(3)
+          )
+
+        assertDecodeString(
+          decoder,
+          s"|request|$request",
+          BattleProgressMessage.Request(result)
+        )

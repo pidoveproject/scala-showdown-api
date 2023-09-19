@@ -3,6 +3,7 @@ package io.github.projectpidove.showdown.protocol.server
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.Timestamp as TimestampValue
 import io.github.projectpidove.showdown.battle.{*, given}
+import io.github.projectpidove.showdown.protocol.server.choice.{ChoiceError, ChoiceRequest}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, messageName}
 import io.github.projectpidove.showdown.room.ChatContent
 import io.github.projectpidove.showdown.team.MoveName
@@ -65,5 +66,14 @@ enum BattleProgressMessage derives MessageDecoder:
 
   /**
    * The selected choice cannot be performed.
+   *
+   * @param error the detailed information about what went wrong
    */
   case Error(error: ChoiceError)
+
+  /**
+   * A choice request from the server.
+   *
+   * @param request information on available actions
+   */
+  case Request(request: ChoiceRequest)

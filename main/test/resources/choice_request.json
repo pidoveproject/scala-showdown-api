@@ -1,0 +1,75 @@
+{
+  "active": [
+    {
+      "moves": [
+        {
+          "move": "Light Screen",
+          "id": "lightscreen",
+          "pp": 48,
+          "maxpp": 48,
+          "target": "allySide",
+          "disabled": false
+        },
+        {
+          "move": "U-turn",
+          "id": "uturn",
+          "pp": 32,
+          "maxpp": 32,
+          "target": "normal",
+          "disabled": false
+        }
+      ]
+    }
+  ],
+  "side": {
+    "name": "Zarel",
+    "id": "p2",
+    "pokemon": [
+      {
+        "ident": "p2: Ledian",
+        "details": "Ledian, L83, M",
+        "condition": "227/227",
+        "active": true,
+        "stats": {
+          "atk": 106,
+          "def": 131,
+          "spa": 139,
+          "spd": 230,
+          "spe": 189
+        },
+        "moves": [
+          "lightscreen",
+          "uturn"
+        ],
+        "baseAbility": "swarm",
+        "item": "leftovers",
+        "pokeball": "pokeball",
+        "ability": "swarm"
+      },
+      {
+        "ident": "p2: Pyukumuku",
+        "details": "Pyukumuku, L83, F",
+        "condition": "227/227",
+        "active": false,
+        "stats": {
+          "atk": 104,
+          "def": 263,
+          "spa": 97,
+          "spd": 263,
+          "spe": 56
+        },
+        "moves": [
+          "recover",
+          "counter",
+          "lightscreen",
+          "reflect"
+        ],
+        "baseAbility": "innardsout",
+        "item": "lightclay",
+        "pokeball": "pokeball",
+        "ability": "innardsout"
+      }
+    ]
+  },
+  "rqid": 3
+}

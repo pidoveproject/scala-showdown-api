@@ -1,11 +1,26 @@
-package io.github.projectpidove.showdown.protocol.server
+package io.github.projectpidove.showdown.protocol.server.choice
 
-import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.toInvalidInput
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.projectpidove.showdown.room.ChatContent
 
+/**
+ * An error message about a wrong choice.
+ */
 enum ChoiceError:
+
+  /**
+   * The sent decision is invalid.
+   * 
+   * @param message the error message
+   */
   case Invalid(message: ChatContent)
+
+  /**
+   * The sent decision is unavailable (e.g due to a ability like Magnet Pull)
+   * 
+   * @param message the error message
+   */
   case Unavailable(message: ChatContent)
 
 object ChoiceError:

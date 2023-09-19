@@ -50,19 +50,19 @@ object BattleMinorActionSuite extends TestSuite:
     test("damage") - assertDecodeString(
       decoder,
       "|-damage|p1a: Gholdengo|12/100",
-      BattleMinorActionMessage.Damage(PokemonId(pos"p1a", Surname("Gholdengo")), HealthStatus(Health(12)))
+      BattleMinorActionMessage.Damage(PokemonId(pos"p1a", Surname("Gholdengo")), HealthStatus(Health.percent(12)))
     )
 
     test("heal") - assertDecodeString(
       decoder,
       "|-heal|p1a: Gholdengo|6/100",
-      BattleMinorActionMessage.Heal(PokemonId(pos"p1a", Surname("Gholdengo")), HealthStatus(Health(6)))
+      BattleMinorActionMessage.Heal(PokemonId(pos"p1a", Surname("Gholdengo")), HealthStatus(Health.percent(6)))
     )
 
     test("setHealth") - assertDecodeString(
       decoder,
       "|-sethp|p1a: Azumarill|50/100",
-      BattleMinorActionMessage.SetHealth(PokemonId(pos"p1a", Surname("Azumarill")), Health(50))
+      BattleMinorActionMessage.SetHealth(PokemonId(pos"p1a", Surname("Azumarill")), Health.percent(50))
     )
 
     test("setStatus") - assertDecodeString(

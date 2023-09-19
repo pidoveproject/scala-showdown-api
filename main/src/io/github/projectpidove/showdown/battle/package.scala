@@ -39,24 +39,6 @@ object TeamSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 6], TeamSlot]
 opaque type MoveSlot = Int :| Interval.Closed[1, 4]
 object MoveSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 4], MoveSlot]
 
-opaque type Health = Int :| Positive
-object Health extends RefinedTypeOpsImpl[Int, Positive, Health]:
-
-  def fromString(value: String): Either[ProtocolError, Health] = value match
-    case s"$health/100" =>
-      for
-        healthInt <- health.toIntOption.toRight(ProtocolError.InvalidInput(health, "Invalid int"))
-        validHealth <- Health.either(healthInt).toInvalidInput(health)
-      yield
-        validHealth
-
-    case health =>
-      for
-        healthInt <- health.toIntOption.toRight(ProtocolError.InvalidInput(health, "Invalid int"))
-        validHealth <- Health.either(healthInt).toInvalidInput(health)
-      yield
-        validHealth
-
 opaque type StatusEffect = String :| Not[Blank]
 object StatusEffect extends RefinedTypeOpsImpl[String, Not[Blank], StatusEffect]:
 
@@ -91,3 +73,6 @@ object SideFieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], SideFieldE
 
 opaque type VolatileStatus = String :| Not[Blank]
 object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]
+
+opaque type PP = Int :| Positive
+object PP extends RefinedTypeOpsImpl[Int, Positive, PP]

@@ -6,6 +6,7 @@ import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.toInvalidInput
 import io.github.projectpidove.showdown.team.{Gender, Level, SpeciesName, Type}
 import io.github.projectpidove.showdown.util.either.*
+import zio.json.JsonDecoder
 
 case class PokemonDetails(
   species: SpeciesName,
@@ -35,8 +36,8 @@ object PokemonDetails:
           case _ => break(Left(ProtocolError.InvalidInput(part, "Invalid detail")))
 
       Right(result)
-
-  given MessageDecoder[PokemonDetails] = MessageDecoder.string.mapEither:
+      
+  def fromString(value: String): Either[ProtocolError, PokemonDetails] = value match
     case s"$species, $details" =>
       for
         validSpecies <- SpeciesName.either(species).toInvalidInput(species)
@@ -44,4 +45,9 @@ object PokemonDetails:
       yield
         result
 
-    case value => Left(ProtocolError.InvalidInput(value, "Invalid pokemon details"))
+    case _ => Left(ProtocolError.InvalidInput(value, "Invalid pokemon details"))
+
+  given MessageDecoder[PokemonDetails] = MessageDecoder.string.mapEither(fromString)
+  
+  given JsonDecoder[PokemonDetails] = JsonDecoder.string.mapOrFail(fromString(_).left.map(_.getMessage))
+    
