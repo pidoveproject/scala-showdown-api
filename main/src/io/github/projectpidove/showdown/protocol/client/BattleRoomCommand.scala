@@ -73,4 +73,4 @@ enum BattleRoomCommand derives MessageEncoder:
   /**
    * Select a choice.
    */
-  case Choose(choice: BattleChoice)
+  case Choose(choice: ChoiceResponse)
