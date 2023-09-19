@@ -28,7 +28,10 @@ enum Type derives MessageEncoder: // TODO convert it to a case class since the d
 
 object Type:
 
+  def fromName(name: String): Option[Type] =
+    Type.values.find(_.toString == name)
+
   given JsonCodec[Type] = JsonCodec.string.transformOrFail(
-    name => Type.values.find(_.toString == name).toRight(s"Invalid type: $name"),
+    name => fromName(name).toRight(s"Invalid type: $name"),
     _.toString
   )

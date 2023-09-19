@@ -29,7 +29,7 @@ object DecodingSuite extends TestSuite:
       test - assertParse(newline, "\u2029", ())
 
     test("nonBlank"):
-      test("valid") - assertParse(nonBlankSyntax(), "Artikuno", SpeciesName("Artikuno"))
+      test("valid") - assertParse(nonBlankSyntax(), "Artikuno", "Artikuno")
       test("empty") - assertFail(nonBlankSyntax(), "")
       test("blank") - assertFail(nonBlankSyntax(), " ")
 
@@ -102,7 +102,7 @@ object DecodingSuite extends TestSuite:
       test("withoutSpace") - assertParse(firstLineSyntax, "Heracross @ Heracrossite", (SpeciesName("Heracross"), None, None, Some(ItemName("Heracrossite"))))
       test("withSpace") - assertParse(firstLineSyntax, "Heracross @ Choice Scarf", (SpeciesName("Heracross"), None, None, Some(ItemName("Choice Scarf"))))
 
-    test("ability") - assertParse(abilityLineSyntax, "Ability: Hyper Cutter", MoveName("Hyper Cutter"))
+    test("ability") - assertParse(abilityLineSyntax, "Ability: Hyper Cutter", AbilityName("Hyper Cutter"))
 
     test("nature"):
       test("valid") - assertParse(natureLineSyntax, "Adamant Nature", Nature.Adamant)
@@ -147,7 +147,7 @@ object DecodingSuite extends TestSuite:
           |- Roost""".stripMargin
 
       val result = PokemonSet(
-        species = "Articuno",
+        species = SpeciesName("Articuno"),
         item = Some(ItemName("Leftovers")),
         ability = AbilityName("Pressure"),
         nature = Nature.Modest,
@@ -190,7 +190,7 @@ object DecodingSuite extends TestSuite:
         tier = Tier("gen9ou"),
         sets = List(
           PokemonSet(
-            species = "Articuno",
+            species = SpeciesName("Articuno"),
             item = Some(ItemName("Leftovers")),
             ability = AbilityName("Pressure"),
             nature = Nature.Modest,
@@ -199,7 +199,7 @@ object DecodingSuite extends TestSuite:
             moves = List(MoveName("Ice Beam"), MoveName("Hurricane"), MoveName("Substitute"), MoveName("Roost")).assume
           ),
           PokemonSet(
-            species = "Ludicolo",
+            species = SpeciesName("Ludicolo"),
             item = Some(ItemName("Life Orb")),
             ability = AbilityName("Swift Swim"),
             nature = Nature.Modest,

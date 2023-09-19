@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown.protocol.server
 
 import io.github.projectpidove.showdown.Timestamp as RoomTimestamp
-import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, messageName}
 import io.github.projectpidove.showdown.room.{given, *}
 import io.github.projectpidove.showdown.user.{UserList, User, given}
 
@@ -37,7 +37,7 @@ enum RoomMessage derives MessageDecoder:
    *
    * @param content the raw content of the message
    */
-  @MessageName("") case Message(content: ChatContent) // TODO support `MESSAGE` format
+  @messageName("") case Message(content: ChatContent) // TODO support `MESSAGE` format
 
   /**
    * An HTML message sent by the server
@@ -66,14 +66,14 @@ enum RoomMessage derives MessageDecoder:
    *
    * @param user the user who joined the room
    */
-  @MessageName("join", "j", "J") case Join(user: User)
+  @messageName("join", "j", "J") case Join(user: User)
 
   /**
    * A user left the room.
    *
    * @param user the who lef the room
    */
-  @MessageName("leave", "l", "L") case Leave(user: User)
+  @messageName("leave", "l", "L") case Leave(user: User)
 
   /**
    * A user changed their name
@@ -89,7 +89,7 @@ enum RoomMessage derives MessageDecoder:
    * @param user the user who sent the message
    * @param message the content of he message
    */
-  @MessageName("chat", "c") case Chat(user: User, message: ChatContent)
+  @messageName("chat", "c") case Chat(user: User, message: ChatContent)
 
   /**
    * A notification was sent in the room.
@@ -105,7 +105,7 @@ enum RoomMessage derives MessageDecoder:
    *
    * @param time the current timestamp of the room (UNIX format)
    */
-  @MessageName(":") case Timestamp(time: RoomTimestamp)
+  @messageName(":") case Timestamp(time: RoomTimestamp)
 
   /**
    * A chat message with a timestamp attached.
@@ -114,7 +114,7 @@ enum RoomMessage derives MessageDecoder:
    * @param user    the user who sent the message
    * @param message the content of he message
    */
-  @MessageName("c:") case TimestampChat(time: RoomTimestamp, user: User, message: ChatContent)
+  @messageName("c:") case TimestampChat(time: RoomTimestamp, user: User, message: ChatContent)
 
   /**
    * A battle started.

@@ -37,12 +37,12 @@ case class PokemonSet(
     moves: MoveNames = List.empty.assume,
     ivs: IVS = Map.empty,
     evs: EVS = Map.empty,
-    level: Level = 100,
+    level: Level = Level(100),
     shiny: Boolean = false,
-    happiness: Happiness = 255,
+    happiness: Happiness = Happiness(255),
     pokeball: String = "",
     hpType: Option[Type] = None,
-    dynamaxLevel: DynamaxLevel = 10,
+    dynamaxLevel: DynamaxLevel = DynamaxLevel(10),
     gigantamax: Boolean = false,
     teraType: Type = Type.Normal
 ) derives JsonDecoder, JsonEncoder

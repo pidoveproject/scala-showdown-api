@@ -23,9 +23,9 @@ object DataSuite extends TestSuite:
       test("nature") - assertEncode(encoder, DataCommand.Data(Nature.Modest), List("data", "modest"))
 
     test("learn"):
-      test("empty") - assertEncode(encoder, DataCommand.Learn(None, SpeciesName("Girafarig"), List("Psybeam")), List("learn", "Girafarig", "Psybeam"))
-      test("generation") - assertEncode(encoder, DataCommand.Learn(Some(Generation(2)), SpeciesName("Girafarig"), List("Psybeam")), List("learn", "gen2", "Girafarig", "Psybeam"))
-      test("format") - assertEncode(encoder, DataCommand.Learn(Some(FormatName("gen2ou")), SpeciesName("Girafarig"), List("Psybeam")), List("learn", "gen2ou", "Girafarig", "Psybeam"))
+      test("empty") - assertEncode(encoder, DataCommand.Learn(None, SpeciesName("Girafarig"), List(MoveName("Psybeam"))), List("learn", "Girafarig", "Psybeam"))
+      test("generation") - assertEncode(encoder, DataCommand.Learn(Some(Generation(2)), SpeciesName("Girafarig"), List(MoveName("Psybeam"))), List("learn", "gen2", "Girafarig", "Psybeam"))
+      test("format") - assertEncode(encoder, DataCommand.Learn(Some(FormatName("gen2ou")), SpeciesName("Girafarig"), List(MoveName("Psybeam"))), List("learn", "gen2ou", "Girafarig", "Psybeam"))
 
     test("statCalc") -
       assertEncode(encoder, DataCommand.StatCalc(

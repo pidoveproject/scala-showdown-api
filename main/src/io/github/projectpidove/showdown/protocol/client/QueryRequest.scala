@@ -1,6 +1,6 @@
 package io.github.projectpidove.showdown.protocol.client
 
-import io.github.projectpidove.showdown.protocol.{MessageEncoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageEncoder, messageName}
 import io.github.projectpidove.showdown.user.Username
 
 /**
@@ -18,9 +18,9 @@ enum QueryRequest derives MessageEncoder:
   /**
    * Get a list of active battle rooms.
    */
-  @MessageName("roomlist") case BattleRooms()
+  @messageName("roomlist") case BattleRooms()
 
   /**
    * Get a list of available chat rooms.
    */
-  @MessageName("rooms") case ChatRooms()
+  @messageName("rooms") case ChatRooms()

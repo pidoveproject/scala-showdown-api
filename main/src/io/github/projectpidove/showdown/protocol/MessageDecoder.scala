@@ -152,26 +152,15 @@ object MessageDecoder:
   private inline def derivedProduct[T](m: Mirror.ProductOf[T], decoder: MessageDecoder[m.MirroredElemTypes]): MessageDecoder[T] =
     decoder.map(fields => m.fromProduct(fields))
 
-  private inline def namesOrDefault(names: Seq[String], default: String): MessageDecoder[String] =
-    if names.isEmpty then word(default)
-    else oneOf(names*)
-
-//  private inline def summonSumDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
-//    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Invalid enum case")))
-//    case _: ((nameType, head) *: EmptyTuple) =>
-//      val name = constValue[nameType].toString.toLowerCase
-//      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]])).asInstanceOf[MessageDecoder[T]]
-//    case _: ((nameType, head) *: tail) =>
-//      val name = constValue[nameType].toString.toLowerCase
-//      (namesOrDefault(MessageName.getMessageNames[head], name) *> derived[head](using summonInline[Mirror.Of[head]]) <> summonSumDecoder[
-//        tail
-//      ]).asInstanceOf[MessageDecoder[T]]
+  private inline def namesOrDefault(prefix: String, names: Seq[String], default: String): MessageDecoder[String] =
+    if names.isEmpty then word(prefix + default)
+    else oneOf(names.map(prefix + _)*)
 
   private inline def summonDecoderMap[A, T <: Tuple]: Map[MessageDecoder[?], MessageDecoder[A]] = inline erasedValue[T] match
     case _: EmptyTuple => Map.empty
     case _: ((nameType, head) *: tail) =>
       val name = constValue[nameType].toString.toLowerCase
-      val keyDecoder = namesOrDefault(MessageName.getMessageNames[head], name)
+      val keyDecoder = namesOrDefault(messagePrefix.getMessagePrefix[A].getOrElse(""), messageName.getMessageNames[head], name)
       val caseDecoder = derived[head](using summonInline[Mirror.Of[head]]).asInstanceOf[MessageDecoder[A]]
       Map(keyDecoder -> caseDecoder) ++ summonDecoderMap[A, tail]
 
@@ -259,6 +248,10 @@ object MessageDecoder:
     summonInline[MessageDecoder[mirror.IronType]].asInstanceOf[MessageDecoder[T]]
 
   given string: MessageDecoder[String] = next
+  
+  given char: MessageDecoder[Char] = string.mapEither:
+    case chr if chr.length == 1 => Right(chr.head)
+    case value => Left(ProtocolError.InvalidInput(value, "Not a single char"))
 
   /**
    * A decoder accepting a keyword.

@@ -1,6 +1,6 @@
 package io.github.projectpidove.showdown.protocol.server.query
 
-import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, messageName}
 
 /**
  * The content of a query response.
@@ -10,12 +10,12 @@ enum ResponseContent derives MessageDecoder:
   /**
    * The list of battle rooms.
    */
-  @MessageName("roomlist") case BattleRoomList(rooms: BattleRooms)
+  @messageName("roomlist") case BattleRoomList(rooms: BattleRooms)
 
   /**
    * The list of chat rooms.
    */
-  @MessageName("rooms") case ChatRoomList(rooms: ChatRooms)
+  @messageName("rooms") case ChatRoomList(rooms: ChatRooms)
 
   /**
    * The details of a user.

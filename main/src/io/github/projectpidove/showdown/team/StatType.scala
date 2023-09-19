@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown.team
 
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import zio.json.*
 
 /**
@@ -32,3 +33,5 @@ object StatType:
 
   given JsonFieldEncoder[StatType] = JsonFieldEncoder.string.contramap(_.shortName.toLowerCase)
   given JsonFieldDecoder[StatType] = JsonFieldDecoder.string.mapOrFail(name => fromShortName(name).toRight(s"Invalid stat name: $name"))
+
+  given MessageDecoder[StatType] = MessageDecoder.string.mapEither(name => fromShortName(name).toRight(ProtocolError.InvalidInput(name, "Invalid stat name")))

@@ -9,9 +9,9 @@ import scala.quoted.*
  * @param name the name to use instead
  * @param aliases further aliases
  */
-case class MessageName(name: String, aliases: String*) extends StaticAnnotation
+case class messageName(name: String, aliases: String*) extends StaticAnnotation
 
-object MessageName:
+object messageName:
 
   /**
    * Get message aliases of a enum case/case class.
@@ -26,9 +26,9 @@ object MessageName:
 
     val repr = TypeRepr.of[T]
     val typeSymbol = repr.typeSymbol
-    val annotationRepr = TypeRepr.of[MessageName]
+    val annotationRepr = TypeRepr.of[messageName]
     val annotationSymbol = annotationRepr.typeSymbol
 
     typeSymbol.getAnnotation(annotationSymbol).map(_.asExpr) match
-      case Some('{ new MessageName($name: String, $aliases*) }) => '{ $aliases.prepended($name) }
-      case _                                                    => '{ Seq.empty }
+      case Some('{ new `messageName`($name: String, $aliases*) }) => '{ $aliases.prepended($name) }
+      case _ =>                                                      '{ Seq.empty }
