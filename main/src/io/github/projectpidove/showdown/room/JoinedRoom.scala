@@ -4,7 +4,7 @@ import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.Timestamp
 import io.github.projectpidove.showdown.user.UserList
 import io.github.iltotore.iron.constraint.collection.MaxLength
-import io.github.projectpidove.showdown.protocol.server.RoomMessage
+import io.github.projectpidove.showdown.protocol.server.{BattleMessage, RoomMessage}
 import io.github.projectpidove.showdown.user.User
 
 /**
@@ -32,7 +32,7 @@ case class JoinedRoom(
    * @param message the message sent by the server
    * @return a new [[JoinedRoom]] updated according to the given message
    */
-  def update(message: RoomMessage): JoinedRoom = message match
+  def update(message: RoomMessage | BattleMessage): JoinedRoom = message match
     case RoomMessage.Init(roomType) => this.copy(roomType = Some(roomType))
     case RoomMessage.Title(title) => this.copy(title = Some(title))
     case RoomMessage.Users(users) => this.copy(users = users.value.toSet)
