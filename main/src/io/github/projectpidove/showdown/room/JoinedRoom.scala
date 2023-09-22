@@ -4,6 +4,7 @@ import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.Timestamp
 import io.github.projectpidove.showdown.user.UserList
 import io.github.iltotore.iron.constraint.collection.MaxLength
+import io.github.projectpidove.showdown.battle.Battle
 import io.github.projectpidove.showdown.protocol.server.{BattleMessage, RoomMessage}
 import io.github.projectpidove.showdown.user.User
 
@@ -21,7 +22,8 @@ case class JoinedRoom(
   roomType: Option[RoomType],
   currentTime: Timestamp,
   users: Set[User],
-  chat: RoomChat
+  chat: RoomChat,
+  battle: Option[Battle]
 ):
 
   def withChatMessage(message: ChatMessage): JoinedRoom = this.copy(chat = chat.withChatMessage(message))
@@ -42,6 +44,7 @@ case class JoinedRoom(
     case RoomMessage.Timestamp(time) => this.copy(currentTime = time)
     case msg: (RoomMessage.Message | RoomMessage.Html | RoomMessage.UHtml | RoomMessage.UHtmlChange | RoomMessage.TimestampChat) =>
       this.copy(chat = chat.update(msg))
+    case battleMessage: BattleMessage => this.copy(battle = Some(battle.getOrElse(Battle.empty).update(battleMessage)))
     case _ => this
 
 object JoinedRoom:
@@ -59,5 +62,6 @@ object JoinedRoom:
     roomType = None,
     currentTime = Timestamp.zero,
     users = Set.empty,
-    chat = RoomChat.empty
+    chat = RoomChat.empty,
+    battle = None
   )

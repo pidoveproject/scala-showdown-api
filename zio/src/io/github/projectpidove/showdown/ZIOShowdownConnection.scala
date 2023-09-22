@@ -52,7 +52,7 @@ class ZIOShowdownConnection(
         _ <- handler(msg)
       yield
         ()
-    ).catchAll(err => Console.printLineError(s"Message: $text\nErr: $err")).toProtocolZIO
+    ).catchAll(err => Console.printLineError(s"Message: $message\nErr: $err")).toProtocolZIO
 
 
   override def subscribe(handler: ServerMessage => ProtocolTask[Unit]): ProtocolTask[Unit] =

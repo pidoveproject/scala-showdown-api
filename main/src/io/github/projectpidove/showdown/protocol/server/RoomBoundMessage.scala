@@ -16,6 +16,6 @@ object RoomBoundMessage:
   given MessageDecoder[RoomBoundMessage] =
     for
       id <- MessageDecoder.currentRoom
-      message <- summon[MessageDecoder[RoomMessage]]
+      message <- MessageDecoder.derivedUnion[RoomMessage | BattleMessage]
     yield
       RoomBoundMessage(id, message)
