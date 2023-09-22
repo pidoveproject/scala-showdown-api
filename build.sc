@@ -21,6 +21,7 @@ object main extends ProjectModule {
   object js extends JSCrossModule
 
   object test extends Tests
+
 }
 
 object zio extends ProjectModule {
