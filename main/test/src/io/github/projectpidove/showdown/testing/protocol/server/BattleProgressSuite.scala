@@ -77,7 +77,7 @@ object BattleProgressSuite extends TestSuite:
                     level = Some(Level(83)),
                     gender = Some(Gender.Male)
                   ),
-                  condition = HealthStatus(Health(227, 227)),
+                  condition = Condition(Health(227, 227)),
                   active = true,
                   stats = Map(
                     StatType.Attack -> Stat(106),
@@ -102,7 +102,7 @@ object BattleProgressSuite extends TestSuite:
                     level = Some(Level(83)),
                     gender = Some(Gender.Female)
                   ),
-                  condition = HealthStatus(Health(227, 227)),
+                  condition = Condition(Health(227, 227)),
                   active = false,
                   stats = Map(
                     StatType.Attack -> Stat(104),

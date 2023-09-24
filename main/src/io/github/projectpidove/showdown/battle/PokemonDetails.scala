@@ -14,7 +14,16 @@ case class PokemonDetails(
   level: Option[Level] = None,
   gender: Option[Gender] = None,
   teraType: Option[Type] = None
-)
+):
+  
+  def merge(details: PokemonDetails): PokemonDetails =
+    PokemonDetails(
+      details.species,
+      details.shiny,
+      level = details.level.orElse(level),
+      gender = details.gender.orElse(gender),
+      teraType = details.teraType.orElse(teraType)
+    )
 
 object PokemonDetails:
 

@@ -19,7 +19,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon      the damaged pokemon
    * @param healthStatus the health and current status of the pokemon
    */
-  case Damage(pokemon: PokemonId, healthStatus: HealthStatus)
+  case Damage(pokemon: PokemonId, healthStatus: Condition)
 
   /**
    * A pokemon was healed.
@@ -27,7 +27,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon      the healed pokemon
    * @param healthStatus the health and current status of the pokemon
    */
-  case Heal(pokemon: PokemonId, healthStatus: HealthStatus)
+  case Heal(pokemon: PokemonId, healthStatus: Condition)
 
   /**
    * Set the health of a pokemon.

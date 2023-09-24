@@ -2,7 +2,7 @@ package io.github.projectpidove.showdown.battle
 
 import io.github.projectpidove.showdown.protocol.server.choice.ChoiceRequest
 import io.github.projectpidove.showdown.{FormatName, Generation}
-import io.github.projectpidove.showdown.protocol.server.{BattleInitializationMessage, BattleMessage, BattleProgressMessage}
+import io.github.projectpidove.showdown.protocol.server.{BattleAttackMessage, BattleInitializationMessage, BattleMajorActionMessage, BattleMessage, BattleProgressMessage}
 import io.github.projectpidove.showdown.user.Username
 
 case class Battle(
@@ -15,11 +15,33 @@ case class Battle(
     timerEnabled: Boolean,
     currentTurn: Option[TurnNumber],
     result: Option[BattleResult],
-    currentRequest: Option[ChoiceRequest]
+    currentRequest: Option[ChoiceRequest],
+    activePokemon: Map[PokemonId, ActivePokemon]
 ):
 
   def updatePlayer(number: PlayerNumber, f: Player => Player): Battle =
     players.get(number).map(f).fold(this)(player => this.copy(players = players.updated(number, player)))
+
+  def getActivePokemon(id: PokemonId): Option[ActivePokemon] = activePokemon.get(id)
+
+  def withActivePokemon(id: PokemonId, pokemon: ActivePokemon): Battle =
+    this.copy(activePokemon = activePokemon.updated(id, pokemon))
+
+  def updateActivePokemon(id: PokemonId, f: ActivePokemon => ActivePokemon): Battle =
+    this.copy(activePokemon = activePokemon.updatedWith(id)(_.map(f)))
+
+  def replacePokemonAt(position: PokemonPosition, newId: PokemonId, f: ActivePokemon => ActivePokemon): Battle =
+    activePokemon.find(_._1.position == position) match
+      case Some((oldId, pokemon)) => this.copy(activePokemon = activePokemon.removed(oldId).updated(newId, f(pokemon)))
+      case None => this
+
+  def changePosition(id: PokemonId, slot: PokemonSlot): Battle =
+    getActivePokemon(id) match
+      case Some(pokemon) =>
+        val newId = id.copy(position = id.position.copy(slot = slot))
+        this.copy(activePokemon = activePokemon.removed(id).updated(newId, pokemon))
+
+      case None => this
 
   def update(message: BattleMessage): Battle = message match
     case BattleInitializationMessage.Player(number, name, avatar, rating) =>
@@ -38,8 +60,17 @@ case class Battle(
     case BattleProgressMessage.TimerDisabled(_) => this.copy(timerEnabled = false)
     case BattleProgressMessage.Turn(turn) => this.copy(currentTurn = Some(turn))
     case BattleProgressMessage.Win(user) => this.copy(result = Some(BattleResult.Win(user)))
-    case BattleProgressMessage.Tie() => this.copy(result = Some(BattleResult.Tie()))
-
+    case BattleProgressMessage.Tie() => this.copy(result = Some(BattleResult.Tie))
+    case BattleMajorActionMessage.Switch(pokemon, details, healthStatus) =>
+      this.withActivePokemon(pokemon, ActivePokemon.switchedIn(details, healthStatus))
+    case BattleMajorActionMessage.DetailsChange(pokemon, details, healthStatus) =>
+      this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = TeamPokemon(p.teamPokemon.details.merge(details), healthStatus.getOrElse(p.teamPokemon.condition))))
+    case BattleMajorActionMessage.Replace(pokemon, details, healthStatus) =>
+      this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = TeamPokemon(details, healthStatus)))
+    case BattleMajorActionMessage.Swap(pokemon, slot) =>
+      this.changePosition(pokemon, slot)
+    case BattleMajorActionMessage.Faint(pokemon) =>
+      this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = p.teamPokemon.copy(condition = p.teamPokemon.condition.faint)))
 
     case _ => this
 
@@ -55,5 +86,6 @@ object Battle:
     timerEnabled = true,
     currentTurn = None,
     result = None,
-    currentRequest = None
+    currentRequest = None,
+    activePokemon = Map.empty
   )

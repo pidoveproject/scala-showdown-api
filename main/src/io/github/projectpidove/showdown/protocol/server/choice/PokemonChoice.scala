@@ -23,16 +23,16 @@ import zio.json.*
  * @param terastallized the type thep pokemon terastallized into
  */
 case class PokemonChoice(
-    @jsonField("ident") id: TeamPosition,
-    details: PokemonDetails,
-    condition: HealthStatus,
-    active: Boolean,
-    stats: Map[StatType, Stat],
-    moves: MoveNames,
-    item: ItemName,
-    pokeball: String,
-    baseAbility: AbilityName,
-    ability: AbilityName,
-    teraType: Option[Type] = None,
-    terastallized: Option[Type] = None
+                          @jsonField("ident") id: TeamPosition,
+                          details: PokemonDetails,
+                          condition: Condition,
+                          active: Boolean,
+                          stats: Map[StatType, Stat],
+                          moves: MoveNames,
+                          item: ItemName,
+                          pokeball: String,
+                          baseAbility: AbilityName,
+                          ability: AbilityName,
+                          teraType: Option[Type] = None,
+                          terastallized: Option[Type] = None
 ) derives JsonDecoder

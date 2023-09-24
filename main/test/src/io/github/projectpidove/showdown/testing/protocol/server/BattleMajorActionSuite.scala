@@ -36,7 +36,7 @@ object BattleMajorActionSuite:
           level = Some(Level(84)),
           gender = Some(Gender.Male)
         ),
-        healthStatus = HealthStatus(Health.percent(55), Some(StatusEffect.Poison))
+        healthStatus = Condition(Health.percent(55), Some(StatusEffect.Poison))
       )
     )
 
@@ -62,7 +62,7 @@ object BattleMajorActionSuite:
           species = SpeciesName("Zoroark"),
           gender = Some(Gender.Male)
         ),
-        healthStatus = HealthStatus(Health.percent(70))
+        healthStatus = Condition(Health.percent(70))
       )
     )
 

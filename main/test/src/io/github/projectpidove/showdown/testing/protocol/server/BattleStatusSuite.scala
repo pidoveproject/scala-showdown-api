@@ -22,13 +22,13 @@ object BattleStatusSuite extends TestSuite:
     test("damage") - assertDecodeString(
       decoder,
       "|-damage|p1a: Gholdengo|12/100",
-      BattleStatusMessage.Damage(PokemonId(pos"p1a", Surname("Gholdengo")), HealthStatus(Health.percent(12)))
+      BattleStatusMessage.Damage(PokemonId(pos"p1a", Surname("Gholdengo")), Condition(Health.percent(12)))
     )
 
     test("heal") - assertDecodeString(
       decoder,
       "|-heal|p1a: Gholdengo|6/100",
-      BattleStatusMessage.Heal(PokemonId(pos"p1a", Surname("Gholdengo")), HealthStatus(Health.percent(6)))
+      BattleStatusMessage.Heal(PokemonId(pos"p1a", Surname("Gholdengo")), Condition(Health.percent(6)))
     )
 
     test("setHealth") - assertDecodeString(

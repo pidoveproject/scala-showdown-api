@@ -42,6 +42,7 @@ object MoveSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 4], MoveSlot]
 opaque type StatusEffect = String :| Not[Blank]
 object StatusEffect extends RefinedTypeOpsImpl[String, Not[Blank], StatusEffect]:
 
+  val Fainted: StatusEffect = "fnt"
   val Burn: StatusEffect = "brn"
   val Freeze: StatusEffect = "frz"
   val Paralysis: StatusEffect = "par"
