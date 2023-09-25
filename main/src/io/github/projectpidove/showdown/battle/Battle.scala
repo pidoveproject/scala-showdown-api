@@ -71,6 +71,12 @@ case class Battle(
       this.changePosition(pokemon, slot)
     case BattleMajorActionMessage.Faint(pokemon) =>
       this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = p.teamPokemon.copy(condition = p.teamPokemon.condition.faint)))
+    case BattleAttackMessage.Waiting(pokemon, _) =>
+      this.updateActivePokemon(pokemon, _.withNextMoveStatus(VolatileStatus.Waiting))
+    case BattleAttackMessage.Prepare(pokemon, move, _) =>
+      this.updateActivePokemon(pokemon, _.withNextMoveStatus(VolatileStatus.fromMove(move)))
+    case BattleAttackMessage.MustRecharge(pokemon) =>
+      this.updateActivePokemon(pokemon, _.withNextMoveStatus(VolatileStatus.MustRecharge))
 
     case _ => this
 

@@ -4,6 +4,7 @@ import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.protocol.ProtocolError
 import io.github.projectpidove.showdown.protocol.MessageDecoder.toInvalidInput
+import io.github.projectpidove.showdown.team.MoveName
 
 opaque type PlayerNumber = Int :| Positive
 object PlayerNumber extends RefinedTypeOpsImpl[Int, Positive, PlayerNumber]:
@@ -73,7 +74,13 @@ opaque type SideFieldEffect = String :| Not[Blank]
 object SideFieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], SideFieldEffect]
 
 opaque type VolatileStatus = String :| Not[Blank]
-object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]
+object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]:
+  
+  def fromMove(move: MoveName): VolatileStatus = VolatileStatus.assume(move.toString)
+  
+  val Confusion: VolatileStatus = "Confusion"
+  val MustRecharge: VolatileStatus = "Must recharge"
+  val Waiting: VolatileStatus = "Waiting"
 
 opaque type PP = Int :| Positive
 object PP extends RefinedTypeOpsImpl[Int, Positive, PP]
