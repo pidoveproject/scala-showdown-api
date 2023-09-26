@@ -93,9 +93,10 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * A pokemon transformed into another species.
    *
    * @param pokemon the transformed pokemon
-   * @param species the new species of the pokemon
+   * @param target the pokemon to copy
+   * @param effect the optional cause of the transformation
    */
-  case Transform(pokemon: PokemonId, species: SpeciesName)
+  case Transform(pokemon: PokemonId, target: PokemonId, effect: Option[Effect])
 
   /**
    * A pokemon mega-evolved.

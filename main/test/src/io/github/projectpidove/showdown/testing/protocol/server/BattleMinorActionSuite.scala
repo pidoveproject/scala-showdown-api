@@ -75,8 +75,12 @@ object BattleMinorActionSuite extends TestSuite:
 
     test("transform") - assertDecodeString(
       decoder,
-      "|-transform|p1a: Ditto|Skarmory",
-      BattleMinorActionMessage.Transform(PokemonId(pos"p1a", Surname("Ditto")), SpeciesName("Skarmory"))
+      "|-transform|p1a: Ditto|p2a: Skarmory|Imposter",
+      BattleMinorActionMessage.Transform(
+        PokemonId(pos"p1a", Surname("Ditto")),
+        PokemonId(pos"p2a", Surname("Skarmory")),
+        Some(Effect("Imposter"))
+      )
     )
 
     test("mega") - assertDecodeString(

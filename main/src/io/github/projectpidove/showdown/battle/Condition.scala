@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown.battle
 
+import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.projectpidove.showdown.protocol.MessageDecoder.toInvalidInput
 import zio.json.JsonDecoder
@@ -11,6 +12,8 @@ case class Condition(health: Health, status: Option[StatusEffect] = None):
   def faint: Condition = this.copy(status = Some(StatusEffect.Fainted))
 
 object Condition:
+
+  val Healthy: Condition = Condition(Health.percent(100))
 
   def fromString(value: String): Either[ProtocolError, Condition] = value match
     case s"$healthValue $statusValue" =>
