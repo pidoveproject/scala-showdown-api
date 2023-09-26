@@ -1,9 +1,12 @@
 package io.github.projectpidove.showdown.battle
 
+import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.server.choice.ChoiceRequest
 import io.github.projectpidove.showdown.{FormatName, Generation}
-import io.github.projectpidove.showdown.protocol.server.{BattleAttackMessage, BattleInitializationMessage, BattleMajorActionMessage, BattleMessage, BattleProgressMessage}
+import io.github.projectpidove.showdown.protocol.server.{BattleAttackMessage, BattleInitializationMessage, BattleMajorActionMessage, BattleMessage, BattleProgressMessage, BattleStatusMessage}
 import io.github.projectpidove.showdown.user.Username
+import scala.math.Integral.Implicits.infixIntegralOps
+import scala.math.Ordering.Implicits.infixOrderingOps
 
 case class Battle(
     state: BattleState,
@@ -27,7 +30,7 @@ case class Battle(
   def withActivePokemon(id: PokemonId, pokemon: ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.updated(id, pokemon))
 
-  def updateActivePokemon(id: PokemonId, f: ActivePokemon => ActivePokemon): Battle =
+  def updateActivePokemon(id: PokemonId)(f: ActivePokemon => ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.updatedWith(id)(_.map(f)))
 
   def replacePokemonAt(position: PokemonPosition, newId: PokemonId, f: ActivePokemon => ActivePokemon): Battle =
@@ -64,20 +67,61 @@ case class Battle(
     case BattleMajorActionMessage.Switch(pokemon, details, healthStatus) =>
       this.withActivePokemon(pokemon, ActivePokemon.switchedIn(details, healthStatus))
     case BattleMajorActionMessage.DetailsChange(pokemon, details, healthStatus) =>
-      this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = TeamPokemon(p.teamPokemon.details.merge(details), healthStatus.getOrElse(p.teamPokemon.condition))))
+      this.updateActivePokemon(pokemon): p =>
+        p.copy(teamPokemon = TeamPokemon(p.teamPokemon.details.merge(details), healthStatus.getOrElse(p.teamPokemon.condition)))
     case BattleMajorActionMessage.Replace(pokemon, details, healthStatus) =>
-      this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = TeamPokemon(details, healthStatus)))
+      this.updateActivePokemon(pokemon)(p => p.copy(teamPokemon = TeamPokemon(details, healthStatus)))
     case BattleMajorActionMessage.Swap(pokemon, slot) =>
       this.changePosition(pokemon, slot)
     case BattleMajorActionMessage.Faint(pokemon) =>
-      this.updateActivePokemon(pokemon, p => p.copy(teamPokemon = p.teamPokemon.copy(condition = p.teamPokemon.condition.faint)))
+      this.updateActivePokemon(pokemon): p =>
+        p.copy(teamPokemon = p.teamPokemon.copy(condition = p.teamPokemon.condition.faint))
     case BattleAttackMessage.Waiting(pokemon, _) =>
-      this.updateActivePokemon(pokemon, _.withNextMoveStatus(VolatileStatus.Waiting))
+      this.updateActivePokemon(pokemon)(_.withNextMoveStatus(VolatileStatus.Waiting))
     case BattleAttackMessage.Prepare(pokemon, move, _) =>
-      this.updateActivePokemon(pokemon, _.withNextMoveStatus(VolatileStatus.fromMove(move)))
+      this.updateActivePokemon(pokemon)(_.withNextMoveStatus(VolatileStatus.fromMove(move)))
     case BattleAttackMessage.MustRecharge(pokemon) =>
-      this.updateActivePokemon(pokemon, _.withNextMoveStatus(VolatileStatus.MustRecharge))
-
+      this.updateActivePokemon(pokemon)(_.withNextMoveStatus(VolatileStatus.MustRecharge))
+    case BattleStatusMessage.Damage(pokemon, condition) =>
+      this.updateActivePokemon(pokemon)(p => p.copy(teamPokemon = p.teamPokemon.copy(condition = condition)))
+    case BattleStatusMessage.Heal(pokemon, condition) =>
+      this.updateActivePokemon(pokemon)(p => p.copy(teamPokemon = p.teamPokemon.copy(condition = condition)))
+    case BattleStatusMessage.SetHealth(pokemon, health) =>
+      this.updateActivePokemon(pokemon)(p => p.copy(teamPokemon = p.teamPokemon.withHealth(health)))
+    case BattleStatusMessage.SetStatus(pokemon, status) =>
+      this.updateActivePokemon(pokemon)(p => p.copy(teamPokemon = p.teamPokemon.withStatus(status)))
+    case BattleStatusMessage.CureStatus(pokemon, _) =>
+      this.updateActivePokemon(pokemon)(p => p.copy(teamPokemon = p.teamPokemon.cured))
+    case BattleStatusMessage.Boost(pokemon, stat, amount) =>
+      this.updateActivePokemon(pokemon)(_.boosted(stat, amount))
+    case BattleStatusMessage.Unboost(pokemon, stat, amount) =>
+      this.updateActivePokemon(pokemon)(_.boosted(stat, -amount))
+    case BattleStatusMessage.SetBoost(pokemon, stat, amount) =>
+      this.updateActivePokemon(pokemon)(_.withBoost(stat, amount))
+    case BattleStatusMessage.InvertBoost(pokemon) =>
+      this.updateActivePokemon(pokemon)(p => p.copy(boosts = p.boosts.map((k, v) => (k, -v))))
+    case BattleStatusMessage.ClearBoost(pokemon) =>
+      this.updateActivePokemon(pokemon)(_.boostsCleared)
+    case BattleStatusMessage.ClearAllBoost =>
+      this.copy(activePokemon = activePokemon.map((k, v) => (k, v.boostsCleared)))
+    case BattleStatusMessage.ClearPositiveBoost(target, _, _) =>
+      this.updateActivePokemon(target)(p => p.copy(boosts = p.boosts.filter((k, v) => v > StatBoost(0))))
+    case BattleStatusMessage.ClearNegativeBoost(target, _) =>
+      this.updateActivePokemon(target)(p => p.copy(boosts = p.boosts.filter((k, v) => v < StatBoost(0))))
+    case BattleStatusMessage.CopyBoost(pokemon, target) =>
+      this.updateActivePokemon(pokemon): pkmn =>
+        getActivePokemon(target) match
+          case Some(targetPkmn) => pkmn.copy(boosts = targetPkmn.boosts)
+          case None => pkmn
+    case BattleStatusMessage.VolatileStatusStart(pokemon, status) =>
+      this.updateActivePokemon(pokemon)(_.withVolatileStatus(status))
+    case BattleStatusMessage.VolatileStatusEnd(pokemon, status) =>
+      this.updateActivePokemon(pokemon)(_.removedVolatileStatus(status))
+    case BattleStatusMessage.SingleMove(pokemon, move) =>
+      this.updateActivePokemon(pokemon)(_.withNextMoveStatus(VolatileStatus.fromMove(move)))
+    case BattleStatusMessage.SingleTurn(pokemon, move) =>
+      this.updateActivePokemon(pokemon)(_.withNextTurnStatus(VolatileStatus.fromMove(move)))
+      
     case _ => this
 
 object Battle:
