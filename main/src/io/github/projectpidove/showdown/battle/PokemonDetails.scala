@@ -54,6 +54,9 @@ object PokemonDetails:
       yield
         result
 
+    case species =>
+      SpeciesName.either(species).toInvalidInput(species).map(PokemonDetails(_))
+
     case _ => Left(ProtocolError.InvalidInput(value, "Invalid pokemon details"))
 
   given MessageDecoder[PokemonDetails] = MessageDecoder.string.mapEither(fromString)
