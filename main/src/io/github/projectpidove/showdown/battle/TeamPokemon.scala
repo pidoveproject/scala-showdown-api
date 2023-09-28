@@ -4,7 +4,7 @@ import io.github.projectpidove.showdown.team.{AbilityName, ItemName}
 
 case class TeamPokemon(
   details: PokemonDetails,
-  condition: Condition,
+  condition: Condition = Condition.Healthy,
   item: HeldItem = HeldItem.Unknown,
   ability: Option[AbilityName] = None
 ):
