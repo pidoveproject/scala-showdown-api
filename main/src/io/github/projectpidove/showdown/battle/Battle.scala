@@ -151,20 +151,20 @@ case class Battle(
     case BattleProgressMessage.Tie() => this.copy(result = Some(BattleResult.Tie))
 
     //Major action
-    case BattleMajorActionMessage.Switch(pokemon, details, healthStatus) =>
+    case BattleMajorActionMessage.Switch(pokemon, details, condition) =>
       val playerNumber = pokemon.position.player
       getTeamSlot(playerNumber, details) match
         case Some(slot) => this.withActivePokemon(pokemon.position, ActivePokemon(slot))
         case None =>
-          declareTeamPokemon(playerNumber, TeamPokemon(details, healthStatus)) match
+          declareTeamPokemon(playerNumber, TeamPokemon(details, condition)) match
             case (Some(slot), battle) => battle.withActivePokemon(pokemon.position, ActivePokemon(slot))
             case (None, battle) => battle
 
-    case BattleMajorActionMessage.DetailsChange(pokemon, details, healthStatus) =>
+    case BattleMajorActionMessage.DetailsChange(pokemon, details, condition) =>
       this.updateTeamPokemonAt(pokemon.position): p =>
-        p.copy(details = p.details.merge(details), condition = healthStatus.getOrElse(p.condition))
-    case BattleMajorActionMessage.Replace(pokemon, details, healthStatus) =>
-      this.withTeamPokemonAt(pokemon.position, TeamPokemon(details, healthStatus))
+        p.copy(details = p.details.merge(details), condition = condition.getOrElse(p.condition))
+    case BattleMajorActionMessage.Replace(pokemon, details, condition) =>
+      this.withTeamPokemonAt(pokemon.position, TeamPokemon(details, condition))
     case BattleMajorActionMessage.Swap(pokemon, slot) =>
       this.changeActiveSlot(pokemon.position, slot)
     case BattleMajorActionMessage.Faint(pokemon) =>

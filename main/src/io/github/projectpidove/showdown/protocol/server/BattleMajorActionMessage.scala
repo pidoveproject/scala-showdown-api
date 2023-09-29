@@ -24,27 +24,27 @@ enum BattleMajorActionMessage derives MessageDecoder:
    *
    * @param pokemon the switched-in pokemon
    * @param details further details about the switched-in pokemon
-   * @param healthStatus the health and current status of the switched-in pokemon
+   * @param condition the health and current status of the switched-in pokemon
    */
-  @messageName("switch", "drag") case Switch(pokemon: ActiveId, details: PokemonDetails, healthStatus: Condition)
+  @messageName("switch", "drag") case Switch(pokemon: ActiveId, details: PokemonDetails, condition: Condition)
 
   /**
    * Details about a pokemon changed. Happens when the pokemon changes form.
    *
    * @param pokemon the modified pokemon
    * @param details the new details of the pokemon
-   * @param healthStatus the health and current status of the pokemon
+   * @param condition the health and current status of the pokemon
    */
-  @messageName("detailschange", "-formechange") case DetailsChange(pokemon: ActiveId, details: PokemonDetails, healthStatus: Option[Condition])
+  @messageName("detailschange", "-formechange") case DetailsChange(pokemon: ActiveId, details: PokemonDetails, condition: Option[Condition])
 
   /**
    * Replace pokemon information. Sent when Zoroark's illusion fades.
    *
    * @param pokemon      the new pokemon
    * @param details      further details about the new pokemon
-   * @param healthStatus the health and current status of the switched-in pokemon
+   * @param condition the health and current status of the switched-in pokemon
    */
-  case Replace(pokemon: ActiveId, details: PokemonDetails, healthStatus: Condition)
+  case Replace(pokemon: ActiveId, details: PokemonDetails, condition: Condition)
 
   /**
    * Change the position of a pokemon.
