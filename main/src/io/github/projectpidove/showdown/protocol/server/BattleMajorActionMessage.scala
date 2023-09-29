@@ -20,13 +20,14 @@ enum BattleMajorActionMessage derives MessageDecoder:
   case Move(pokemon: ActiveId, move: MoveName, target: ActiveId)
 
   /**
-   * A pokemon switched-in/out.
+   * A pokemon switched-in.
    *
    * @param pokemon the switched-in pokemon
    * @param details further details about the switched-in pokemon
    * @param condition the health and current status of the switched-in pokemon
+   * @param cause the optional cause of the switch-in (e.g U-turn, Dragon Tail...)
    */
-  @messageName("switch", "drag") case Switch(pokemon: ActiveId, details: PokemonDetails, condition: Condition)
+  @messageName("switch", "drag") case Switch(pokemon: ActiveId, details: PokemonDetails, condition: Condition, cause: Option[Effect])
 
   /**
    * Details about a pokemon changed. Happens when the pokemon changes form.

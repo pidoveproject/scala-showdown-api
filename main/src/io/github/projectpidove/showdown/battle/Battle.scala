@@ -151,7 +151,7 @@ case class Battle(
     case BattleProgressMessage.Tie() => this.copy(result = Some(BattleResult.Tie))
 
     //Major action
-    case BattleMajorActionMessage.Switch(pokemon, details, condition) =>
+    case BattleMajorActionMessage.Switch(pokemon, details, condition, _) =>
       val playerNumber = pokemon.position.player
       getTeamSlot(playerNumber, details) match
         case Some(slot) => this.withActivePokemon(pokemon.position, ActivePokemon(slot))

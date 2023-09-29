@@ -36,7 +36,8 @@ object BattleMajorActionSuite:
           level = Some(Level(84)),
           gender = Some(Gender.Male)
         ),
-        condition = Condition(Health.percent(55), Some(StatusEffect.Poison))
+        condition = Condition(Health.percent(55), Some(StatusEffect.Poison)),
+        cause = None
       )
     )
 
