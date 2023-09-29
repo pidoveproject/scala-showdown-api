@@ -20,7 +20,7 @@ object BattleInitializationSuite extends TestSuite:
     test("player") - assertDecodeString(
       decoder,
       "|player|p1|Il_totore|kimonogirl|1500",
-      BattleInitializationMessage.Player(PlayerNumber(1), Username("Il_totore"), AvatarName("kimonogirl"), Some(Rating(1500)))
+      BattleInitializationMessage.Player(PlayerNumber(1), Some(Username("Il_totore")), Some(AvatarName("kimonogirl")), Some(Rating(1500)))
     )
 
     test("teamsize") - assertDecodeString(decoder, "|teamsize|p1|6", BattleInitializationMessage.TeamSize(PlayerNumber(1), Count(6)))
