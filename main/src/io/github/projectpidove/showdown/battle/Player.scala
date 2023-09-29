@@ -4,8 +4,8 @@ import io.github.projectpidove.showdown.user.{AvatarName, Username}
 
 case class Player(
      number: PlayerNumber,
-     name: Username,
-     avatar: AvatarName,
+     name: Option[Username],
+     avatar: Option[AvatarName],
      rating: Option[Rating],
      team: Option[PlayerTeam] = None
 )

@@ -21,7 +21,7 @@ enum BattleInitializationMessage derives MessageDecoder:
    * @param avatar the avatar of the user
    * @param rating the rating of the user in the battle's format
    */
-  case Player(number: PlayerNumber, name: Username, avatar: AvatarName, rating: Option[Rating])
+  case Player(number: PlayerNumber, name: Option[Username], avatar: Option[AvatarName], rating: Option[Rating])
 
   /**
    * Declare the size of a player's team.
