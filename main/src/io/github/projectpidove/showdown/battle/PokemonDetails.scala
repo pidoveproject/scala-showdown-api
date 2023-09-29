@@ -25,6 +25,15 @@ case class PokemonDetails(
       teraType = details.teraType.orElse(teraType)
     )
 
+  def isCompatible(details: PokemonDetails): Boolean =
+    species == details.species
+      && (!shiny || details.shiny)
+      && level == details.level
+      && gender == details.gender
+      && teraType == details.teraType
+    
+  def ~=(details: PokemonDetails): Boolean = isCompatible(details)
+
 object PokemonDetails:
 
   private def parse(species: SpeciesName, details: String): Either[ProtocolError, PokemonDetails] =
