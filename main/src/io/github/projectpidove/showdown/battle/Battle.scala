@@ -107,7 +107,7 @@ case class Battle(
         activeTarget <- getActivePokemon(targetPosition)
         teamTarget <- getTeamPokemonAt(targetPosition)
       yield
-        val targetAbility = activeTarget.modifiedAbility.orElse(teamTarget.ability.map(CurrentAbility.LongTerm.apply))
+        val targetAbility = activeTarget.modifiedAbility.orElse(teamTarget.ability.map(RevealedAbility.Base.apply))
         val targetSpecies = activeTarget.transformedSpecies.getOrElse(teamTarget.details.species)
 
         activePokemon.copy(modifiedAbility = targetAbility, transformedSpecies = Some(targetSpecies))

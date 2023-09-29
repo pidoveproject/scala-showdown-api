@@ -22,38 +22,38 @@ object BattleStatusSuite extends TestSuite:
     test("damage") - assertDecodeString(
       decoder,
       "|-damage|p1a: Gholdengo|12/100",
-      BattleStatusMessage.Damage(PokemonId(pos"p1a", Surname("Gholdengo")), Condition(Health.percent(12)))
+      BattleStatusMessage.Damage(ActiveId(pos"p1a", Surname("Gholdengo")), Condition(Health.percent(12)))
     )
 
     test("heal") - assertDecodeString(
       decoder,
       "|-heal|p1a: Gholdengo|6/100",
-      BattleStatusMessage.Heal(PokemonId(pos"p1a", Surname("Gholdengo")), Condition(Health.percent(6)))
+      BattleStatusMessage.Heal(ActiveId(pos"p1a", Surname("Gholdengo")), Condition(Health.percent(6)))
     )
 
     test("setHealth") - assertDecodeString(
       decoder,
       "|-sethp|p1a: Azumarill|50/100",
-      BattleStatusMessage.SetHealth(PokemonId(pos"p1a", Surname("Azumarill")), Health.percent(50))
+      BattleStatusMessage.SetHealth(ActiveId(pos"p1a", Surname("Azumarill")), Health.percent(50))
     )
 
     test("setStatus") - assertDecodeString(
       decoder,
       "|-setstatus|p1a: Darmanitan|psn",
-      BattleStatusMessage.SetStatus(PokemonId(pos"p1a", Surname("Darmanitan")), StatusEffect.Poison)
+      BattleStatusMessage.SetStatus(ActiveId(pos"p1a", Surname("Darmanitan")), StatusEffect.Poison)
     )
 
     test("cureStatus") - assertDecodeString(
       decoder,
       "|-curestatus|p1a: Darmanitan|psn",
-      BattleStatusMessage.CureStatus(PokemonId(pos"p1a", Surname("Darmanitan")), StatusEffect.Poison)
+      BattleStatusMessage.CureStatus(ActiveId(pos"p1a", Surname("Darmanitan")), StatusEffect.Poison)
     )
 
     test("boost") - assertDecodeString(
       decoder,
       "|-boost|p1a: Cloyster|atk|2",
       BattleStatusMessage.Boost(
-        pokemon = PokemonId(pos"p1a", Surname("Cloyster")),
+        pokemon = ActiveId(pos"p1a", Surname("Cloyster")),
         stat = StatType.Attack,
         amount = StatBoost(2)
       )
@@ -63,7 +63,7 @@ object BattleStatusSuite extends TestSuite:
       decoder,
       "|-unboost|p1a: Cloyster|def|2",
       BattleStatusMessage.Unboost(
-        pokemon = PokemonId(pos"p1a", Surname("Cloyster")),
+        pokemon = ActiveId(pos"p1a", Surname("Cloyster")),
         stat = StatType.Defense,
         amount = StatBoost(2)
       )
@@ -73,7 +73,7 @@ object BattleStatusSuite extends TestSuite:
       decoder,
       "|-setboost|p1a: Azumarill|atk|6",
       BattleStatusMessage.SetBoost(
-        pokemon = PokemonId(pos"p1a", Surname("Azumarill")),
+        pokemon = ActiveId(pos"p1a", Surname("Azumarill")),
         stat = StatType.Attack,
         amount = StatBoost(6)
       )
@@ -83,8 +83,8 @@ object BattleStatusSuite extends TestSuite:
       decoder,
       "|-swapboost|p1a: Magearna|p2a: Cloyster|atk,spe,spa",
       BattleStatusMessage.SwapBoost(
-        pokemon = PokemonId(pos"p1a", Surname("Magearna")),
-        target = PokemonId(pos"p2a", Surname("Cloyster")),
+        pokemon = ActiveId(pos"p1a", Surname("Magearna")),
+        target = ActiveId(pos"p2a", Surname("Cloyster")),
         stats = List(StatType.Attack, StatType.Speed, StatType.SpecialAttack)
       )
     )
@@ -92,21 +92,21 @@ object BattleStatusSuite extends TestSuite:
     test("invertBoost") - assertDecodeString(
       decoder,
       "|-invertboost|p1a: Grapploct",
-      BattleStatusMessage.InvertBoost(PokemonId(pos"p1a", Surname("Grapploct")))
+      BattleStatusMessage.InvertBoost(ActiveId(pos"p1a", Surname("Grapploct")))
     )
 
     test("clearBoost") - assertDecodeString(
       decoder,
       "|-clearboost|p1a: Amoongus",
-      BattleStatusMessage.ClearBoost(PokemonId(pos"p1a", Surname("Amoongus")))
+      BattleStatusMessage.ClearBoost(ActiveId(pos"p1a", Surname("Amoongus")))
     )
 
     test("clearPositiveBoost") - assertDecodeString(
       decoder,
       "|-clearpositiveboost|p2a: Gyarados|p1a: Marshadow|move: Spectral Thief",
       BattleStatusMessage.ClearPositiveBoost(
-        target = PokemonId(pos"p2a", Surname("Gyarados")),
-        pokemon = PokemonId(pos"p1a", Surname("Marshadow")),
+        target = ActiveId(pos"p2a", Surname("Gyarados")),
+        pokemon = ActiveId(pos"p1a", Surname("Marshadow")),
         effect = Effect("move: Spectral Thief")
       )
     )
@@ -115,7 +115,7 @@ object BattleStatusSuite extends TestSuite:
       decoder,
       "|-clearnegativeboost|p1a: Porygon-Z|zeffect: Z-Celebrate",
       BattleStatusMessage.ClearNegativeBoost(
-        pokemon = PokemonId(pos"p1a", Surname("Porygon-Z")),
+        pokemon = ActiveId(pos"p1a", Surname("Porygon-Z")),
         effect = Effect("zeffect: Z-Celebrate")
       )
     )
@@ -123,29 +123,29 @@ object BattleStatusSuite extends TestSuite:
     test("copyBoost") - assertDecodeString(
       decoder,
       "|-copyboost|p1a: Alakazam|p2a: Dragonite",
-      BattleStatusMessage.CopyBoost(PokemonId(pos"p1a", Surname("Alakazam")), PokemonId(pos"p2a", Surname("Dragonite")))
+      BattleStatusMessage.CopyBoost(ActiveId(pos"p1a", Surname("Alakazam")), ActiveId(pos"p2a", Surname("Dragonite")))
     )
 
     test("volatileStatusStart") - assertDecodeString(
       decoder,
       "|-start|p1a: Garchomp|confusion",
-      BattleStatusMessage.VolatileStatusStart(PokemonId(pos"p1a", Surname("Garchomp")), VolatileStatus("confusion"))
+      BattleStatusMessage.VolatileStatusStart(ActiveId(pos"p1a", Surname("Garchomp")), VolatileStatus("confusion"))
     )
 
     test("volatileStatusEnd") - assertDecodeString(
       decoder,
       "|-end|p1a: Garchomp|confusion",
-      BattleStatusMessage.VolatileStatusEnd(PokemonId(pos"p1a", Surname("Garchomp")), VolatileStatus("confusion"))
+      BattleStatusMessage.VolatileStatusEnd(ActiveId(pos"p1a", Surname("Garchomp")), VolatileStatus("confusion"))
     )
 
     test("singleMove") - assertDecodeString(
       decoder,
       "|-singlemove|p1a: Celesteela|Destiny Bound",
-      BattleStatusMessage.SingleMove(PokemonId(pos"p1a", Surname("Celesteela")), MoveName("Destiny Bound"))
+      BattleStatusMessage.SingleMove(ActiveId(pos"p1a", Surname("Celesteela")), MoveName("Destiny Bound"))
     )
 
     test("singleTurn") - assertDecodeString(
       decoder,
       "|-singleturn|p1a: Celesteela|Protect",
-      BattleStatusMessage.SingleTurn(PokemonId(pos"p1a", Surname("Celesteela")), MoveName("Protect"))
+      BattleStatusMessage.SingleTurn(ActiveId(pos"p1a", Surname("Celesteela")), MoveName("Protect"))
     )

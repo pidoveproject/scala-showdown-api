@@ -62,7 +62,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param item the revealed item
    * @param effect the optional cause of the reveal
    */
-  case Item(pokemon: PokemonId, item: ItemName, effect: Option[Effect])
+  case Item(pokemon: ActiveId, item: ItemName, effect: Option[Effect])
 
   /**
    * An item was destroyed.
@@ -71,7 +71,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param item    the revealed item
    * @param effect  the optional cause of the destruction
    */
-  case EndItem(pokemon: PokemonId, item: ItemName, effect: Option[Effect])
+  case EndItem(pokemon: ActiveId, item: ItemName, effect: Option[Effect])
 
   /**
    * An ability was revealed.
@@ -80,14 +80,14 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param ability the revealed ability
    * @param effect the optional cause of the reveal
    */
-  case Ability(pokemon: PokemonId, ability: AbilityName, effect: Option[Effect])
+  case Ability(pokemon: ActiveId, ability: AbilityName, effect: Option[Effect])
 
   /**
    * An ability was destroyed.
    *
    * @param pokemon the ability holder
    */
-  case EndAbility(pokemon: PokemonId)
+  case EndAbility(pokemon: ActiveId)
 
   /**
    * A pokemon transformed into another species.
@@ -96,7 +96,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param target the pokemon to copy
    * @param effect the optional cause of the transformation
    */
-  case Transform(pokemon: PokemonId, target: PokemonId, effect: Option[Effect])
+  case Transform(pokemon: ActiveId, target: ActiveId, effect: Option[Effect])
 
   /**
    * A pokemon mega-evolved.
@@ -104,7 +104,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param pokemon the mega-evolving pokemon
    * @param megaStone the mega stone held by the pokemon
    */
-  case Mega(pokemon: PokemonId, megaStone: ItemName)
+  case Mega(pokemon: ActiveId, megaStone: ItemName)
 
   /**
    * A pokemon ultra-bursted.
@@ -113,21 +113,21 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param species the new species of the pokemon (e.g Ultra-Necrozma)
    * @param item the item causing the ultra burst
    */
-  @messageName("burst") case UltraBurst(pokemon: PokemonId, species: SpeciesName, item: ItemName)
+  @messageName("burst") case UltraBurst(pokemon: ActiveId, species: SpeciesName, item: ItemName)
 
   /**
    * A pokemon used its Z power.
    *
    * @param pokemon the pokemon using its Z power
    */
-  case ZPower(pokemon: PokemonId)
+  case ZPower(pokemon: ActiveId)
 
   /**
    * A Z move was countered by a protection move.
    *
    * @param pokemon the pokemon who used its Z power
    */
-  case ZBroken(pokemon: PokemonId)
+  case ZBroken(pokemon: ActiveId)
 
   /**
    * An effect was triggered.

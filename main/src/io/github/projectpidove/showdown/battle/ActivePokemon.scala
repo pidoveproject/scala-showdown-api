@@ -6,13 +6,13 @@ import io.github.projectpidove.showdown.team.{AbilityName, SpeciesName, StatType
 import scala.math.Integral.Implicits.infixIntegralOps
 
 case class ActivePokemon(
-    teamSlot: TeamSlot,
-    boosts: Map[StatType, StatBoost] = Map.empty,
-    volatileStatus: Set[VolatileStatus] = Set.empty,
-    nextMoveStatus: Set[VolatileStatus] = Set.empty,
-    nextTurnStatus: Set[VolatileStatus] = Set.empty,
-    modifiedAbility: Option[CurrentAbility] = None,
-    transformedSpecies: Option[SpeciesName] = None
+                          teamSlot: TeamSlot,
+                          boosts: Map[StatType, StatBoost] = Map.empty,
+                          volatileStatus: Set[VolatileStatus] = Set.empty,
+                          nextMoveStatus: Set[VolatileStatus] = Set.empty,
+                          nextTurnStatus: Set[VolatileStatus] = Set.empty,
+                          modifiedAbility: Option[RevealedAbility] = None,
+                          transformedSpecies: Option[SpeciesName] = None
 ):
 
   def getBoost(stat: StatType): Option[StatBoost] = boosts.get(stat)
@@ -33,6 +33,6 @@ case class ActivePokemon(
 
   def clearMoveStatus: ActivePokemon = this.copy(nextMoveStatus = Set.empty)
 
-  def withModifiedAbility(ability: AbilityName, cause: Effect): ActivePokemon = this.copy(modifiedAbility = Some(CurrentAbility.Modified(ability, cause)))
+  def withModifiedAbility(ability: AbilityName, cause: Effect): ActivePokemon = this.copy(modifiedAbility = Some(RevealedAbility.Modified(ability, cause)))
 
-  def disabledAbility: ActivePokemon = this.copy(modifiedAbility = Some(CurrentAbility.Disabled))
+  def disabledAbility: ActivePokemon = this.copy(modifiedAbility = Some(RevealedAbility.Disabled))

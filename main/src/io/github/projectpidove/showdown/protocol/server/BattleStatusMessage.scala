@@ -19,7 +19,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon   the damaged pokemon
    * @param condition the health and current status of the pokemon
    */
-  case Damage(pokemon: PokemonId, condition: Condition)
+  case Damage(pokemon: ActiveId, condition: Condition)
 
   /**
    * A pokemon was healed.
@@ -27,7 +27,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon   the healed pokemon
    * @param condition the health and current status of the pokemon
    */
-  case Heal(pokemon: PokemonId, condition: Condition)
+  case Heal(pokemon: ActiveId, condition: Condition)
 
   /**
    * Set the health of a pokemon.
@@ -35,7 +35,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the modified pokemon
    * @param health  the new health of the pokemon
    */
-  @messageName("sethp") case SetHealth(pokemon: PokemonId, health: Health)
+  @messageName("sethp") case SetHealth(pokemon: ActiveId, health: Health)
 
   /**
    * Set the status of a pokemon.
@@ -43,7 +43,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the modified pokemon
    * @param status  the new status of the pokemon
    */
-  case SetStatus(pokemon: PokemonId, status: StatusEffect)
+  case SetStatus(pokemon: ActiveId, status: StatusEffect)
 
   /**
    * Clear the status of a pokemon.
@@ -51,7 +51,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the cured pokemon
    * @param status  the removed status
    */
-  case CureStatus(pokemon: PokemonId, status: StatusEffect)
+  case CureStatus(pokemon: ActiveId, status: StatusEffect)
 
   /**
    * Boost a pokemon.
@@ -60,7 +60,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param stat    the raised stat
    * @param amount  the number of stage the stat was raised by
    */
-  case Boost(pokemon: PokemonId, stat: StatType, amount: StatBoost)
+  case Boost(pokemon: ActiveId, stat: StatType, amount: StatBoost)
 
   /**
    * Unboost a pokemon.
@@ -69,7 +69,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param stat    the dropped stat
    * @param amount  the number of stage the stat was dropped by
    */
-  case Unboost(pokemon: PokemonId, stat: StatType, amount: StatBoost)
+  case Unboost(pokemon: ActiveId, stat: StatType, amount: StatBoost)
 
   /**
    * Set the boost of a pokemon.
@@ -78,7 +78,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param stat    the modified stat
    * @param amount  the new boost stage of the stat
    */
-  case SetBoost(pokemon: PokemonId, stat: StatType, amount: StatBoost)
+  case SetBoost(pokemon: ActiveId, stat: StatType, amount: StatBoost)
 
   /**
    * Swap boost of two pokemon.
@@ -87,21 +87,21 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param target  the pokemon affected by the boost swap
    * @param stats   the swapped stats
    */
-  case SwapBoost(pokemon: PokemonId, target: PokemonId, stats: List[StatType])
+  case SwapBoost(pokemon: ActiveId, target: ActiveId, stats: List[StatType])
 
   /**
    * Invert the boost stages of a pokemon.
    *
    * @param pokemon the affected pokemon
    */
-  case InvertBoost(pokemon: PokemonId)
+  case InvertBoost(pokemon: ActiveId)
 
   /**
    * Clear the boosts of a pokemon.
    *
    * @param pokemon the affected pokemon
    */
-  case ClearBoost(pokemon: PokemonId)
+  case ClearBoost(pokemon: ActiveId)
 
   /**
    * Clear the boosts of all pokemon.
@@ -115,7 +115,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the pokemon triggering the boost clear
    * @param effect  the effect causing the boost clear
    */
-  case ClearPositiveBoost(target: PokemonId, pokemon: PokemonId, effect: Effect)
+  case ClearPositiveBoost(target: ActiveId, pokemon: ActiveId, effect: Effect)
 
   /**
    * Clear the negative boosts of a pokemon.
@@ -123,7 +123,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the affected pokemon
    * @param effect  the effect causing the boost clear
    */
-  case ClearNegativeBoost(pokemon: PokemonId, effect: Effect)
+  case ClearNegativeBoost(pokemon: ActiveId, effect: Effect)
 
   /**
    * Copy the boosts of a pokemon.
@@ -131,7 +131,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the copying pokemon
    * @param target  the copied pokemon
    */
-  case CopyBoost(pokemon: PokemonId, target: PokemonId)
+  case CopyBoost(pokemon: ActiveId, target: ActiveId)
 
   /**
    * Start a volatile status.
@@ -139,7 +139,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the affected pokemon
    * @param status  the started volatile status
    */
-  @messageName("start") case VolatileStatusStart(pokemon: PokemonId, status: VolatileStatus)
+  @messageName("start") case VolatileStatusStart(pokemon: ActiveId, status: VolatileStatus)
 
   /**
    * End a volatile status.
@@ -147,7 +147,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the no longer affected pokemon
    * @param status  the ended volatile status
    */
-  @messageName("end") case VolatileStatusEnd(pokemon: PokemonId, status: VolatileStatus)
+  @messageName("end") case VolatileStatusEnd(pokemon: ActiveId, status: VolatileStatus)
 
   /**
    * Declare a move effect lasting until another move is used.
@@ -155,7 +155,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the affected pokemon
    * @param move    the used move
    */
-  case SingleMove(pokemon: PokemonId, move: MoveName)
+  case SingleMove(pokemon: ActiveId, move: MoveName)
 
   /**
    * Declare a move effect lasting until the next turn.
@@ -163,7 +163,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the affected pokemon
    * @param move    the used move
    */
-  case SingleTurn(pokemon: PokemonId, move: MoveName)
+  case SingleTurn(pokemon: ActiveId, move: MoveName)
 
 object BattleStatusMessage:
 

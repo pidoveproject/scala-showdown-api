@@ -23,7 +23,7 @@ import zio.json.*
  * @param terastallized the type thep pokemon terastallized into
  */
 case class PokemonChoice(
-                          @jsonField("ident") id: TeamPosition,
+                          @jsonField("ident") id: TeamId,
                           details: PokemonDetails,
                           condition: Condition,
                           active: Boolean,

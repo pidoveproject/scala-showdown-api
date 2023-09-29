@@ -71,7 +71,7 @@ object BattleProgressSuite extends TestSuite:
               player = PlayerNumber(2),
               pokemon = List(
                 PokemonChoice(
-                  id = TeamPosition(PlayerNumber(2), Surname("Ledian")),
+                  id = TeamId(PlayerNumber(2), Surname("Ledian")),
                   details = PokemonDetails(
                     species = SpeciesName("Ledian"),
                     level = Some(Level(83)),
@@ -96,7 +96,7 @@ object BattleProgressSuite extends TestSuite:
                   ability = AbilityName("swarm")
                 ),
                 PokemonChoice(
-                  id = TeamPosition(PlayerNumber(2), Surname("Pyukumuku")),
+                  id = TeamId(PlayerNumber(2), Surname("Pyukumuku")),
                   details = PokemonDetails(
                     species = SpeciesName("Pyukumuku"),
                     level = Some(Level(83)),

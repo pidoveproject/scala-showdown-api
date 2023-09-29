@@ -20,9 +20,9 @@ object BattleMajorActionSuite:
       decoder,
       "|move|p1a: Qwilfish|Hydro Pump|p2a: Sudowoodo",
       BattleMajorActionMessage.Move(
-        pokemon = PokemonId(pos"p1a", Surname("Qwilfish")),
+        pokemon = ActiveId(pos"p1a", Surname("Qwilfish")),
         move = MoveName("Hydro Pump"),
-        target = PokemonId(pos"p2a", Surname("Sudowoodo"))
+        target = ActiveId(pos"p2a", Surname("Sudowoodo"))
       )
     )
 
@@ -30,7 +30,7 @@ object BattleMajorActionSuite:
       decoder,
       "|switch|p1a: Qwilfish|Qwilfish, L84, M|55/100 psn",
       BattleMajorActionMessage.Switch(
-        pokemon = PokemonId(pos"p1a", Surname("Qwilfish")),
+        pokemon = ActiveId(pos"p1a", Surname("Qwilfish")),
         details = PokemonDetails(
           species = SpeciesName("Qwilfish"),
           level = Some(Level(84)),
@@ -44,7 +44,7 @@ object BattleMajorActionSuite:
       decoder,
       "|detailschange|p2a: Sableye|Sableye-Mega, M",
       BattleMajorActionMessage.DetailsChange(
-        pokemon = PokemonId(pos"p2a", Surname("Sableye")),
+        pokemon = ActiveId(pos"p2a", Surname("Sableye")),
         details = PokemonDetails(
           species = SpeciesName("Sableye-Mega"),
           gender = Some(Gender.Male)
@@ -57,7 +57,7 @@ object BattleMajorActionSuite:
       decoder,
       "|replace|p2a: Zoroark|Zoroark, M|70/100",
       BattleMajorActionMessage.Replace(
-        pokemon = PokemonId(pos"p2a", Surname("Zoroark")),
+        pokemon = ActiveId(pos"p2a", Surname("Zoroark")),
         details = PokemonDetails(
           species = SpeciesName("Zoroark"),
           gender = Some(Gender.Male)
@@ -70,7 +70,7 @@ object BattleMajorActionSuite:
       decoder,
       "|swap|p1a: Blissey|b",
       BattleMajorActionMessage.Swap(
-        pokemon = PokemonId(pos"p1a", Surname("Blissey")),
+        pokemon = ActiveId(pos"p1a", Surname("Blissey")),
         slot = PokemonSlot(1)
       )
     )
@@ -79,7 +79,7 @@ object BattleMajorActionSuite:
       decoder,
       "|cant|p2a: Sudowoodo|flinch",
       BattleMajorActionMessage.Unable(
-        pokemon = PokemonId(pos"p2a", Surname("Sudowoodo")),
+        pokemon = ActiveId(pos"p2a", Surname("Sudowoodo")),
         reason = "flinch",
         move = None
       )
@@ -88,5 +88,5 @@ object BattleMajorActionSuite:
     test("faint") - assertDecodeString(
       decoder,
       "faint|p2a: Sudowoodo",
-      BattleMajorActionMessage.Faint(PokemonId(pos"p2a", Surname("Sudowoodo")))
+      BattleMajorActionMessage.Faint(ActiveId(pos"p2a", Surname("Sudowoodo")))
     )

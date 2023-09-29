@@ -52,33 +52,33 @@ object BattleMinorActionSuite extends TestSuite:
     test("item") - assertDecodeString(
       decoder,
       "|-item|p1a: Heatran|leftovers",
-      BattleMinorActionMessage.Item(PokemonId(pos"p1a", Surname("Heatran")), ItemName("leftovers"), None)
+      BattleMinorActionMessage.Item(ActiveId(pos"p1a", Surname("Heatran")), ItemName("leftovers"), None)
     )
 
     test("endItem") - assertDecodeString(
       decoder,
       "|-enditem|p1a: Heatran|leftovers|move: Knock Off",
-      BattleMinorActionMessage.EndItem(PokemonId(pos"p1a", Surname("Heatran")), ItemName("leftovers"), Some(Effect("move: Knock Off")))
+      BattleMinorActionMessage.EndItem(ActiveId(pos"p1a", Surname("Heatran")), ItemName("leftovers"), Some(Effect("move: Knock Off")))
     )
 
     test("ability") - assertDecodeString(
       decoder,
       "|-ability|p1a: Gardevoir|Fire Flash|ability: Trace",
-      BattleMinorActionMessage.Ability(PokemonId(pos"p1a", Surname("Gardevoir")), AbilityName("Fire Flash"), Some(Effect("ability: Trace")))
+      BattleMinorActionMessage.Ability(ActiveId(pos"p1a", Surname("Gardevoir")), AbilityName("Fire Flash"), Some(Effect("ability: Trace")))
     )
 
     test("endAbility") - assertDecodeString(
       decoder,
       "|-endability|p1a: Gardevoir",
-      BattleMinorActionMessage.EndAbility(PokemonId(pos"p1a", Surname("Gardevoir")))
+      BattleMinorActionMessage.EndAbility(ActiveId(pos"p1a", Surname("Gardevoir")))
     )
 
     test("transform") - assertDecodeString(
       decoder,
       "|-transform|p1a: Ditto|p2a: Skarmory|Imposter",
       BattleMinorActionMessage.Transform(
-        PokemonId(pos"p1a", Surname("Ditto")),
-        PokemonId(pos"p2a", Surname("Skarmory")),
+        ActiveId(pos"p1a", Surname("Ditto")),
+        ActiveId(pos"p2a", Surname("Skarmory")),
         Some(Effect("Imposter"))
       )
     )
@@ -86,14 +86,14 @@ object BattleMinorActionSuite extends TestSuite:
     test("mega") - assertDecodeString(
       decoder,
       "|-mega|p1a: Beedrill|Beedrillite",
-      BattleMinorActionMessage.Mega(PokemonId(pos"p1a", Surname("Beedrill")), ItemName("Beedrillite"))
+      BattleMinorActionMessage.Mega(ActiveId(pos"p1a", Surname("Beedrill")), ItemName("Beedrillite"))
     )
 
     test("ultraBurst") - assertDecodeString(
       decoder,
       "|-burst|p1a: Necrozma|Ultra-Necrozma|Ultranecrozium-Z",
       BattleMinorActionMessage.UltraBurst(
-        pokemon = PokemonId(pos"p1a", Surname("Necrozma")),
+        pokemon = ActiveId(pos"p1a", Surname("Necrozma")),
         species = SpeciesName("Ultra-Necrozma"),
         item = ItemName("Ultranecrozium-Z")
       )
@@ -102,13 +102,13 @@ object BattleMinorActionSuite extends TestSuite:
     test("zpower") - assertDecodeString(
       decoder,
       "|-zpower|p1a: Durant",
-      BattleMinorActionMessage.ZPower(PokemonId(pos"p1a", Surname("Durant")))
+      BattleMinorActionMessage.ZPower(ActiveId(pos"p1a", Surname("Durant")))
     )
 
     test("zbroken") - assertDecodeString(
       decoder,
       "|-zpower|p1a: Durant",
-      BattleMinorActionMessage.ZPower(PokemonId(pos"p1a", Surname("Durant")))
+      BattleMinorActionMessage.ZPower(ActiveId(pos"p1a", Surname("Durant")))
     )
 
     test("activate") - assertDecodeString(
