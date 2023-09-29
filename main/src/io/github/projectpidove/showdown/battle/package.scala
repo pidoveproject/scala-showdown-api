@@ -51,9 +51,6 @@ object StatusEffect extends RefinedTypeOpsImpl[String, Not[Blank], StatusEffect]
   val Poison: StatusEffect = "psn"
   val Sleep: StatusEffect = "slp"
 
-opaque type Effect = String :| Not[Blank]
-object Effect extends RefinedTypeOpsImpl[String, Not[Blank], Effect]
-
 opaque type StatBoost = Int :| Interval.Closed[-6, 6]
 object StatBoost extends NumericTypeOps[Int, Interval.Closed[-6, 6], StatBoost]
 

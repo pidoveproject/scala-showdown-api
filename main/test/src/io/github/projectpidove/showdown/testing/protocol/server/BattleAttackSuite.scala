@@ -27,10 +27,10 @@ object BattleAttackSuite extends TestSuite:
 
     test("block") - assertDecodeString(
       decoder,
-      "|-block|p1a: Celesteela|Protect|p2a: Nidoking",
+      "|-block|p1a: Celesteela|[from] ability: Protect|p2a: Nidoking",
       BattleAttackMessage.Block(
         pokemon = ActiveId(pos"p1a", Surname("Celesteela")),
-        effect = Effect("Protect"),
+        effect = Effect.Ability(AbilityName("Protect")),
         attacker = ActiveId(pos"p2a", Surname("Nidoking"))
       )
     )

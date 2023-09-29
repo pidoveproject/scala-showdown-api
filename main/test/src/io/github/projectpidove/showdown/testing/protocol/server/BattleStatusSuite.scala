@@ -103,20 +103,20 @@ object BattleStatusSuite extends TestSuite:
 
     test("clearPositiveBoost") - assertDecodeString(
       decoder,
-      "|-clearpositiveboost|p2a: Gyarados|p1a: Marshadow|move: Spectral Thief",
+      "|-clearpositiveboost|p2a: Gyarados|p1a: Marshadow|[from] move: Spectral Thief",
       BattleStatusMessage.ClearPositiveBoost(
         target = ActiveId(pos"p2a", Surname("Gyarados")),
         pokemon = ActiveId(pos"p1a", Surname("Marshadow")),
-        effect = Effect("move: Spectral Thief")
+        effect = Effect.Move(MoveName("Spectral Thief"))
       )
     )
 
     test("clearNegativeBoost") - assertDecodeString(
       decoder,
-      "|-clearnegativeboost|p1a: Porygon-Z|zeffect: Z-Celebrate",
+      "|-clearnegativeboost|p1a: Porygon-Z|[from] zeffect: Z-Celebrate",
       BattleStatusMessage.ClearNegativeBoost(
         pokemon = ActiveId(pos"p1a", Surname("Porygon-Z")),
-        effect = Effect("zeffect: Z-Celebrate")
+        effect = Effect.ZEffect(MoveName("Z-Celebrate"))
       )
     )
 

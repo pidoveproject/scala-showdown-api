@@ -57,14 +57,14 @@ object BattleMinorActionSuite extends TestSuite:
 
     test("endItem") - assertDecodeString(
       decoder,
-      "|-enditem|p1a: Heatran|leftovers|move: Knock Off",
-      BattleMinorActionMessage.EndItem(ActiveId(pos"p1a", Surname("Heatran")), ItemName("leftovers"), Some(Effect("move: Knock Off")))
+      "|-enditem|p1a: Heatran|leftovers|[from] move: Knock Off",
+      BattleMinorActionMessage.EndItem(ActiveId(pos"p1a", Surname("Heatran")), ItemName("leftovers"), Some(Effect.Move(MoveName("Knock Off"))))
     )
 
     test("ability") - assertDecodeString(
       decoder,
-      "|-ability|p1a: Gardevoir|Fire Flash|ability: Trace",
-      BattleMinorActionMessage.Ability(ActiveId(pos"p1a", Surname("Gardevoir")), AbilityName("Fire Flash"), Some(Effect("ability: Trace")))
+      "|-ability|p1a: Gardevoir|Fire Flash|[from] ability: Trace",
+      BattleMinorActionMessage.Ability(ActiveId(pos"p1a", Surname("Gardevoir")), AbilityName("Fire Flash"), Some(Effect.Ability(AbilityName("Trace"))))
     )
 
     test("endAbility") - assertDecodeString(
@@ -75,11 +75,11 @@ object BattleMinorActionSuite extends TestSuite:
 
     test("transform") - assertDecodeString(
       decoder,
-      "|-transform|p1a: Ditto|p2a: Skarmory|Imposter",
+      "|-transform|p1a: Ditto|p2a: Skarmory|[from] ability: Imposter",
       BattleMinorActionMessage.Transform(
         ActiveId(pos"p1a", Surname("Ditto")),
         ActiveId(pos"p2a", Surname("Skarmory")),
-        Some(Effect("Imposter"))
+        Some(Effect.Ability(AbilityName("Imposter")))
       )
     )
 
@@ -113,8 +113,8 @@ object BattleMinorActionSuite extends TestSuite:
 
     test("activate") - assertDecodeString(
       decoder,
-      "|-activate|Future Sight",
-      BattleMinorActionMessage.Activate(Effect("Future Sight"))
+      "|-activate|[from] move: Future Sight",
+      BattleMinorActionMessage.Activate(Effect.Move(MoveName("Future Sight")))
     )
 
     test("hint") - assertDecodeString(
