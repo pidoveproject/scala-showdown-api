@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.battle
 /**
  * A player side relative to another.
  */
-enum PokemonSide:
+enum RelativeSide:
 
   /**
    * The same side.

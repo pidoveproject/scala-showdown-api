@@ -28,20 +28,20 @@ import scala.math.Ordering.Implicits.infixOrderingOps
  * @param sides the currently active side-bound effects
  */
 case class Battle(
-    state: BattleState,
-    activePokemon: Map[PokemonPosition, ActivePokemon],
-    battleType: Option[BattleType],
-    players: Map[PlayerNumber, Player],
-    generation: Option[Generation],
-    format: Option[FormatName],
-    rules: Set[BattleRule],
-    timerEnabled: Boolean,
-    currentTurn: Option[TurnNumber],
-    result: Option[BattleResult],
-    currentRequest: Option[ChoiceRequest],
-    weather: Option[Weather],
-    field: Map[FieldEffect, TurnNumber],
-    sides: Map[PlayerId, SideCondition]
+                   state: BattleState,
+                   activePokemon: Map[ActivePosition, ActivePokemon],
+                   battleType: Option[BattleType],
+                   players: Map[PlayerNumber, Player],
+                   generation: Option[Generation],
+                   format: Option[FormatName],
+                   rules: Set[BattleRule],
+                   timerEnabled: Boolean,
+                   currentTurn: Option[TurnNumber],
+                   result: Option[BattleResult],
+                   currentRequest: Option[ChoiceRequest],
+                   weather: Option[Weather],
+                   field: Map[FieldEffect, TurnNumber],
+                   sides: Map[PlayerId, SideCondition]
 ):
 
   /**
@@ -60,7 +60,7 @@ case class Battle(
    * @param position the position of the pokemon
    * @return the pokemon currently active at `position`
    */
-  def getActivePokemon(position: PokemonPosition): Option[ActivePokemon] =
+  def getActivePokemon(position: ActivePosition): Option[ActivePokemon] =
     activePokemon.get(position)
 
   /**
@@ -70,7 +70,7 @@ case class Battle(
    * @param pokemon the pokemon to set at `position`
    * @return a copy of this battle with the given pokemon
    */
-  def withActivePokemon(position: PokemonPosition, pokemon: ActivePokemon): Battle =
+  def withActivePokemon(position: ActivePosition, pokemon: ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.updated(position, pokemon))
 
   /**
@@ -80,7 +80,7 @@ case class Battle(
    * @param f      the function to apply to the pokemon
    * @return a copy of this battle with the pokemon updated
    */
-  def updateActivePokemon(position: PokemonPosition)(f: ActivePokemon => ActivePokemon): Battle =
+  def updateActivePokemon(position: ActivePosition)(f: ActivePokemon => ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.updatedWith(position)(_.map(f)))
 
   /**
@@ -96,10 +96,10 @@ case class Battle(
    * Get the inactive data of the pokemon active at the given position.
    *
    * @param position the position of the pokemon
-   * @return the [[TeamPokemon]] of the pokemon currently active at `position`
+   * @return the [[TeamMember]] of the pokemon currently active at `position`
    */
-  def getTeamPokemonAt(position: PokemonPosition): Option[TeamPokemon] =
-    getActivePokemon(position).flatMap(p => getTeamPokemon(position.player, p.teamSlot))
+  def getTeamMemberAt(position: ActivePosition): Option[TeamMember] =
+    getActivePokemon(position).flatMap(p => getTeamMember(position.player, p.teamSlot))
 
   /**
    * Get the team member of a player.
@@ -108,7 +108,7 @@ case class Battle(
    * @param slot the slot of the pokemon in the player's team
    * @return the inactive pokemon at the given position
    */
-  def getTeamPokemon(player: PlayerNumber, slot: TeamSlot): Option[TeamPokemon] =
+  def getTeamMember(player: PlayerNumber, slot: TeamSlot): Option[TeamMember] =
     for
       owner <- players.get(player)
       team <- owner.team
@@ -123,7 +123,7 @@ case class Battle(
    * @param teamPokemon  the inactive information to set
    * @return a copy of this battle with the given pokemon
    */
-  def withTeamPokemonAt(position: PokemonPosition, teamPokemon: TeamPokemon): Battle =
+  def withTeamMemberAt(position: ActivePosition, teamPokemon: TeamMember): Battle =
     val result =
       for
         activePokemon <- getActivePokemon(position)
@@ -143,7 +143,7 @@ case class Battle(
    * @param f        the function to apply to the pokemon
    * @return a copy of this battle with the pokemon updated
    */
-  def updateTeamPokemonAt(position: PokemonPosition)(f: TeamPokemon => TeamPokemon): Battle =
+  def updateTeamMemberAt(position: ActivePosition)(f: TeamMember => TeamMember): Battle =
     val result =
       for
         activePokemon <- getActivePokemon(position)
@@ -179,7 +179,7 @@ case class Battle(
    * @param teamPokemon the pokemon to add to the team
    * @return a copy of this battle with the given pokemon added
    */
-  def declareTeamPokemon(playerNumber: PlayerNumber, teamPokemon: TeamPokemon): (Option[TeamSlot], Battle) =
+  def declareTeamMember(playerNumber: PlayerNumber, teamPokemon: TeamMember): (Option[TeamSlot], Battle) =
     val result =
       for
         player <- players.get(playerNumber)
@@ -198,13 +198,13 @@ case class Battle(
    * @param targetPosition the position of the pokemon to copy
    * @return a copy of this battle with the pokemon transformed
    */
-  def transformPokemon(pokemonPosition: PokemonPosition, targetPosition: PokemonPosition): Battle =
+  def transformPokemon(pokemonPosition: ActivePosition, targetPosition: ActivePosition): Battle =
     val transformedPokemon =
       for
         activePokemon <- getActivePokemon(pokemonPosition)
-        teamPokemon <- getTeamPokemonAt(pokemonPosition)
+        teamPokemon <- getTeamMemberAt(pokemonPosition)
         activeTarget <- getActivePokemon(targetPosition)
-        teamTarget <- getTeamPokemonAt(targetPosition)
+        teamTarget <- getTeamMemberAt(targetPosition)
       yield
         val targetAbility = activeTarget.modifiedAbility.orElse(teamTarget.ability.map(RevealedAbility.Base.apply))
         val targetSpecies = activeTarget.transformedSpecies.getOrElse(teamTarget.details.species)
@@ -220,7 +220,7 @@ case class Battle(
    * @param slot the slot to move the pokemon to
    * @return a copy of this battle with the given pokemon moved
    */
-  def changeActiveSlot(position: PokemonPosition, slot: PokemonSlot): Battle =
+  def changeActiveSlot(position: ActivePosition, slot: PokemonSlot): Battle =
     getActivePokemon(position) match
       case Some(pokemon) =>
         val newPos = position.copy(slot = slot)
@@ -260,7 +260,7 @@ case class Battle(
     case BattleInitializationMessage.StartPreview() => this.copy(state = BattleState.Preview)
     case BattleInitializationMessage.Start() => this.copy(state = BattleState.Playing)
     case BattleInitializationMessage.DeclarePokemon(player, details, item) =>
-      this.declareTeamPokemon(player, TeamPokemon(details, item = item.fold(HeldItem.Unknown)(HeldItem.Revealed(_, None))))._2
+      this.declareTeamMember(player, TeamMember(details, item = item.fold(HeldItem.Unknown)(HeldItem.Revealed(_, None))))._2
 
     //Progress
     case BattleProgressMessage.TimerMessage(_) => this.copy(timerEnabled = true)
@@ -275,19 +275,19 @@ case class Battle(
       getTeamSlot(playerNumber, details) match
         case Some(slot) => this.withActivePokemon(pokemon.position, ActivePokemon(slot))
         case None =>
-          declareTeamPokemon(playerNumber, TeamPokemon(details, condition)) match
+          declareTeamMember(playerNumber, TeamMember(details, condition)) match
             case (Some(slot), battle) => battle.withActivePokemon(pokemon.position, ActivePokemon(slot))
             case (None, battle) => battle
 
     case BattleMajorActionMessage.DetailsChange(pokemon, details, condition) =>
-      this.updateTeamPokemonAt(pokemon.position): p =>
+      this.updateTeamMemberAt(pokemon.position): p =>
         p.copy(details = p.details.merge(details), condition = condition.getOrElse(p.condition))
     case BattleMajorActionMessage.Replace(pokemon, details, condition) =>
-      this.withTeamPokemonAt(pokemon.position, TeamPokemon(details, condition))
+      this.withTeamMemberAt(pokemon.position, TeamMember(details, condition))
     case BattleMajorActionMessage.Swap(pokemon, slot) =>
       this.changeActiveSlot(pokemon.position, slot)
     case BattleMajorActionMessage.Faint(pokemon) =>
-      this.updateTeamPokemonAt(pokemon.position)(p => p.copy(condition = p.condition.faint))
+      this.updateTeamMemberAt(pokemon.position)(p => p.copy(condition = p.condition.faint))
 
     //Attack
     case BattleAttackMessage.Waiting(pokemon, _) =>
@@ -299,15 +299,15 @@ case class Battle(
 
     //Status
     case BattleStatusMessage.Damage(pokemon, condition) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.copy(condition = condition))
+      this.updateTeamMemberAt(pokemon.position)(_.copy(condition = condition))
     case BattleStatusMessage.Heal(pokemon, condition) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.copy(condition = condition))
+      this.updateTeamMemberAt(pokemon.position)(_.copy(condition = condition))
     case BattleStatusMessage.SetHealth(pokemon, health) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.withHealth(health))
+      this.updateTeamMemberAt(pokemon.position)(_.withHealth(health))
     case BattleStatusMessage.SetStatus(pokemon, status) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.withStatus(status))
+      this.updateTeamMemberAt(pokemon.position)(_.withStatus(status))
     case BattleStatusMessage.CureStatus(pokemon, _) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.cured)
+      this.updateTeamMemberAt(pokemon.position)(_.cured)
     case BattleStatusMessage.Boost(pokemon, stat, amount) =>
       this.updateActivePokemon(pokemon.position)(_.boosted(stat, amount))
     case BattleStatusMessage.Unboost(pokemon, stat, amount) =>
@@ -350,11 +350,11 @@ case class Battle(
       this.updateSide(side)(_.removedEffect(field))
     case BattleMinorActionMessage.SwapSideConditions => this
     case BattleMinorActionMessage.Item(pokemon, item, effect) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.revealedItem(item, effect))
+      this.updateTeamMemberAt(pokemon.position)(_.withRevealedItem(item, effect))
     case BattleMinorActionMessage.EndItem(pokemon, item, effect) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.destroyedItem(item, effect))
+      this.updateTeamMemberAt(pokemon.position)(_.withDestroyedItem(item, effect))
     case BattleMinorActionMessage.Ability(pokemon, ability, None) =>
-      this.updateTeamPokemonAt(pokemon.position)(_.revealedAbility(ability))
+      this.updateTeamMemberAt(pokemon.position)(_.withRevealedAbility(ability))
     case BattleMinorActionMessage.Ability(pokemon, ability, Some(cause)) =>
       this.updateActivePokemon(pokemon.position)(_.withModifiedAbility(ability, cause))
     case BattleMinorActionMessage.EndAbility(pokemon) =>

@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.testing.protocol.server
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.battle.*
-import io.github.projectpidove.showdown.battle.PokemonPosition.pos
+import io.github.projectpidove.showdown.battle.ActivePosition.pos
 import io.github.projectpidove.showdown.protocol.MessageDecoder
 import io.github.projectpidove.showdown.protocol.server.BattleMajorActionMessage
 import io.github.projectpidove.showdown.testing.protocol.*

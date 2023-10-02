@@ -8,13 +8,13 @@ import io.github.projectpidove.showdown.protocol.MessageEncoder
  * @param side the relative side of the pokemon
  * @param slot the slot of the pokemon
  */
-case class PokemonTarget(side: PokemonSide, slot: PokemonSlot)
+case class RelativePosition(side: RelativeSide, slot: PokemonSlot)
 
-object PokemonTarget:
+object RelativePosition:
 
-  given MessageEncoder[PokemonTarget] = MessageEncoder.string.contramap: target =>
+  given MessageEncoder[RelativePosition] = MessageEncoder.string.contramap: target =>
     val side =
-      if target.side == PokemonSide.Ally then "-"
+      if target.side == RelativeSide.Ally then "-"
       else "+"
 
     s"$side${target.slot}"

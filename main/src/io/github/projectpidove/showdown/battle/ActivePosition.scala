@@ -11,9 +11,9 @@ import scala.quoted.Expr
  * @param player the side of the pokemon
  * @param slot the slot of the pokemon in its side
  */
-case class PokemonPosition(player: PlayerNumber, slot: PokemonSlot)
+case class ActivePosition(player: PlayerNumber, slot: PokemonSlot)
 
-object PokemonPosition:
+object ActivePosition:
 
   /**
    * Create a pokemon position in singles.
@@ -21,7 +21,7 @@ object PokemonPosition:
    * @param player the side of the pokemon
    * @return a position representing the first slot of the given side
    */
-  def single(player: PlayerNumber): PokemonPosition = PokemonPosition(player, PokemonSlot(0))
+  def single(player: PlayerNumber): ActivePosition = ActivePosition(player, PokemonSlot(0))
 
   /**
    * Parse a position from a [[String]].
@@ -29,7 +29,7 @@ object PokemonPosition:
    * @param value the text to parse
    * @return the parsed position or a [[ProtocolError]] if it failed.
    */
-  def fromString(value: String): Either[ProtocolError, PokemonPosition] =
+  def fromString(value: String): Either[ProtocolError, ActivePosition] =
     val stringNumber = value.substring(0, 2)
     val slotCode = value.last
 
@@ -37,16 +37,16 @@ object PokemonPosition:
       playerNumber <- PlayerNumber.fromString(stringNumber)
       slot <- PokemonSlot.fromCode(slotCode)
     yield
-      PokemonPosition(playerNumber, slot)
+      ActivePosition(playerNumber, slot)
 
   extension (context: StringContext)
 
     /**
      * Interpolator to create a position.
      */
-    def pos(args: Any*): PokemonPosition = context.parts match
-      case Seq(head) => PokemonPosition.fromString(head).fold(throw _, identity)
+    def pos(args: Any*): ActivePosition = context.parts match
+      case Seq(head) => ActivePosition.fromString(head).fold(throw _, identity)
       case _ => throw IllegalArgumentException("Position cannot contain spaces")
 
   
-  given MessageDecoder[PokemonPosition] = MessageDecoder.string.mapEither(fromString)
+  given MessageDecoder[ActivePosition] = MessageDecoder.string.mapEither(fromString)
