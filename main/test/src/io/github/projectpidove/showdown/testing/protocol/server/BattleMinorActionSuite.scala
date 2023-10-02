@@ -22,7 +22,7 @@ object BattleMinorActionSuite extends TestSuite:
     test("weather") - assertDecodeString(
       decoder,
       "|-weather|snow",
-      BattleMinorActionMessage.Weather(Some(Weather.Snow))
+      BattleMinorActionMessage.Weather(Some(Weather.Snow), None)
     )
 
     test("fieldStart") - assertDecodeString(
