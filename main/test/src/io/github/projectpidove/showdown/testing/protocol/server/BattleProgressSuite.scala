@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.testing.protocol.server
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.battle.*
-import io.github.projectpidove.showdown.battle.PokemonPosition.pos
+import io.github.projectpidove.showdown.battle.ActivePosition.pos
 import io.github.projectpidove.showdown.protocol.MessageDecoder
 import io.github.projectpidove.showdown.protocol.server.BattleProgressMessage
 import io.github.projectpidove.showdown.room.ChatContent
@@ -71,13 +71,13 @@ object BattleProgressSuite extends TestSuite:
               player = PlayerNumber(2),
               pokemon = List(
                 PokemonChoice(
-                  id = TeamPosition(PlayerNumber(2), Surname("Ledian")),
+                  id = TeamId(PlayerNumber(2), Surname("Ledian")),
                   details = PokemonDetails(
                     species = SpeciesName("Ledian"),
                     level = Some(Level(83)),
                     gender = Some(Gender.Male)
                   ),
-                  condition = HealthStatus(Health(227, 227)),
+                  condition = Condition(Health(227, 227)),
                   active = true,
                   stats = Map(
                     StatType.Attack -> Stat(106),
@@ -96,13 +96,13 @@ object BattleProgressSuite extends TestSuite:
                   ability = AbilityName("swarm")
                 ),
                 PokemonChoice(
-                  id = TeamPosition(PlayerNumber(2), Surname("Pyukumuku")),
+                  id = TeamId(PlayerNumber(2), Surname("Pyukumuku")),
                   details = PokemonDetails(
                     species = SpeciesName("Pyukumuku"),
                     level = Some(Level(83)),
                     gender = Some(Gender.Female)
                   ),
-                  condition = HealthStatus(Health(227, 227)),
+                  condition = Condition(Health(227, 227)),
                   active = false,
                   stats = Map(
                     StatType.Attack -> Stat(104),

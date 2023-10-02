@@ -4,9 +4,11 @@ import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import io.github.projectpidove.showdown.protocol.ProtocolError
 import io.github.projectpidove.showdown.protocol.MessageDecoder.toInvalidInput
+import io.github.projectpidove.showdown.team.MoveName
+import io.github.projectpidove.showdown.util.NumericTypeOps
 
 opaque type PlayerNumber = Int :| Positive
-object PlayerNumber extends RefinedTypeOpsImpl[Int, Positive, PlayerNumber]:
+object PlayerNumber extends NumericTypeOps[Int, Positive, PlayerNumber]:
 
   def fromString(value: String): Either[ProtocolError, PlayerNumber] = value match
     case s"p$numberString" =>
@@ -19,10 +21,10 @@ object PlayerNumber extends RefinedTypeOpsImpl[Int, Positive, PlayerNumber]:
     case value => Left(ProtocolError.InvalidInput(value, "Invalid player number"))
 
 opaque type Rating = Int :| Positive
-object Rating extends RefinedTypeOpsImpl[Int, Positive, Rating]
+object Rating extends NumericTypeOps[Int, Positive, Rating]
 
 opaque type TurnNumber = Int :| Positive
-object TurnNumber extends RefinedTypeOpsImpl[Int, Positive, TurnNumber]
+object TurnNumber extends NumericTypeOps[Int, Positive, TurnNumber]
 
 opaque type PokemonSlot = Int :| Interval.Closed[0, 2]
 object PokemonSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 2], PokemonSlot]:
@@ -34,25 +36,23 @@ object PokemonSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 2], Pokemo
     case _   => Left(ProtocolError.InvalidInput(value.toString, "Invalid slot"))
 
 opaque type TeamSlot = Int :| Interval.Closed[1, 6]
-object TeamSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 6], TeamSlot]
+object TeamSlot extends NumericTypeOps[Int, Interval.Closed[1, 6], TeamSlot]
 
 opaque type MoveSlot = Int :| Interval.Closed[1, 4]
-object MoveSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[1, 4], MoveSlot]
+object MoveSlot extends NumericTypeOps[Int, Interval.Closed[1, 4], MoveSlot]
 
 opaque type StatusEffect = String :| Not[Blank]
 object StatusEffect extends RefinedTypeOpsImpl[String, Not[Blank], StatusEffect]:
 
+  val Fainted: StatusEffect = "fnt"
   val Burn: StatusEffect = "brn"
   val Freeze: StatusEffect = "frz"
   val Paralysis: StatusEffect = "par"
   val Poison: StatusEffect = "psn"
   val Sleep: StatusEffect = "slp"
 
-opaque type Effect = String :| Not[Blank]
-object Effect extends RefinedTypeOpsImpl[String, Not[Blank], Effect]
-
 opaque type StatBoost = Int :| Interval.Closed[-6, 6]
-object StatBoost extends RefinedTypeOpsImpl[Int, Interval.Closed[-6, 6], StatBoost]
+object StatBoost extends NumericTypeOps[Int, Interval.Closed[-6, 6], StatBoost]
 
 opaque type Weather = String :| Not[Blank]
 object Weather extends RefinedTypeOpsImpl[String, Not[Blank], Weather]:
@@ -72,7 +72,13 @@ opaque type SideFieldEffect = String :| Not[Blank]
 object SideFieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], SideFieldEffect]
 
 opaque type VolatileStatus = String :| Not[Blank]
-object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]
+object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]:
+  
+  def fromMove(move: MoveName): VolatileStatus = VolatileStatus.assume(move.toString)
+  
+  val Confusion: VolatileStatus = "Confusion"
+  val MustRecharge: VolatileStatus = "Must recharge"
+  val Waiting: VolatileStatus = "Waiting"
 
 opaque type PP = Int :| Positive
-object PP extends RefinedTypeOpsImpl[Int, Positive, PP]
+object PP extends NumericTypeOps[Int, Positive, PP]

@@ -1,5 +1,6 @@
 package io.github.projectpidove.showdown
 
+import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, ServerMessage}
 import io.github.projectpidove.showdown.protocol.*
@@ -18,7 +19,8 @@ class ZIOShowdownConnection(
                              stateRef: Ref[ShowdownData]
                            ) extends ShowdownConnection[WebSocketFrame, ProtocolTask]:
 
-  override def sendRawMessage(frame: WebSocketFrame): ProtocolTask[Unit] = socket.send(frame).mapError(ProtocolError.Thrown.apply)
+  override def sendRawMessage(frame: WebSocketFrame): ProtocolTask[Unit] =
+    socket.send(frame).mapError(ProtocolError.Thrown.apply)
 
   override def sendMessage(room: RoomId, message: ClientMessage): ProtocolTask[Unit] =
     for
@@ -38,6 +40,21 @@ class ZIOShowdownConnection(
 
   override def disconnect(): ProtocolTask[Unit] = sendRawMessage(WebSocketFrame.close)
 
+  private def readMessage(message: String, room: RoomId, text: String, handler: ServerMessage => ProtocolTask[Unit]): ProtocolTask[Unit] =
+    (
+      for
+        msg <-
+          MessageDecoder
+            .derivedUnion[ServerMessage]
+            .decodeZPure(MessageInput.fromInput(message, room))
+            .toZIO
+        _ <- stateSubscription(msg)
+        _ <- handler(msg)
+      yield
+        ()
+    ).catchAll(err => Console.printLineError(s"Message: $message\nErr: $err")).toProtocolZIO
+
+
   override def subscribe(handler: ServerMessage => ProtocolTask[Unit]): ProtocolTask[Unit] =
     val receive =
       for
@@ -45,18 +62,13 @@ class ZIOShowdownConnection(
         _ <- Console.printLine(frame.toString).toProtocolZIO
         message <- frame match
           case WebSocketFrame.Text(text, _, _) =>
-            ZIO.foreach(text.split(raw"(\r\n|\r|\n)")): msg =>
-              (for
-                message <-
-                  MessageDecoder
-                    .derivedUnion[ServerMessage]
-                    .decodeZPure(MessageInput.fromInput(msg))
-                    .toZIO
-                _ <- stateSubscription(message)
-                _ <- handler(message)
-              yield
-                ()
-              ).catchAll(err => Console.printLineError(s"Message: $text\nErr: $err")).toProtocolZIO
+            for
+              messagesAndRoom <- text.split(raw"(\r\n|\r|\n)").toList match
+                case s">$room" :: tail => RoomId.applyZIO(room).map((tail, _))
+                case messages => ZIO.succeed((messages, RoomId("lobby")))
+              _ <- ZIO.foreach(messagesAndRoom._1)(readMessage(_, messagesAndRoom._2, text, handler))
+            yield
+              ()
           case _ => ZIO.unit
       yield
         frame

@@ -9,13 +9,13 @@ import io.github.projectpidove.showdown.room.RoomId
  * @param id the id of the room the message is bound to
  * @param message the message sent from the room
  */
-case class RoomBoundMessage(id: RoomId, message: RoomMessage)
+case class RoomBoundMessage(id: RoomId, message: RoomMessage | BattleMessage)
 
 object RoomBoundMessage:
 
   given MessageDecoder[RoomBoundMessage] =
     for
       id <- MessageDecoder.currentRoom
-      message <- summon[MessageDecoder[RoomMessage]]
+      message <- MessageDecoder.derivedUnion[RoomMessage | BattleMessage]
     yield
       RoomBoundMessage(id, message)

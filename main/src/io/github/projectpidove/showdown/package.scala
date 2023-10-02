@@ -2,14 +2,15 @@ package io.github.projectpidove.showdown
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
+import io.github.projectpidove.showdown.util.NumericTypeOps
 
 opaque type Timestamp = Long :| GreaterEqual[0]
 object Timestamp extends RefinedTypeOpsImpl[Long, GreaterEqual[0], Timestamp]:
   
   def zero: Timestamp = 0
 
-opaque type Count = Int :| Positive
-object Count extends RefinedTypeOpsImpl[Int, Positive, Count]
+opaque type Count = Int :| GreaterEqual[0]
+object Count extends NumericTypeOps[Int, GreaterEqual[0], Count]
 
 opaque type ChallStr = String :| FixedLength[258]
 object ChallStr extends RefinedTypeOpsImpl[String, FixedLength[258], ChallStr]

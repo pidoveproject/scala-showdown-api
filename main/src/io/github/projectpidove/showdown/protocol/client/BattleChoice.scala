@@ -24,7 +24,7 @@ enum BattleChoice derives MessageEncoder:
    * @param target the target, if several
    * @param modifier an optional modifier to the move, like mega evolving or z-move
    */
-  case Move(move: MoveName | MoveSlot, target: Option[PokemonTarget], modifier: Option[MoveModifier])
+  case Move(move: MoveName | MoveSlot, target: Option[RelativePosition], modifier: Option[MoveModifier])
 
   /**
    * Do the first legal action.

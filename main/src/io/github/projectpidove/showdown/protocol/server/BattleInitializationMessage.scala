@@ -21,7 +21,7 @@ enum BattleInitializationMessage derives MessageDecoder:
    * @param avatar the avatar of the user
    * @param rating the rating of the user in the battle's format
    */
-  case Player(number: PlayerNumber, name: Username, avatar: AvatarName, rating: Rating)
+  case Player(number: PlayerNumber, name: Option[Username], avatar: Option[AvatarName], rating: Option[Rating])
 
   /**
    * Declare the size of a player's team.
@@ -78,7 +78,7 @@ enum BattleInitializationMessage derives MessageDecoder:
    * @param details the details of the pokemon
    * @param item the item held by the declared pokemon
    */
-  @messageName("poke") case DeclarePokemon(player: PlayerNumber, details: PokemonDetails, item: ItemName)
+  @messageName("poke") case DeclarePokemon(player: PlayerNumber, details: PokemonDetails, item: Option[ItemName])
 
   /**
    * Start the battle
