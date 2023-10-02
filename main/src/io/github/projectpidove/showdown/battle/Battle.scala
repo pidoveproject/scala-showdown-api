@@ -9,6 +9,24 @@ import io.github.projectpidove.showdown.user.Username
 import scala.math.Integral.Implicits.infixIntegralOps
 import scala.math.Ordering.Implicits.infixOrderingOps
 
+/**
+ * The state of a battle. Represents all data about a battle.
+ *
+ * @param state the game state of this battle (initialization, playing...)
+ * @param activePokemon the pokemon currently active on the battlefield
+ * @param battleType the type of the battle (e.g singles)
+ * @param players this battle's participants
+ * @param generation this battle's generation
+ * @param format this battle's format
+ * @param rules this battle's rules
+ * @param timerEnabled whether the time for each turn is limited or not
+ * @param currentTurn the current turn of this battle
+ * @param result the result of this battle if it ended
+ * @param currentRequest the last pending choice request sent by the server
+ * @param weather the weather currently active on the battlefield
+ * @param field the currently active terrain effects
+ * @param sides the currently active side-bound effects
+ */
 case class Battle(
     state: BattleState,
     activePokemon: Map[PokemonPosition, ActivePokemon],
@@ -23,27 +41,73 @@ case class Battle(
     currentRequest: Option[ChoiceRequest],
     weather: Option[Weather],
     field: Map[FieldEffect, TurnNumber],
-    sides: Map[PlayerPosition, SideCondition]
+    sides: Map[PlayerId, SideCondition]
 ):
 
+  /**
+   * Update a player represented by its number.
+   *
+   * @param number the numeric id of the player
+   * @param f the function to apply to the player
+   * @return a copy of this battle with the player updated
+   */
   def updatePlayer(number: PlayerNumber, f: Player => Player): Battle =
     players.get(number).map(f).fold(this)(player => this.copy(players = players.updated(number, player)))
 
+  /**
+   * Get the pokemon active at the given position.
+   *
+   * @param position the position of the pokemon
+   * @return the pokemon currently active at `position`
+   */
   def getActivePokemon(position: PokemonPosition): Option[ActivePokemon] =
     activePokemon.get(position)
 
+  /**
+   * Set the active pokemon at a given position.
+   *
+   * @param position the position to place the pokemon at
+   * @param pokemon the pokemon to set at `position`
+   * @return a copy of this battle with the given pokemon
+   */
   def withActivePokemon(position: PokemonPosition, pokemon: ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.updated(position, pokemon))
 
+  /**
+   * Update a pokemon represented by its position.
+   *
+   * @param position the position of the pokemon
+   * @param f      the function to apply to the pokemon
+   * @return a copy of this battle with the pokemon updated
+   */
   def updateActivePokemon(position: PokemonPosition)(f: ActivePokemon => ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.updatedWith(position)(_.map(f)))
 
+  /**
+   * Update all currently active pokemon.
+   *
+   * @param f the function to apply to the pokemon
+   * @return a copy of this battle with the active pokemon updated
+   */
   def updateAllActivePokemon(f: ActivePokemon => ActivePokemon): Battle =
     this.copy(activePokemon = activePokemon.map((k, v) => (k, f(v))))
 
+  /**
+   * Get the inactive data of the pokemon active at the given position.
+   *
+   * @param position the position of the pokemon
+   * @return the [[TeamPokemon]] of the pokemon currently active at `position`
+   */
   def getTeamPokemonAt(position: PokemonPosition): Option[TeamPokemon] =
     getActivePokemon(position).flatMap(p => getTeamPokemon(position.player, p.teamSlot))
 
+  /**
+   * Get the team member of a player.
+   *
+   * @param player the pokemon's owner
+   * @param slot the slot of the pokemon in the player's team
+   * @return the inactive pokemon at the given position
+   */
   def getTeamPokemon(player: PlayerNumber, slot: TeamSlot): Option[TeamPokemon] =
     for
       owner <- players.get(player)
@@ -52,6 +116,13 @@ case class Battle(
     yield
       teamPokemon
 
+  /**
+   * Set the inactive information of a pokemon currently active at a given position.
+   *
+   * @param position the current position of the pokemon
+   * @param teamPokemon  the inactive information to set
+   * @return a copy of this battle with the given pokemon
+   */
   def withTeamPokemonAt(position: PokemonPosition, teamPokemon: TeamPokemon): Battle =
     val result =
       for
@@ -65,6 +136,13 @@ case class Battle(
 
     result.getOrElse(this)
 
+  /**
+   * Update the inactive data of a currently active pokemon represented by its position.
+   *
+   * @param position the position of the pokemon
+   * @param f        the function to apply to the pokemon
+   * @return a copy of this battle with the pokemon updated
+   */
   def updateTeamPokemonAt(position: PokemonPosition)(f: TeamPokemon => TeamPokemon): Battle =
     val result =
       for
@@ -79,6 +157,13 @@ case class Battle(
 
     result.getOrElse(this)
 
+  /**
+   * Retrieve the slot of a team member using its details.
+   *
+   * @param playerNumber the owner of the member's team
+   * @param details the details of the pokemon
+   * @return the slot matching with the given details
+   */
   def getTeamSlot(playerNumber: PlayerNumber, details: PokemonDetails): Option[TeamSlot] =
     for
       player <- players.get(playerNumber)
@@ -87,6 +172,13 @@ case class Battle(
     yield
       slot
 
+  /**
+   * Declare a new team member.
+   *
+   * @param playerNumber the pokemon's owner
+   * @param teamPokemon the pokemon to add to the team
+   * @return a copy of this battle with the given pokemon added
+   */
   def declareTeamPokemon(playerNumber: PlayerNumber, teamPokemon: TeamPokemon): (Option[TeamSlot], Battle) =
     val result =
       for
@@ -99,6 +191,13 @@ case class Battle(
 
     result.getOrElse((None, this))
 
+  /**
+   * Transform a pokemon into another, like the ability.
+   *
+   * @param pokemonPosition the position of the pokemon to transform
+   * @param targetPosition the position of the pokemon to copy
+   * @return a copy of this battle with the pokemon transformed
+   */
   def transformPokemon(pokemonPosition: PokemonPosition, targetPosition: PokemonPosition): Battle =
     val transformedPokemon =
       for
@@ -114,6 +213,13 @@ case class Battle(
 
     transformedPokemon.fold(this)(pokemon => this.withActivePokemon(pokemonPosition, pokemon))
 
+  /**
+   * Change the local position of a pokemon.
+   *
+   * @param position the current position of the pokemon
+   * @param slot the slot to move the pokemon to
+   * @return a copy of this battle with the given pokemon moved
+   */
   def changeActiveSlot(position: PokemonPosition, slot: PokemonSlot): Battle =
     getActivePokemon(position) match
       case Some(pokemon) =>
@@ -121,9 +227,22 @@ case class Battle(
         this.copy(activePokemon = activePokemon.removed(position).updated(newPos, pokemon))
       case None => this
 
-  def updateSide(side: PlayerPosition)(f: SideCondition => SideCondition): Battle =
+  /**
+   * Update the side condition of a player.
+   *
+   * @param side the side to update
+   * @param f the function to apply to the side condition
+   * @return a copy of this battle with the given side updated
+   */
+  def updateSide(side: PlayerId)(f: SideCondition => SideCondition): Battle =
     this.copy(sides = sides.updatedWith(side)(_.map(f)))
 
+  /**
+   * Update this data according to the passed server event/message.
+   *
+   * @param message the message sent by the server
+   * @return a new [[Battle]] updated according to the given message
+   */
   def update(message: BattleMessage): Battle = message match
 
     //Initialization
@@ -220,7 +339,7 @@ case class Battle(
       this.updateActivePokemon(pokemon.position)(_.withNextTurnStatus(VolatileStatus.fromMove(move)))
 
     //Minor action
-    case BattleMinorActionMessage.Weather(weather) => this.copy(weather = weather)
+    case BattleMinorActionMessage.Weather(weather, _) => this.copy(weather = weather)
     case BattleMinorActionMessage.FieldStart(fieldEffect) =>
       this.copy(field = field.updated(fieldEffect, currentTurn.getOrElse(TurnNumber(1))))
     case BattleMinorActionMessage.FieldEnd(fieldEffect) =>
@@ -253,6 +372,9 @@ case class Battle(
 
 object Battle:
 
+  /**
+   * An empty [[Battle]]. Typically the initial state of the data.
+   */
   val empty: Battle = Battle(
     state = BattleState.Initialization,
     activePokemon = Map.empty,

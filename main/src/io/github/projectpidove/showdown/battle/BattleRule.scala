@@ -2,6 +2,12 @@ package io.github.projectpidove.showdown.battle
 
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, ProtocolError}
 
+/**
+ * The rule of a battle or format.
+ * 
+ * @param name the name of this rule
+ * @param description a short description of this rule
+ */
 case class BattleRule(name: String, description: String)
 
 object BattleRule:

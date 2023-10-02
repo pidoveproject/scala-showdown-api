@@ -1,9 +1,14 @@
 package io.github.projectpidove.showdown.battle
 
-import io.github.projectpidove.showdown.protocol.ProtocolError
 import io.github.projectpidove.showdown.team.Surname
 import zio.json.*
 
+/**
+ * A member identifier relative to a team.
+ * 
+ * @param player the owner
+ * @param name the name of the pokemon
+ */
 case class TeamId(player: PlayerNumber, name: Surname)
 
 object TeamId:

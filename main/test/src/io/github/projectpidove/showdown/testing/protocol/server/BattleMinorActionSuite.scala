@@ -40,13 +40,13 @@ object BattleMinorActionSuite extends TestSuite:
     test("sideStart") - assertDecodeString(
       decoder,
       "|-sidestart|p1: Il_totore|Stealth Rock",
-      BattleMinorActionMessage.SideStart(PlayerPosition(PlayerNumber(1), Username("Il_totore")), SideFieldEffect("Stealth Rock"))
+      BattleMinorActionMessage.SideStart(PlayerId(PlayerNumber(1), Username("Il_totore")), SideFieldEffect("Stealth Rock"))
     )
 
     test("sideEnd") - assertDecodeString(
       decoder,
       "|-sideend|p1: Il_totore|Stealth Rock",
-      BattleMinorActionMessage.SideEnd(PlayerPosition(PlayerNumber(1), Username("Il_totore")), SideFieldEffect("Stealth Rock"))
+      BattleMinorActionMessage.SideEnd(PlayerId(PlayerNumber(1), Username("Il_totore")), SideFieldEffect("Stealth Rock"))
     )
 
     test("item") - assertDecodeString(

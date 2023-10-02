@@ -17,8 +17,9 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * Set or clear the active weather.
    *
    * @param weather the active weather or clear if absent
+   * @param cause the cause of the weather change
    */
-  case Weather(weather: Option[WeatherEffect])
+  case Weather(weather: Option[WeatherEffect], cause: Option[Effect])
 
   /**
    * Start a field effect.
@@ -40,7 +41,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param side the side of the effect
    * @param field the field effect
    */
-  case SideStart(side: PlayerPosition, field: SideFieldEffect)
+  case SideStart(side: PlayerId, field: SideFieldEffect)
 
   /**
    * End a side-dependent field effect.
@@ -48,7 +49,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * @param side the side of the effect
    * @param field the field effect
    */
-  case SideEnd(side: PlayerPosition, field: SideFieldEffect)
+  case SideEnd(side: PlayerId, field: SideFieldEffect)
 
   /**
    * Flip side of field effects (aka Court Change).
