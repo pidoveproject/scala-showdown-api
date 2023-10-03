@@ -131,6 +131,14 @@ enum BattleMinorActionMessage derives MessageDecoder:
   case ZBroken(pokemon: ActiveId)
 
   /**
+   * A pokemon terastallized.
+   *
+   * @param pokemon the pokemon who terastallized
+   * @param tpe the type the pokemon terastallized into
+   */
+  case Terastallize(pokemon: ActiveId, tpe: Type)
+
+  /**
    * An effect was triggered.
    *
    * @param effect the triggered effect

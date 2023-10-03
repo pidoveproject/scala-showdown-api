@@ -1,6 +1,6 @@
 package io.github.projectpidove.showdown.team
 
-import io.github.projectpidove.showdown.protocol.MessageEncoder
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageEncoder, ProtocolError}
 import zio.json.JsonCodec
 
 /**
@@ -35,3 +35,8 @@ object Type:
     name => fromName(name).toRight(s"Invalid type: $name"),
     _.toString
   )
+
+  given MessageDecoder[Type] =
+    MessageDecoder
+      .string
+      .mapEither(x => fromName(x).toRight(ProtocolError.InvalidInput(x, "Invalid type")))

@@ -23,7 +23,8 @@ case class ActivePokemon(
                           nextMoveStatus: Set[VolatileStatus] = Set.empty,
                           nextTurnStatus: Set[VolatileStatus] = Set.empty,
                           modifiedAbility: Option[RevealedAbility] = None,
-                          transformedSpecies: Option[SpeciesName] = None
+                          transformedSpecies: Option[SpeciesName] = None,
+                          isTerastallized: Boolean = false
 ):
 
   /**
@@ -113,3 +114,5 @@ case class ActivePokemon(
    * @return a copy of this pokemon with the ability [[RevealedAbility.Disabled]]
    */
   def disabledAbility: ActivePokemon = this.copy(modifiedAbility = Some(RevealedAbility.Disabled))
+
+  def terastallized: ActivePokemon = this.copy(isTerastallized = true)

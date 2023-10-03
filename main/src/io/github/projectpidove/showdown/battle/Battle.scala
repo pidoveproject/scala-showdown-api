@@ -363,6 +363,10 @@ case class Battle(
       transformPokemon(pokemon.position, target.position)
     case BattleMinorActionMessage.UltraBurst(pokemon, species, _) =>
       this.updateActivePokemon(pokemon.position)(_.copy(transformedSpecies = Some(species)))
+    case BattleMinorActionMessage.Terastallize(pokemon, tpe) =>
+      this
+        .updateTeamMemberAt(pokemon.position)(p => p.copy(details = p.details.copy(teraType = Some(tpe))))
+        .updateActivePokemon(pokemon.position)(_.terastallized)
     case BattleMinorActionMessage.Center =>
       val centeredPokemon = activePokemon.map((k, v) => (k.copy(slot = PokemonSlot(0)), v))
       this.copy(activePokemon = centeredPokemon)

@@ -111,6 +111,12 @@ object BattleMinorActionSuite extends TestSuite:
       BattleMinorActionMessage.ZPower(ActiveId(pos"p1a", Surname("Durant")))
     )
 
+    test("terastallize") - assertDecodeString(
+      decoder,
+      "|-terastallize|p1a: Swanna|Ground",
+      BattleMinorActionMessage.Terastallize(ActiveId(pos"p1a", Surname("Swanna")), Type.Ground)
+    )
+
     test("activate") - assertDecodeString(
       decoder,
       "|-activate|[from] move: Future Sight",
