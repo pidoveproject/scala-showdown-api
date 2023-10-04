@@ -1,31 +1,34 @@
 package io.github.projectpidove.showdown
 
 import io.github.projectpidove.showdown.protocol.ProtocolError
-import sttp.capabilities.WebSockets
-import sttp.capabilities.zio.ZioStreams
-import sttp.client3.*
-import sttp.model.Uri
-import sttp.ws.*
 import zio.*
+import zio.http.*
 
-class ZIOShowdownClient(backend: SttpBackend[Task, ZioStreams & WebSockets], uri: Uri) extends ShowdownClient[WebSocketFrame, ProtocolTask]:
+class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClient[WebSocketFrame, ProtocolTask]:
 
   override def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit]): ProtocolTask[Unit] =
-    basicRequest
-      .get(uri)
-      .response(asWebSocketAlways(ZIOShowdownConnection.withHandler(backend, handler)))
-      .send(backend)
-      .mapError(ProtocolError.Thrown.apply)
-      .unit
+
+    ZIO.scoped:
+      for
+        aliveRef <- Ref.make(true)
+        socketApp = Handler.webSocket(ZIOShowdownConnection.withHandler(client, aliveRef, handler))
+        url <- ZIO.fromEither(URL.decode(serverUrl)).toProtocolZIO
+        _ <- client.socket(url = url, headers = Headers.empty, app = socketApp).unit.toProtocolZIO
+        _ <- ZIO.sleep(Duration.Zero).repeatWhileZIO(_ => aliveRef.get)
+      yield
+        ()
 
 object ZIOShowdownClient:
 
-  def layer(uri: Uri = uri"wss://sim3.psim.us/showdown/websocket"): ZLayer[SttpBackend[Task, ZioStreams & WebSockets], Nothing, ZIOShowdownClient] =
+  def layer(serverUrl: String = "wss://sim3.psim.us/showdown/websocket"): ZLayer[Client, Nothing, ZIOShowdownClient] =
     ZLayer:
       for
-        backend <- ZIO.service[SttpBackend[Task, ZioStreams & WebSockets]]
+        client <- ZIO.service[Client]
       yield
-        ZIOShowdownClient(backend, uri)
+        ZIOShowdownClient(client, serverUrl)
 
-  def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit]): ZIO[ZIOShowdownClient, ProtocolError, Unit] =
+  def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit]): ZIO[ShowdownClient[WebSocketFrame, ProtocolTask], ProtocolError, Unit] =
     ZIO.serviceWithZIO(_.openConnection(handler))
+
+  def openConnectionEnv(handler: ZIO[ShowdownConnection[WebSocketFrame, ProtocolTask], ProtocolError, Unit]): ZIO[ShowdownClient[WebSocketFrame, ProtocolTask], ProtocolError, Unit] =
+    openConnection(connection => handler.provide(ZLayer.succeed(connection)))
