@@ -64,4 +64,7 @@ trait ShowdownConnection[Frame, Cmd[_]]:
    */
   def loginGuest(name: Username): Cmd[String]
 
+  /**
+   * The current state of the Showdown application.
+   */
   def currentState: Cmd[ShowdownData]

@@ -29,7 +29,7 @@ case class PokemonChoice(
                           active: Boolean,
                           stats: Map[StatType, Stat],
                           moves: MoveNames,
-                          item: ItemName,
+                          item: Option[ItemName],
                           pokeball: String,
                           baseAbility: AbilityName,
                           ability: AbilityName,

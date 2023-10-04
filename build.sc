@@ -29,9 +29,7 @@ object zio extends ProjectModule {
 
   def ivyDeps = main.ivyDeps() ++ Agg(
     ivy"dev.zio::zio::2.0.15",
-    ivy"dev.zio::zio-streams::2.0.15",
-    ivy"com.softwaremill.sttp.client3::core::3.9.0",
-    ivy"com.softwaremill.sttp.client3::zio::3.9.0"
+    ivy"dev.zio::zio-http:3.0.0-RC2"
   )
 }
 
