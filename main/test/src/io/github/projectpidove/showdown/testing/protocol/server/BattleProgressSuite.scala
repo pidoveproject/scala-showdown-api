@@ -90,7 +90,7 @@ object BattleProgressSuite extends TestSuite:
                     MoveName("lightscreen"),
                     MoveName("uturn")
                   ).assume,
-                  item = ItemName("leftovers"),
+                  item = Some(ItemName("leftovers")),
                   pokeball = "pokeball",
                   baseAbility = AbilityName("swarm"),
                   ability = AbilityName("swarm")
@@ -117,7 +117,7 @@ object BattleProgressSuite extends TestSuite:
                     MoveName("lightscreen"),
                     MoveName("reflect")
                   ).assume,
-                  item = ItemName("lightclay"),
+                  item = Some(ItemName("lightclay")),
                   pokeball = "pokeball",
                   baseAbility = AbilityName("innardsout"),
                   ability = AbilityName("innardsout")
