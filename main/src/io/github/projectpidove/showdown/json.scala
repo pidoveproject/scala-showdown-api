@@ -16,6 +16,15 @@ object json:
   given someOrEmptyDecoder[A: JsonDecoder]: JsonDecoder[Option[A]] =
     blankNoneDecoder <> JsonDecoder.option[A]
 
+  given nonEmptyListOrEmpty[A](using decoder: JsonDecoder[List[A]]): JsonDecoder[List[A]] with
+
+    override def unsafeDecodeMissing(trace: List[JsonError]): List[A] = List.empty
+
+    override def unsafeDecode(trace: List[JsonError], in: RetractReader): List[A] = decoder.unsafeDecode(trace, in)
+
+    override def unsafeFromJsonAST(trace: List[JsonError], json: Json): List[A] = decoder.unsafeFromJsonAST(trace, json)
+
+
   given someOrEmptyEncoder[A](using encoder: JsonEncoder[A]): JsonEncoder[Option[A]] =
     new JsonEncoder[Option[A]]:
 

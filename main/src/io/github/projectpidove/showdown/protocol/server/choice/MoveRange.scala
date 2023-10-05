@@ -23,6 +23,16 @@ enum MoveRange: //TODO hit all ennemies & hit everyone?
    */
   case Self
 
+  /**
+   * Target all adjacent pokemon.
+   */
+  case AllAdjacent
+
+  /**
+   * Target any pokemon.
+   */
+  case Any
+
 object MoveRange:
 
   given JsonDecoder[MoveRange] =

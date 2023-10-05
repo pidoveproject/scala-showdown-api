@@ -1,6 +1,7 @@
 package io.github.projectpidove.showdown.protocol.server.choice
 
 import io.github.projectpidove.showdown.protocol.MessageDecoder
+import io.github.projectpidove.showdown.json.nonEmptyListOrEmpty
 import zio.json.*
 
 /**
