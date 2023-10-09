@@ -33,6 +33,19 @@ object zio extends ProjectModule {
   )
 }
 
+object examples extends Module {
+
+  object `zio-client` extends ProjectModule {
+
+    def moduleDeps = Seq(main, zio)
+
+    def ivyDeps = main.ivyDeps() ++ Agg(
+      ivy"dev.zio::zio::2.0.15",
+      ivy"dev.zio::zio-http:3.0.0-RC2"
+    )
+  }
+}
+
 //Internals
 trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule { outer =>
 

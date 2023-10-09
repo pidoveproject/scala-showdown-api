@@ -11,7 +11,15 @@ import scala.quoted.Expr
  * @param player the side of the pokemon
  * @param slot the slot of the pokemon in its side
  */
-case class ActivePosition(player: PlayerNumber, slot: PokemonSlot)
+case class ActivePosition(player: PlayerNumber, slot: PokemonSlot):
+
+  override def toString: String =
+    val charSlot = slot.value match
+      case 0 => "a"
+      case 1 => "b"
+      case 2 => "c"
+
+    s"p$player$charSlot"
 
 object ActivePosition:
 
