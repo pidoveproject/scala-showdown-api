@@ -6,7 +6,7 @@ import zio.json.*
  * The range of a move.
  */
 @jsonMemberNames(CamelCase)
-enum MoveRange: //TODO hit all ennemies & hit everyone?
+enum MoveRange:
 
   /**
    * Target a single opponent.
@@ -24,9 +24,24 @@ enum MoveRange: //TODO hit all ennemies & hit everyone?
   case Self
 
   /**
+   * Target everyone.
+   */
+  case All
+
+  /**
    * Target all adjacent pokemon.
    */
   case AllAdjacent
+
+  /**
+   * Target all adjacent opponents.
+   */
+  case AllAdjacentFoes
+
+  /**
+   * Target all opponents.
+   */
+  case FoeSide
 
   /**
    * Target any pokemon.
