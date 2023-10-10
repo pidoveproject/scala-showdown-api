@@ -15,6 +15,9 @@ import zio.http.*
 
 object Main extends ZIOAppDefault:
 
+  /**
+   * Login to an account.
+   */
   private val loginProgram: ConnectionTask[Unit] =
     for
       _ <- Console.printLine("Logging in...").toProtocolZIO
@@ -24,6 +27,13 @@ object Main extends ZIOAppDefault:
     yield
       ()
 
+  /**
+   * Perform the given command.
+   * 
+   * @param command the command to process
+   * @param app the current state of the app
+   * @return the new state of the client
+   */
   private def processCommand(command: String, app: ClientApp): ConnectionTask[ClientApp] = command match
     case "debug" =>
       val updated = app.copy(debugging = !app.debugging)
@@ -80,6 +90,12 @@ object Main extends ZIOAppDefault:
       yield
         app
 
+  /**
+   * Receive a command as user's input and process it.
+   * 
+   * @param appRef the reference to the state of the client
+   * @return the processed command
+   */
   private def receiveCommand(appRef: Ref[ClientApp]): ConnectionTask[String] =
     for
       command <- Console.readLine("> ").toProtocolZIO
@@ -89,9 +105,21 @@ object Main extends ZIOAppDefault:
     yield
       command
 
+  /**
+   * The command line interface of the client.
+   * 
+   * @param appRef the reference to the state of the client
+   */
   private def commandProgram(appRef: Ref[ClientApp]): ConnectionTask[Unit] =
     receiveCommand(appRef).repeatUntilEquals("stop").unit
 
+  /**
+   * Process the received message.
+   * 
+   * @param connection the current connection to Pokemon Showdown
+   * @param appRef the reference to the state of the client
+   * @param message the received message to process
+   */
   private def subscribeProgram(connection: ShowdownConnection[WebSocketFrame, ProtocolTask], appRef: Ref[ClientApp])(message: ServerMessage): ProtocolTask[Unit] =
     for
       app <- appRef.get
@@ -106,7 +134,12 @@ object Main extends ZIOAppDefault:
         case _ => ZIO.unit
     yield
       ()
-  
+
+  /**
+   * Launch the client's main logic using the given connection.
+   * 
+   * @param connection the connection to use
+   */
   private def connectionProgram(connection: ShowdownConnection[WebSocketFrame, ProtocolTask]): ProtocolTask[Unit] =
     for
       appRef <- Ref.make(ClientApp())

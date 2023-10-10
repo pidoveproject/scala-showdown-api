@@ -3,6 +3,12 @@ package io.github.projectpidove.showdown.client
 import io.github.projectpidove.showdown.battle.*
 import io.github.projectpidove.showdown.protocol.server.choice.*
 
+/**
+ * Pretty print a team member.
+ *
+ * @param member the member to represent
+ * @return a textual representation of the given member
+ */
 def showTeamMember(member: TeamMember): String =
   val species = member.details.species
   val item = member.item match
@@ -20,6 +26,13 @@ def showTeamMember(member: TeamMember): String =
 
   s"$species $item, $ability, $condition"
 
+/**
+ * Pretty print a team.
+ *
+ * @param player the team's owner
+ * @param team the team to represent
+ * @return a textual representation of the given team
+ */
 def showTeam(player: PlayerNumber, team: PlayerTeam): String =
   val memberInfo =
     team
@@ -31,6 +44,14 @@ def showTeam(player: PlayerNumber, team: PlayerTeam): String =
   s"""=== Player $player ===
      |${(memberInfo ++ remainingLines).mkString("\n")}""".stripMargin
 
+/**
+ * Pretty print an active pokemon.
+ *
+ * @param position the position of the pokemon
+ * @param pokemon the pokemon to represent
+ * @param member the team info of the pokemon
+ * @return a textual representation of the given pokemon
+ */
 def showActive(position: ActivePosition, pokemon: ActivePokemon, member: TeamMember): String =
   val species = pokemon.transformedSpecies match
     case Some(transformed) => s"$transformed (${member.details.species})"
@@ -60,7 +81,12 @@ def showActive(position: ActivePosition, pokemon: ActivePokemon, member: TeamMem
      |Condition: $condition
      |Ability: $ability""".stripMargin
 
-
+/**
+ * Pretty print a all active pokemon of a battle.
+ *
+ * @param battle the battle containing the pokemon to represent
+ * @return a textual representation of the active pokemon of the given battle
+ */
 def showAllActive(battle: Battle): String =
   val entries =
     battle.activePokemon.map: (position, pokemon) =>
@@ -72,8 +98,20 @@ def showAllActive(battle: Battle): String =
 
   entries.mkString("\n")
 
+/**
+ * Pretty print a move choice.
+ *
+ * @param choice the move to represent
+ * @return a textual representation of the given usable move
+ */
 def showMoveChoice(choice: MoveChoice): String = s"${choice.name} (${choice.pp}/${choice.maxPP})"
 
+/**
+ * Pretty print a pokemon choice.
+ *
+ * @param choice the pokemon to represent
+ * @return a textual representation of the given switchable pokemon
+ */
 def showPokemonChoice(choice: PokemonChoice): String =
   val condition = choice.condition match
     case Condition(Health(current, max), Some(status)) => s"$current/$max $status"
@@ -81,12 +119,30 @@ def showPokemonChoice(choice: PokemonChoice): String =
 
   s"${choice.details.species} ($condition)"
 
+/**
+ * Pretty print the choices of an active pokemon.
+ *
+ * @param choice the moves to represent
+ * @return a textual representation of the given active choice
+ */
 def showActiveChoice(choice: ActiveChoice): String =
   choice.moves.map(showMoveChoice).mkString(" / ")
 
+/**
+ * Pretty print a team choice.
+ *
+ * @param choice the team to represent
+ * @return a textual representation of the switch options
+ */
 def showTeamChoice(choice: TeamChoice): String =
   choice.pokemon.map(showPokemonChoice).mkString(" / ")
 
+/**
+ * Pretty print a choice request.
+ *
+ * @param choice the choice to represent
+ * @return a textual representation of the given choice.
+ */
 def showChoiceRequest(choice: ChoiceRequest): String =
   val activeChoices = choice.active.map(showActiveChoice).mkString("\n")
 
