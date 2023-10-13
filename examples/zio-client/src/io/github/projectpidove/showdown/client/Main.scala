@@ -69,7 +69,7 @@ object Main extends ZIOAppDefault:
     case "show active" =>
       for
         battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
-        _ <- Console.printLine(showAllActive).toProtocolZIO
+        _ <- Console.printLine(showAllActive(battle)).toProtocolZIO
       yield
         app
 
@@ -83,6 +83,16 @@ object Main extends ZIOAppDefault:
         app
 
     case "stop" => Console.printLine("Stopping client...").toProtocolZIO *> ZIO.succeed(app)
+
+    case "choice" =>
+      for
+        battle <- app.currentBattle
+        choice <-
+          battle.flatMap(_.currentRequest) match
+            case Some(choice) => Console.printLine(showBattleState(battle.get, choice)).toProtocolZIO
+            case None => Console.printLine("No choice request to display.").toProtocolZIO
+      yield
+        app
 
     case message =>
       for
@@ -128,8 +138,25 @@ object Main extends ZIOAppDefault:
         case GlobalMessage.ChallStr(challstr) =>
           Console.printLine("Login available").toProtocolZIO
 
-        case RoomBoundMessage(_, BattleProgressMessage.Request(choice)) =>
-          Console.printLine(showChoiceRequest(choice)).toProtocolZIO
+        case RoomBoundMessage(room, BattleProgressMessage.Request(choice)) =>
+          for
+            state <- connection.currentState
+            battle <- ZIO.fromOption(state.getJoinedRoomOrEmpty(room).battle).orElseFail(ProtocolError.Miscellaneous("Received request from unjoined room"))
+            _ <- Console.printLine(showBattleState(battle, choice)).toProtocolZIO
+          yield
+            ()
+
+        case RoomBoundMessage(_, BattleMajorActionMessage.Switch(pokemon, details, condition, _)) =>
+          Console.printLine(s"${details.species} (${condition.health.current}/${condition.health.max}) switched-in position ${pokemon.position}").toProtocolZIO
+
+        case RoomBoundMessage(room, BattleMajorActionMessage.Move(attackerPos, move, _)) =>
+          for
+            state <- connection.currentState
+            battle <- ZIO.fromOption(state.getJoinedRoomOrEmpty(room).battle).orElseFail(ProtocolError.Miscellaneous("Received request from unjoined room"))
+            attacker <- ZIO.fromOption(battle.getTeamMemberAt(attackerPos.position)).orElseFail(ProtocolError.Miscellaneous(s"Missing pokemon at $attackerPos"))
+            _ <- Console.printLine(s"${attacker.details.species} used $move").toProtocolZIO
+          yield
+            ()
 
         case _ => ZIO.unit
     yield

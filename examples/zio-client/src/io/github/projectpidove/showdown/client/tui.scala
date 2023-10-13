@@ -1,5 +1,7 @@
 package io.github.projectpidove.showdown.client
 
+import io.github.iltotore.iron.*
+import io.github.iltotore.iron.constraint.numeric.Positive
 import io.github.projectpidove.showdown.battle.*
 import io.github.projectpidove.showdown.protocol.server.choice.*
 
@@ -151,3 +153,57 @@ def showChoiceRequest(choice: ChoiceRequest): String =
      |
      |Switch:
      |${showTeamChoice(choice.team)}""".stripMargin
+
+/**
+ * Colorize a text.
+ *
+ * @param text the text to colorize
+ * @param color the color to apply
+ * @return a new String colored with the given ANSI color
+ */
+def colored(text: String, color: String): String =
+  s"$color$text${Console.RESET}"
+
+/**
+ * Pretty print opponent's team, highlighting active and fainted pokemon.
+ *
+ * @param player the team's owner
+ * @param team the team to render
+ * @param active the set of slots of active pokemon to highlight
+ * @return a textual representation of the given team
+ */
+def showOpponentTeam(player: PlayerNumber, team: PlayerTeam, active: Set[TeamSlot]): String =
+  val members =
+    team.members.map: (slot, pokemon) =>
+
+      val condition = pokemon.condition
+      val label =
+        if condition.status.isDefined then s"${pokemon.details.species} (${condition.health.current}/${condition.health.max} ${condition.status.get})"
+        else s"${pokemon.details.species} (${condition.health.current}/${condition.health.max})"
+
+      if active.contains(slot) then colored(label, Console.GREEN)
+      else if pokemon.condition.fainted then colored(label, Console.RED)
+      else label
+
+  s"Player $player: ${members.mkString(" / ")}"
+
+/**
+ * Pretty print battle's current state.
+ *
+ * @param battle the battle state to show
+ * @param choice the choice to render
+ * @return a textual representation of the given battle state and choice request
+ */
+def showBattleState(battle: Battle, choice: ChoiceRequest): String =
+  val opponents = battle.players.filterNot(_._1 == PlayerNumber(1)).map: (n, player) =>
+    player.team match
+      case Some(team) =>
+        val active =
+          battle.activePokemon.collect:
+            case (ActivePosition(playerNumber, _), pokemon) if playerNumber == n => pokemon.teamSlot
+        showOpponentTeam(n, team, active.toSet)
+      case None => s"=== $n ===\n???"
+
+  s"""${opponents.mkString("\n")}
+    |
+    |${showChoiceRequest(choice)}""".stripMargin
