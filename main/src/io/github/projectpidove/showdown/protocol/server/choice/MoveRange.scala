@@ -44,6 +44,11 @@ enum MoveRange:
   case FoeSide
 
   /**
+   * Random normal.
+   */
+  case RandomNormal
+
+  /**
    * Target any pokemon.
    */
   case Any
