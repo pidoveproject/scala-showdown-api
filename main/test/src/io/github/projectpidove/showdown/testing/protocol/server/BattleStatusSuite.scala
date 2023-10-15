@@ -39,7 +39,7 @@ object BattleStatusSuite extends TestSuite:
 
     test("setStatus") - assertDecodeString(
       decoder,
-      "|-setstatus|p1a: Darmanitan|psn",
+      "|-status|p1a: Darmanitan|psn",
       BattleStatusMessage.SetStatus(ActiveId(pos"p1a", Surname("Darmanitan")), StatusEffect.Poison)
     )
 

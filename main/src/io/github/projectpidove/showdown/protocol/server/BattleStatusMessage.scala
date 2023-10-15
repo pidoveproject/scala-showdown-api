@@ -43,7 +43,7 @@ enum BattleStatusMessage derives MessageDecoder:
    * @param pokemon the modified pokemon
    * @param status  the new status of the pokemon
    */
-  case SetStatus(pokemon: ActiveId, status: StatusEffect)
+  @messageName("status") case SetStatus(pokemon: ActiveId, status: StatusEffect)
 
   /**
    * Clear the status of a pokemon.
