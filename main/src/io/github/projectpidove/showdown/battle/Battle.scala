@@ -268,7 +268,7 @@ case class Battle(
     case BattleProgressMessage.Turn(turn) => this.copy(currentTurn = Some(turn))
     case BattleProgressMessage.Win(user) => this.copy(result = Some(BattleResult.Win(user)))
     case BattleProgressMessage.Tie() => this.copy(result = Some(BattleResult.Tie))
-    case BattleProgressMessage.Request(request) => this.copy(currentRequest = Some(request))
+    case BattleProgressMessage.Request(request) => this.copy(currentRequest = request)
 
     //Major action
     case BattleMajorActionMessage.Switch(pokemon, details, condition, _) =>
