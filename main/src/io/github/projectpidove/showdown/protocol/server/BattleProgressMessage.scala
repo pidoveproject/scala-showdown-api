@@ -3,6 +3,7 @@ package io.github.projectpidove.showdown.protocol.server
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.Timestamp as TimestampValue
 import io.github.projectpidove.showdown.battle.{*, given}
+import io.github.projectpidove.showdown.protocol.client.BattleChoice
 import io.github.projectpidove.showdown.protocol.server.choice.{ChoiceError, ChoiceRequest}
 import io.github.projectpidove.showdown.protocol.{MessageDecoder, messageName}
 import io.github.projectpidove.showdown.room.ChatContent
@@ -76,4 +77,11 @@ enum BattleProgressMessage derives MessageDecoder:
    *
    * @param request information on available actions
    */
-  case Request(request: ChoiceRequest)
+  case Request(request: Option[ChoiceRequest])
+
+  /**
+   * The server confirmed the choice response has been received.
+   *
+   * @param choice the received choice
+   */
+  case SentChoice(choice: BattleChoice)

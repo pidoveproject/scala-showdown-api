@@ -130,5 +130,5 @@ object BattleProgressSuite extends TestSuite:
         assertDecodeString(
           decoder,
           s"|request|$request",
-          BattleProgressMessage.Request(result)
+          BattleProgressMessage.Request(Some(result))
         )
