@@ -44,8 +44,10 @@ enum BattleAttackMessage derives MessageDecoder:
 
   /**
    * A pokemon made a critical hit.
+   *
+   * @param target the attacked pokemon
    */
-  @messageName("crit") case CriticalHit
+  @messageName("crit") case CriticalHit(target: ActiveId)
 
   /**
    * A move was super effective.
