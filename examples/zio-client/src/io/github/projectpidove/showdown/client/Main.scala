@@ -9,7 +9,7 @@ import io.github.projectpidove.showdown.protocol.client.GlobalCommand
 import io.github.projectpidove.showdown.protocol.server.choice.{ActiveChoice, ChoiceRequest, MoveChoice, PokemonChoice, TeamChoice}
 import io.github.projectpidove.showdown.protocol.server.*
 import io.github.projectpidove.showdown.room.RoomId
-import io.github.projectpidove.showdown.user.Username
+import io.github.projectpidove.showdown.user.*
 import zio.*
 import zio.http.*
 
@@ -24,6 +24,20 @@ object Main extends ZIOAppDefault:
       username <- Console.readLine("Username: ").toProtocolZIO.flatMap(Username.applyZIO(_)).retryN(3)
       password <- Console.readLine("Password: ").toProtocolZIO
       _ <- ZIOShowdownConnection.login(username, password)
+    yield
+      ()
+
+  private def showTeams(app: ClientApp): ConnectionTask[Unit] =
+    for
+      battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
+      teams =
+        battle
+          .players
+          .map:
+            case (num, Player(_, _, _, _, Some(team))) => showTeam(num, team)
+            case (num, _) => s"=== Player $num ===\nNo team"
+
+      _ <- Console.printLine(teams.mkString("\n")).toProtocolZIO
     yield
       ()
 
@@ -53,18 +67,7 @@ object Main extends ZIOAppDefault:
       ZIO.succeed(app.copy(currentRoom = None))
 
     case "show teams" =>
-      for
-        battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
-        teams =
-          battle
-            .players
-            .map:
-              case (num, Player(_, _, _, _, Some(team))) => showTeam(num, team)
-              case (num, _) => s"=== Player $num ===\nNo team"
-
-        _ <- Console.printLine(teams.mkString("\n")).toProtocolZIO
-      yield
-        app
+      showTeams(app) *> ZIO.succeed(app)
 
     case "show active" =>
       for
@@ -138,13 +141,21 @@ object Main extends ZIOAppDefault:
         case GlobalMessage.ChallStr(challstr) =>
           Console.printLine("Login available").toProtocolZIO
 
-        case RoomBoundMessage(room, BattleProgressMessage.Request(choice)) =>
-          for
-            state <- connection.currentState
-            battle <- ZIO.fromOption(state.getJoinedRoomOrEmpty(room).battle).orElseFail(ProtocolError.Miscellaneous("Received request from unjoined room"))
-            _ <- Console.printLine(showBattleState(battle, choice)).toProtocolZIO
-          yield
-            ()
+        case RoomBoundMessage(_, RoomMessage.Message(content)) => Console.printLine(content).toProtocolZIO
+
+        case RoomBoundMessage(_, RoomMessage.Chat(User(name, _), content)) => Console.printLine(s"<$name> $content").toProtocolZIO
+
+        case RoomBoundMessage(room, BattleInitializationMessage.StartPreview()) =>
+          Console.printLine(s"===== Preview Start =====").toProtocolZIO
+            *> showTeams(app).provide(ZLayer.succeed(connection))
+            *> appRef.update(_.copy(currentRoom = Some(room)))
+
+        case RoomBoundMessage(room, BattleInitializationMessage.Start()) =>
+          Console.printLine(s"===== Battle Start =====").toProtocolZIO *> appRef.update(_.copy(currentRoom = Some(room)))
+
+        case RoomBoundMessage(_, BattleProgressMessage.Turn(number)) => Console.printLine(s"===== Turn $number =====").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleProgressMessage.Win(user)) => Console.printLine(s"$user won the battle").toProtocolZIO
 
         case RoomBoundMessage(_, BattleMajorActionMessage.Switch(pokemon, details, condition, _)) =>
           Console.printLine(s"${details.species} (${condition.health.current}/${condition.health.max}) switched-in position ${pokemon.position}").toProtocolZIO
@@ -157,6 +168,45 @@ object Main extends ZIOAppDefault:
             _ <- Console.printLine(s"${attacker.details.species} used $move").toProtocolZIO
           yield
             ()
+
+        case RoomBoundMessage(_, BattleAttackMessage.Fail(ActiveId(_, name), move)) =>
+          Console.printLine(s"$name failed $move").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleAttackMessage.Miss(_, ActiveId(_, name))) =>
+          Console.printLine(s"$name avoided the attack").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleAttackMessage.Block(ActiveId(_, name), effect, _)) =>
+          Console.printLine(s"$name blocked the attack using $effect").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleAttackMessage.SuperEffective(ActiveId(_, name))) =>
+          Console.printLine(s"It's super effective on $name").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleAttackMessage.Resisted(ActiveId(_, name))) =>
+          Console.printLine(s"It's not very effective on $name").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleAttackMessage.Immune(ActiveId(_, name))) =>
+          Console.printLine(s"It does not affect $name").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleAttackMessage.CriticalHit(ActiveId(_, name))) =>
+          Console.printLine(s"A critical hit on $name!").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleStatusMessage.Damage(ActiveId(_, name), condition)) =>
+          Console.printLine(s"$name was damaged (${showCondition(condition)})").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleStatusMessage.Heal(ActiveId(_, name), condition)) =>
+          Console.printLine(s"$name was healed (${showCondition(condition)})").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleStatusMessage.SetStatus(ActiveId(_, name), status)) =>
+          Console.printLine(s"$name now has status $status").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleStatusMessage.CureStatus(ActiveId(_, name), status)) =>
+          Console.printLine(s"$name cured from $status").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleStatusMessage.Boost(ActiveId(_, name), stat, amount)) =>
+          Console.printLine(s"$name's $stat raised by $amount").toProtocolZIO
+
+        case RoomBoundMessage(_, BattleStatusMessage.Unboost(ActiveId(_, name), stat, amount)) =>
+          Console.printLine(s"$name's $stat decreased by $amount").toProtocolZIO
 
         case _ => ZIO.unit
     yield

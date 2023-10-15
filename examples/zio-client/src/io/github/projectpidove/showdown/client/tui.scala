@@ -4,6 +4,39 @@ import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.numeric.Positive
 import io.github.projectpidove.showdown.battle.*
 import io.github.projectpidove.showdown.protocol.server.choice.*
+import io.github.projectpidove.showdown.team.StatType
+
+/**
+ * Format a boost stat.
+ *
+ * @param boost the boost to format
+ * @return the textual representation of the boost
+ */
+def showBoost(boost: StatBoost): String =
+  if boost.value > 0 then s"+$boost"
+  else boost.toString
+
+/**
+ * Pretty print the boosts of a pokemon.
+ *
+ * @param boosts the boosts to represent
+ * @return a textual representation of the given boosts
+ */
+def showBoosts(boosts: Map[StatType, StatBoost]): String =
+  boosts
+    .filterNot(_._2.value == 0)
+    .map((stat, boost) => s"$stat ${showBoost(boost)}")
+    .mkString(" / ")
+
+/**
+ * Pretty print the condition of a pokemon.
+ *
+ * @param condition the condition to represent
+ * @return a textual representation of the given condition
+ */
+def showCondition(condition: Condition): String = condition match
+  case Condition(Health(current, max), Some(status)) => s"$current/$max $status"
+  case Condition(Health(current, max), None) => s"$current/$max"
 
 /**
  * Pretty print a team member.
@@ -20,13 +53,9 @@ def showTeamMember(member: TeamMember): String =
     case HeldItem.Destroyed(item, None) => s"@ $item"
     case HeldItem.Unknown => ""
 
-  val condition = member.condition match
-    case Condition(Health(current, max), Some(status)) => s"$current/$max $status"
-    case Condition(Health(current, max), None) => s"$current/$max"
-
   val ability = member.ability.fold("Unknown ability")(_.value)
 
-  s"$species $item, $ability, $condition"
+  s"$species $item, $ability, ${showCondition(member.condition)}"
 
 /**
  * Pretty print a team.
@@ -65,11 +94,7 @@ def showActive(position: ActivePosition, pokemon: ActivePokemon, member: TeamMem
     case HeldItem.Destroyed(item, Some(cause)) => s"@ $item (Destroyed by $cause})"
     case HeldItem.Destroyed(item, None) => s"@ $item"
     case HeldItem.Unknown => ""
-
-  val condition = member.condition match
-    case Condition(Health(current, max), Some(status)) => s"$current/$max $status"
-    case Condition(Health(current, max), None) => s"$current/$max"
-
+  
   val baseAbility = member.ability.fold("Unknown Ability")(_.value)
 
   val ability = pokemon.modifiedAbility match
@@ -80,8 +105,9 @@ def showActive(position: ActivePosition, pokemon: ActivePokemon, member: TeamMem
 
   s"""=== $position ===
      |$species $item
-     |Condition: $condition
-     |Ability: $ability""".stripMargin
+     |Condition: ${showCondition(member.condition)}
+     |Ability: $ability
+     |Boosts: ${showBoosts(pokemon.boosts)}""".stripMargin
 
 /**
  * Pretty print a all active pokemon of a battle.
@@ -115,9 +141,7 @@ def showMoveChoice(choice: MoveChoice): String = s"${choice.name} (${choice.pp}/
  * @return a textual representation of the given switchable pokemon
  */
 def showPokemonChoice(choice: PokemonChoice): String =
-  val condition = choice.condition match
-    case Condition(Health(current, max), Some(status)) => s"$current/$max $status"
-    case Condition(Health(current, max), None) => s"$current/$max"
+  val condition = showCondition(choice.condition)
 
   s"${choice.details.species} ($condition)"
 
@@ -175,11 +199,7 @@ def colored(text: String, color: String): String =
 def showOpponentTeam(player: PlayerNumber, team: PlayerTeam, active: Set[TeamSlot]): String =
   val members =
     team.members.map: (slot, pokemon) =>
-
-      val condition = pokemon.condition
-      val label =
-        if condition.status.isDefined then s"${pokemon.details.species} (${condition.health.current}/${condition.health.max} ${condition.status.get})"
-        else s"${pokemon.details.species} (${condition.health.current}/${condition.health.max})"
+      val label = s"${pokemon.details.species} (${showCondition(pokemon.condition)})"
 
       if active.contains(slot) then colored(label, Console.GREEN)
       else if pokemon.condition.fainted then colored(label, Console.RED)
@@ -195,7 +215,7 @@ def showOpponentTeam(player: PlayerNumber, team: PlayerTeam, active: Set[TeamSlo
  * @return a textual representation of the given battle state and choice request
  */
 def showBattleState(battle: Battle, choice: ChoiceRequest): String =
-  val opponents = battle.players.filterNot(_._1 == PlayerNumber(1)).map: (n, player) =>
+  val opponents = battle.players.filterNot(_._1 == choice.team.player).map: (n, player) =>
     player.team match
       case Some(team) =>
         val active =
@@ -205,5 +225,5 @@ def showBattleState(battle: Battle, choice: ChoiceRequest): String =
       case None => s"=== $n ===\n???"
 
   s"""${opponents.mkString("\n")}
-    |
-    |${showChoiceRequest(choice)}""".stripMargin
+     |
+     |${showChoiceRequest(choice)}""".stripMargin
