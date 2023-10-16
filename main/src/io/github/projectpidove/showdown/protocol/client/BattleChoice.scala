@@ -2,13 +2,13 @@ package io.github.projectpidove.showdown.protocol.client
 
 import io.github.iltotore.iron.*
 import io.github.projectpidove.showdown.battle.*
-import io.github.projectpidove.showdown.protocol.MessageEncoder
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageEncoder}
 import io.github.projectpidove.showdown.team.{MoveName, SpeciesName}
 
 /**
  * A battle choice
  */
-enum BattleChoice derives MessageEncoder:
+enum BattleChoice derives MessageEncoder, MessageDecoder:
 
   /**
    * Switch in a pokemon.
@@ -40,3 +40,9 @@ enum BattleChoice derives MessageEncoder:
    * Cancel selected action
    */
   case Undo
+
+object BattleChoice:
+
+  private given pokemonIdentifierDecoder: MessageDecoder[SpeciesName | TeamSlot] = MessageDecoder.derivedUnion
+
+  private given moveIdentifierDecoder: MessageDecoder[MoveName | MoveSlot] = MessageDecoder.derivedUnion

@@ -44,7 +44,7 @@ enum RoomMessage derives MessageDecoder:
    *
    * @param content the content of the message
    */
-  case Html(content: HTML)
+  @messageName("html", "raw") case Html(content: HTML)
 
   /**
    * A named HTML message sent by the server

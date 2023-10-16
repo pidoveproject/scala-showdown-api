@@ -20,7 +20,7 @@ class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClien
 
 object ZIOShowdownClient:
 
-  def layer(serverUrl: String = "wss://sim3.psim.us/showdown/websocket"): ZLayer[Client, Nothing, ZIOShowdownClient] =
+  def layer(serverUrl: String = "wss://sim3.psim.us/showdown/websocket"): ZLayer[Client, Nothing, ShowdownClient[WebSocketFrame, ProtocolTask]] =
     ZLayer:
       for
         client <- ZIO.service[Client]

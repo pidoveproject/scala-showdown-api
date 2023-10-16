@@ -1,23 +1,23 @@
 package io.github.projectpidove.showdown.protocol.client
 
-import io.github.projectpidove.showdown.protocol.MessageEncoder
+import io.github.projectpidove.showdown.protocol.{MessageDecoder, MessageEncoder}
 
 /**
  * A modifier usable with a move.
  */
-enum MoveModifier derives MessageEncoder:
+enum MoveModifier derives MessageEncoder, MessageDecoder:
 
   /**
    * Mega evolve.
    */
-  case Mega
+  case Mega()
 
   /**
    * Make the move a Z move.
    */
-  case ZMove
+  case ZMove()
 
   /**
    * Dynamax/Gigantamax.
    */
-  case Max
+  case Max()

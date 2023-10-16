@@ -17,11 +17,16 @@ enum ChoiceError:
   case Invalid(message: ChatContent)
 
   /**
-   * The sent decision is unavailable (e.g due to a ability like Magnet Pull)
+   * The sent decision is unavailable (e.g due to a ability like Magnet Pull).
    * 
    * @param message the error message
    */
   case Unavailable(message: ChatContent)
+
+  /**
+   * A miscellaneous error.
+   */
+  case Miscellaneous(message: ChatContent)
 
 object ChoiceError:
 
@@ -38,4 +43,5 @@ object ChoiceError:
         .map(ChoiceError.Unavailable.apply)
         .toInvalidInput(message)
 
-    case value => Left(ProtocolError.InvalidInput(value.toString, "Invalid choice error"))
+    case message =>
+      Right(ChoiceError.Miscellaneous(message))
