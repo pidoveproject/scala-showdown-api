@@ -146,6 +146,20 @@ def showPokemonChoice(choice: PokemonChoice): String =
   s"${choice.details.species} ($condition)"
 
 /**
+ * Pretty print a pokemon choice.
+ *
+ * @param choice the pokemon to represent
+ * @return a detailed textual representation of the given switchable pokemon
+ */
+def showFullPokemonChoice(choice: PokemonChoice): String =
+  val active = if choice.active then "[ACTIVE] " else ""
+  
+  s"""$active${choice.details.species} (${showCondition(choice.condition)}
+     |Item: ${choice.item.getOrElse("None")}
+     |Ability: ${choice.ability}
+     |${choice.moves.mkString("- ", "\n- ", "")}""".stripMargin
+
+/**
  * Pretty print the choices of an active pokemon.
  *
  * @param choice the moves to represent
@@ -162,6 +176,15 @@ def showActiveChoice(choice: ActiveChoice): String =
  */
 def showTeamChoice(choice: TeamChoice): String =
   choice.pokemon.map(showPokemonChoice).mkString(" / ")
+
+/**
+ * Pretty print a team choice.
+ *
+ * @param choice the team to represent
+ * @return a detailed textual representation of the switch options
+ */
+def showFullTeamChoice(choice: TeamChoice): String =
+  choice.pokemon.map(showFullPokemonChoice).mkString("\n\n")
 
 /**
  * Pretty print a choice request.

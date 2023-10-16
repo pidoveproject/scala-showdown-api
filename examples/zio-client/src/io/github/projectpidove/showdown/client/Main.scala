@@ -69,6 +69,16 @@ object Main extends ZIOAppDefault:
     case "show teams" =>
       showTeams(app) *> ZIO.succeed(app)
 
+    case "show team" =>
+      for
+        battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
+        team = battle.currentRequest match
+          case Some(choice) => showFullTeamChoice(choice.team)
+          case None => "No team choice"
+        _ <- Console.printLine(team).toProtocolZIO
+      yield
+        app
+
     case "show active" =>
       for
         battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
