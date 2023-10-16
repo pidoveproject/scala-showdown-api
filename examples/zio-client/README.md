@@ -28,7 +28,7 @@ This usually results in a chat message sent to the current room or a user comman
 
 You can see the [`show teams` and `show active` commands](#usage) to show battle information.
 
-When a choice request from the server is received, it will be displayed in the console.
+When a choice request from the server is received (usually at the end of each turn), you can display it to the console using `choice`.
 You can use either `/move <slot>` or `/switch <slot>` to choose an action. Use `/undo` to cancel it.
 
 See also [Showdown's action choice documentation](https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md#possible-choices).
