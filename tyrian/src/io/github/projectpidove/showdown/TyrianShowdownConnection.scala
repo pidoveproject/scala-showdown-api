@@ -11,7 +11,7 @@ import tyrian.{Cmd, Sub}
 import tyrian.http.{Body, Decoder, Http, Request}
 import tyrian.websocket.WebSocket
 
-case class TyrianConnection[F[_] : Async](socket: WebSocket[F]):
+case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F]):
 
   /**
    * Send a socket frame to the server.
