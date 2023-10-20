@@ -23,6 +23,17 @@ object main extends ProjectModule {
   object test extends Tests
 }
 
+object tyrian extends ProjectModule with ScalaJSModule {
+
+  def scalaJSVersion = versions.scalaJS
+
+  def moduleDeps = Seq(main)
+
+  def ivyDeps = main.ivyDeps() ++ Agg(
+    ivy"io.indigoengine::tyrian::0.8.0"
+  )
+}
+
 object zio extends ProjectModule {
 
   def moduleDeps = Seq(main)
