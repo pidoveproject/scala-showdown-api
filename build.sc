@@ -55,6 +55,20 @@ object examples extends Module {
       ivy"dev.zio::zio-http:3.0.0-RC2"
     )
   }
+
+  object `tyrian-client` extends ProjectModule with ScalaJSModule {
+
+    def scalaJSVersion = versions.scalaJS
+
+    def moduleDeps = Seq(main.js, tyrian)
+
+    def ivyDeps = main.ivyDeps() ++ Agg(
+      ivy"io.indigoengine::tyrian::0.8.0",
+      ivy"io.indigoengine::tyrian-io::0.8.0"
+    )
+
+    def moduleKind = T(mill.scalajslib.api.ModuleKind.ESModule)
+  }
 }
 
 //Internals
