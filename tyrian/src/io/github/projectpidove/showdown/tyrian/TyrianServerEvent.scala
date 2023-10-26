@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.tyrian
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.*

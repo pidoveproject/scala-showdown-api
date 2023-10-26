@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.tyrian
 
 import cats.effect.kernel.Async
 import tyrian.Cmd

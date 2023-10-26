@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.tyrian
 
 import cats.effect.Async
 import io.github.projectpidove.showdown.protocol.ProtocolError

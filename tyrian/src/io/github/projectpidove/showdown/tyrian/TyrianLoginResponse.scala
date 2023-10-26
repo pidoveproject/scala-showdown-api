@@ -1,4 +1,4 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.tyrian
 
 import io.github.projectpidove.showdown.protocol.{LoginResponse, ProtocolError}
 import tyrian.http.{HttpError, Response}

@@ -1,15 +1,18 @@
-package io.github.projectpidove.showdown
+package io.github.projectpidove.showdown.tyrian
 
 import cats.effect.Async
 import io.github.projectpidove.showdown.protocol.{LoginResponse, MessageDecoder, MessageEncoder, ProtocolError}
-import io.github.projectpidove.showdown.protocol.client.ClientMessage
-import io.github.projectpidove.showdown.protocol.server.GlobalMessage.ChallStr
+import io.github.projectpidove.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.projectpidove.showdown.protocol.server.ServerMessage
 import io.github.projectpidove.showdown.room.RoomId
 import io.github.projectpidove.showdown.user.Username
+import io.github.projectpidove.showdown.ChallStr
 import tyrian.{Cmd, Sub}
-import tyrian.http.{Body, Decoder, Http, Request}
+import tyrian.http.{Body, Decoder, Header, Http, Request, RequestCredentials}
 import tyrian.websocket.WebSocket
+
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F]):
 
@@ -64,15 +67,18 @@ case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F]):
    * @return the authentification response sent by the server
    */
   def login(challStr: ChallStr, name: Username, password: String): Cmd[F, TyrianLoginResponse] =
+    val encodedName = URLEncoder.encode(name.value, StandardCharsets.UTF_8)
+    val encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8)
+    val encodedChallStr = URLEncoder.encode(challStr.value, StandardCharsets.UTF_8)
+
     val request = Request.post(
       url = "https://play.pokemonshowdown.com/action.php",
-      body = Body.plainText(
-        s"""act: login
-           |name: $name
-           |pass: $password
-           |challstr: $challStr""".stripMargin
+      body = Body.PlainText(
+        contentType = "application/x-www-form-urlencoded; charset=UTF-8",
+        s"act=login&name=$encodedName&pass=$encodedPassword&challstr=$encodedChallStr"
       )
     )
+      .withHeaders(Header("Sec-Fetch-Site", "cross-site"))
 
     val decoder = Decoder(
       onResponse = TyrianLoginResponse.fromUserLoginResponse,
