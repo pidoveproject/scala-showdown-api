@@ -24,13 +24,19 @@ object Main extends TyrianApp[ClientMessage, ClientApp]:
     (ClientApp(ClientState.Connect, None, ShowdownData.empty), Cmd.None)
 
   def update(app: ClientApp): ClientMessage => (ClientApp, Cmd[IO, ClientMessage]) =
+    case ClientMessage.Combine(messages) =>
+      (app, messages.map(Cmd.emit).foldLeft[Cmd[IO, ClientMessage]](Cmd.None)(_ |+| _))
+
     case ClientMessage.ShowdownEvent(TyrianServerEvent.Receive(messages)) =>
       println(messages.mkString("> ", "\n> ", ""))
 
       val validMessages = messages.collect:
         case Right(message) => message
 
-      (validMessages.foldLeft(app)(_.updateShowdown(_)), Cmd.None)
+      validMessages.foldLeft[(ClientApp, Cmd[IO, ClientMessage])]((app, Cmd.None)):
+        case ((state, cmd), message) =>
+          val (newState, newCmd) = state.updateShowdown(message)
+          (newState, cmd |+| newCmd)
 
     case ClientMessage.ShowdownEvent(TyrianConnectEvent.Open(connection)) =>
       (app.connected(connection), Cmd.None)

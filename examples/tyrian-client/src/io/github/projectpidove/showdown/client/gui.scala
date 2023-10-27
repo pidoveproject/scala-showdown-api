@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown.client
 
 import io.github.iltotore.iron.*
-import io.github.projectpidove.showdown.room.{ChatMessage, HTML, JoinedRoom}
+import io.github.projectpidove.showdown.room.{ChatMessage, HTML, JoinedRoom, RoomChat}
 import io.github.projectpidove.showdown.user.User
 import tyrian.Html
 import tyrian.Html.*
@@ -29,3 +29,12 @@ def viewRoom(room: JoinedRoom): Html[ClientMessage] =
     h3(s"${room.users.size} connected"),
     div(messages)
   )
+
+def viewPrivateMessages(chat: RoomChat): Html[ClientMessage] =
+  val messages =
+    chat
+      .messages
+      .flatMap(viewMessage)
+      .flatMap(List(_, br()))
+
+  div(messages)

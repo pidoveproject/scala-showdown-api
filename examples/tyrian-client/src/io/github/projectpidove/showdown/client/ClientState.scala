@@ -1,14 +1,17 @@
 package io.github.projectpidove.showdown.client
 
-import io.github.projectpidove.showdown.protocol.server.{RoomBoundMessage, RoomMessage, ServerMessage}
+import io.github.projectpidove.showdown.ShowdownData
+import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, RoomMessage, ServerMessage}
+import io.github.projectpidove.showdown.room.{ChatContent, RoomChat, RoomId}
 import io.github.projectpidove.showdown.tyrian.TyrianLoginResponse
+import io.github.projectpidove.showdown.user.{User, Username}
 import tyrian.Html
 import tyrian.Html.*
 
 enum ClientState:
   case Connect
   case Login(username: String, password: String)
-  case Main(choice: Option[TabChoice], choiceInput: String, messageInput: String)
+  case Main(choice: Option[TabChoice], openPMs: Set[Username], choiceInput: String, messageInput: String)
 
   def view(app: ClientApp): Html[ClientMessage] = this match
     case Connect =>
@@ -23,10 +26,10 @@ enum ClientState:
         input(`type` := "text", name := "username", onInput(ClientMessage.UpdateUsername.apply)),
         label("Password:"),
         input(`type` := "password", name := "password", onInput(ClientMessage.UpdatePassword.apply)),
-        button(onClick(ClientMessage.Login(username, password)))("Login")
+        button(onClick(Username.option(username).fold(ClientMessage.None)(ClientMessage.Login(_, password))))("Login")
       )
 
-    case Main(choice, choiceInput, messsageInput) =>
+    case Main(choice, openPMs, choiceInput, messageInput) =>
       val userInfo = app.showdownState.loggedUser match
         case Some(user) =>
           div(
@@ -41,23 +44,46 @@ enum ClientState:
 
       val roomTabs = app.showdownState.joinedRooms.map: (id, room) =>
         div(
-          div(onClick(ClientMessage.JoinRoom(id.value)))(
+          div(onClick(ClientMessage.JoinRoom(id)))(
             label(room.title.getOrElse("No title")),
             label(id.value)
           ),
           button(onClick(ClientMessage.LeaveRoom(id)))("X")
         )
 
-      val openedTabs = div(roomTabs.toList)
+      val pmTabs = openPMs.map: user =>
+        div(
+          div(onClick(ClientMessage.ChangeTab(TabChoice.PrivateMessage(user))))(
+            label(s"Discussion with $user"),
+          ),
+          button(onClick(ClientMessage.ClosePrivateMessages(user)))("X")
+        )
+
+      val openedTabs = div(roomTabs.toList ++ pmTabs.toList)
 
       val displayedTab = choice match
-        case Some(TabChoice.PrivateMessage(user)) => h2(s"Discussion with $user")
+        case Some(TabChoice.PrivateMessage(user)) =>
+          val chat =
+            app
+              .showdownState
+              .loggedUser
+              .flatMap(_.privateMessages.find(_._1.name == user))
+              .fold(RoomChat.empty)(_._2)
+
+          div(
+            h2(s"Discussion with $user"),
+            input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
+            button(onClick(ChatContent.option(messageInput).fold(ClientMessage.None)(ClientMessage.SendPrivateMessage(user, _))))("Envoyer"),
+            viewPrivateMessages(chat)
+          )
+
         case Some(TabChoice.Room(room)) =>
           val joinedRoom = app.showdownState.getJoinedRoomOrEmpty(room)
+
           div(
             h2(s"${joinedRoom.title.getOrElse(joinedRoom.id)}${joinedRoom.roomType.fold("")(tpe => s" ($tpe)")}"),
             input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
-            button(onClick(ClientMessage.SendMessage(room, messsageInput)))("Envoyer"),
+            button(onClick(ChatContent.option(messageInput).fold(ClientMessage.None)(ClientMessage.SendMessage(room, _))))("Envoyer"),
             viewRoom(joinedRoom)
           )
 
@@ -65,9 +91,12 @@ enum ClientState:
           
       val roomChoice =
         div(
-          label("Room choice:"),
-          input(`type` := "text", name := "room_choice", onInput(ClientMessage.UpdateRoomChoice.apply)),
-          button(onClick(ClientMessage.JoinRoom(choiceInput)))("Join")
+          label("Room/PMs choice:"),
+          input(`type` := "text", name := "room_pm_choice", onInput(ClientMessage.UpdateRoomChoice.apply)),
+          button(onClick(RoomId.option(choiceInput).fold(ClientMessage.None)(ClientMessage.JoinRoom.apply)))("Join"),
+          button(onClick(Username.option(choiceInput).fold(ClientMessage.None)(user =>
+            ClientMessage.OpenPrivateMessages(user) |+| ClientMessage.ChangeTab(TabChoice.PrivateMessage(user))
+          )))("Open PMs")
         )
 
       div(
@@ -86,19 +115,21 @@ enum ClientState:
         case ClientMessage.UpdatePassword(value) => Login(username, value)
         case _ => this
 
-    case Main(choice, choiceInput, messageInput) =>
+    case Main(choice, openPMs, choiceInput, messageInput) =>
       message match
-        case ClientMessage.UpdateRoomChoice(value) => Main(choice, value, messageInput)
-        case ClientMessage.UpdateChatInput(value) => Main(choice, choiceInput, value)
-        case ClientMessage.ChangeTab(value) => Main(Some(value), choiceInput, messageInput)
+        case ClientMessage.UpdateRoomChoice(value) => Main(choice, openPMs, value, messageInput)
+        case ClientMessage.UpdateChatInput(value) => Main(choice, openPMs, choiceInput, value)
+        case ClientMessage.ChangeTab(value) => Main(Some(value), openPMs, choiceInput, messageInput)
+        case ClientMessage.OpenPrivateMessages(user) => Main(choice, openPMs + user, choiceInput, messageInput)
+        case ClientMessage.ClosePrivateMessages(user) => Main(choice, openPMs - user, choiceInput, messageInput)
         case _ => this
 
   def updateShowdown(message: ServerMessage): ClientState =
     this match
       case Connect => this
       case Login(username, password) => this
-      case Main(Some(TabChoice.Room(currentRoom)), choiceInput, messageInput) =>
+      case Main(Some(TabChoice.Room(currentRoom)), openPMs, choiceInput, messageInput) =>
         message match
-          case RoomBoundMessage(room, RoomMessage.DeInit()) if room == currentRoom => Main(None, choiceInput, messageInput)
+          case RoomBoundMessage(room, RoomMessage.DeInit()) if room == currentRoom => Main(None, openPMs, choiceInput, messageInput)
           case _ => this
-      case Main(choice, choiceInput, messageInput) => this
+      case Main(choice, openPMs, choiceInput, messageInput) => this
