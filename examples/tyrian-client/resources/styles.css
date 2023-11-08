@@ -1,0 +1,19 @@
+.active {
+    background: lightgreen;
+}
+
+.inactive {
+    background-color: lightgray;
+}
+
+.fnt {
+    background: #ff9898;
+}
+
+.psn {
+    background-color: mediumpurple;
+}
+
+.par {
+    background-color: lightyellow;
+}

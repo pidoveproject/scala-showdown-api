@@ -12,5 +12,5 @@ object ChoiceResponse:
         encodedChoice <- choiceEncoder.encode(value.choice)
         encodedRequest <- requestEncoder.encode(value.requestId)
       yield
-        if encodedRequest.isEmpty then encodedChoice
-        else encodedChoice.dropRight(1) :+ s"${encodedChoice.last}|${encodedRequest.mkString}"
+        if encodedRequest.isEmpty then List(encodedChoice.mkString(" "))
+        else List((encodedChoice.dropRight(1) :+ s"${encodedChoice.last}|${encodedRequest.mkString}").mkString(" "))

@@ -29,7 +29,7 @@ enum ClientState:
         button(onClick(Username.option(username).fold(ClientMessage.None)(ClientMessage.Login(_, password))))("Login")
       )
 
-    case Main(choice, openPMs, choiceInput, messageInput) =>
+    case main@Main(choice, openPMs, choiceInput, messageInput) =>
       val userInfo = app.showdownState.loggedUser match
         case Some(user) =>
           div(
@@ -61,33 +61,7 @@ enum ClientState:
 
       val openedTabs = div(roomTabs.toList ++ pmTabs.toList)
 
-      val displayedTab = choice match
-        case Some(TabChoice.PrivateMessage(user)) =>
-          val chat =
-            app
-              .showdownState
-              .loggedUser
-              .flatMap(_.privateMessages.find(_._1.name == user))
-              .fold(RoomChat.empty)(_._2)
-
-          div(
-            h2(s"Discussion with $user"),
-            input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
-            button(onClick(ChatContent.option(messageInput).fold(ClientMessage.None)(ClientMessage.SendPrivateMessage(user, _))))("Envoyer"),
-            viewPrivateMessages(chat)
-          )
-
-        case Some(TabChoice.Room(room)) =>
-          val joinedRoom = app.showdownState.getJoinedRoomOrEmpty(room)
-
-          div(
-            h2(s"${joinedRoom.title.getOrElse(joinedRoom.id)}${joinedRoom.roomType.fold("")(tpe => s" ($tpe)")}"),
-            input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
-            button(onClick(ChatContent.option(messageInput).fold(ClientMessage.None)(ClientMessage.SendMessage(room, _))))("Envoyer"),
-            viewRoom(joinedRoom)
-          )
-
-        case None => div()
+      val displayedTab = choice.fold(div())(_.view(app, main))
           
       val roomChoice =
         div(

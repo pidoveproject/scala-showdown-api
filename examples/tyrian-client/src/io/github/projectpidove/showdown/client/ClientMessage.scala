@@ -1,6 +1,7 @@
 package io.github.projectpidove.showdown.client
 
 import cats.effect.IO
+import io.github.projectpidove.showdown.protocol.client.BattleChoice
 import io.github.projectpidove.showdown.tyrian.{TyrianLoginResponse, TyrianShowdownEvent}
 import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.user.Username
@@ -23,6 +24,8 @@ enum ClientMessage:
   case SendMessage(room: RoomId, message: ChatContent)
   case SendPrivateMessage(user: Username, message: ChatContent)
   case Combine(messages: List[ClientMessage])
+  case ChooseAction(room: RoomId, choice: BattleChoice, requestId: Option[Int])
+  case Forfeit(roomId: RoomId)
   case None
   
   def combine(other: ClientMessage): ClientMessage = this match

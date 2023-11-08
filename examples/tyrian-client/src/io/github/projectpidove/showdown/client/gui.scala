@@ -1,7 +1,10 @@
 package io.github.projectpidove.showdown.client
 
 import io.github.iltotore.iron.*
-import io.github.projectpidove.showdown.room.{ChatMessage, HTML, JoinedRoom, RoomChat}
+import io.github.projectpidove.showdown.battle.*
+import io.github.projectpidove.showdown.protocol.client.BattleChoice
+import io.github.projectpidove.showdown.protocol.server.choice.{ActiveChoice, ChoiceRequest, MoveChoice, PokemonChoice}
+import io.github.projectpidove.showdown.room.{ChatMessage, HTML, JoinedRoom, RoomChat, RoomId, RoomType}
 import io.github.projectpidove.showdown.user.User
 import tyrian.Html
 import tyrian.Html.*
@@ -17,7 +20,7 @@ def viewMessage(message: ChatMessage): Option[Html[ClientMessage]] = message mat
   case ChatMessage.Leave(user) => Some(span(s"[-] ${user.name}"))
   case ChatMessage.Challenge(opponent, format) => Some(span("Not implemented"))
 
-def viewRoom(room: JoinedRoom): Html[ClientMessage] =
+def viewChatRoom(room: JoinedRoom): Html[ClientMessage] =
   val messages =
     room
       .chat
@@ -30,6 +33,101 @@ def viewRoom(room: JoinedRoom): Html[ClientMessage] =
     div(messages)
   )
 
+def viewTeamMember(isActive: Boolean)(pokemon: TeamMember): Html[ClientMessage] =
+  val itemView = pokemon.item match
+    case HeldItem.Revealed(item, _) => label(s"Item: $item")
+    case HeldItem.Destroyed(item, _) => label(s"Item: $item")
+    case HeldItem.Unknown => label("Unknown item")
+
+  val conditionView = pokemon.condition match
+    case Condition(Health(current, max), Some(status)) =>
+      div(
+        label(s"$current/$max"),
+        label(status.value)
+      )
+    case Condition(Health(current, max), None) =>
+      label(s"$current/$max")
+
+  val status =
+    if isActive then "active"
+    else pokemon.condition.status.fold("inactive")(_.value)
+
+  div(`class` := status)(
+    label(pokemon.details.species.value),
+    itemView,
+    conditionView
+  )
+
+val viewEmptySlot: Html[ClientMessage] =
+  div(
+    label("Unknown pokemon")
+  )
+
+def viewTeam(activeSlots: Set[TeamSlot])(team: PlayerTeam): Html[ClientMessage] =
+  val slots =
+    for slot <- 1 to team.size.value yield
+      team.getPokemon(TeamSlot.assume(slot)).fold(viewEmptySlot)(viewTeamMember(activeSlots.contains(TeamSlot.assume(slot))))
+
+  div(slots.toList)
+
+def viewPlayer(player: Player, activeSlots: Set[TeamSlot]): Html[ClientMessage] =
+  div(
+    label(player.name.fold("???")(_.value)),
+    player.team.fold(div())(viewTeam(activeSlots))
+  )
+
+def viewMoveChoice(room: RoomId, requestId: Option[Int])(choice: MoveChoice): Html[ClientMessage] =
+  button(onClick(ClientMessage.ChooseAction(room, BattleChoice.Move(choice.name, None, None), requestId)))(s"${choice.name} (${choice.pp}/${choice.maxPP})")
+
+def viewTeamChoice(room: RoomId, requestId: Option[Int])(choice: PokemonChoice, slot: Int): Html[ClientMessage] =
+  val condition = choice.condition match
+    case Condition(Health(min, max), None) => s"$min/$max"
+    case Condition(Health(min, max), Some(effect)) => s"$min/$max $effect"
+
+  button(
+    onClick(ClientMessage.ChooseAction(room, BattleChoice.Switch(TeamSlot.assume(slot+1)), requestId))
+  )(s"${choice.details.species} ($condition)")
+
+def viewActiveChoice(room: RoomId, requestId: Option[Int])(choice: ActiveChoice): Html[ClientMessage] =
+  div(choice.moves.map(viewMoveChoice(room, requestId)))
+
+def viewChoice(room: RoomId)(choice: ChoiceRequest): Html[ClientMessage] = div(
+  div(choice.team.pokemon.zipWithIndex.map(viewTeamChoice(room, choice.requestId))),
+  div(choice.active.map(viewActiveChoice(room, choice.requestId))),
+  button(onClick(ClientMessage.ChooseAction(room, BattleChoice.Undo, choice.requestId)))("Cancel")
+)
+
+def viewBattle(room: RoomId)(battle: Battle): Html[ClientMessage] =
+  val playersWithActive =
+    battle.players.map:(n, p) =>
+      (
+        p,
+        battle.activePokemon.collect {
+          case (pos, pokemon) if pos.player == n => pokemon.teamSlot
+        }.toSet
+      )
+
+  val teams = div(
+    playersWithActive.map(viewPlayer).toList
+  )
+
+  val choice = battle.currentRequest.fold(div())(viewChoice(room))
+
+  div(
+    teams,
+    choice,
+    button(onClick(ClientMessage.Forfeit(room)))("Forfeit")
+  )
+
+def viewBattleRoom(room: JoinedRoom): Html[ClientMessage] =
+  room.battle.fold(div())(viewBattle(room.id))
+
+def viewRoom(room: JoinedRoom): Html[ClientMessage] =
+  room.roomType match
+    case Some(RoomType.Chat) => viewChatRoom(room)
+    case Some(RoomType.Battle) => viewBattleRoom(room)
+    case None => div()
+
 def viewPrivateMessages(chat: RoomChat): Html[ClientMessage] =
   val messages =
     chat
@@ -38,3 +136,4 @@ def viewPrivateMessages(chat: RoomChat): Html[ClientMessage] =
       .flatMap(List(_, br()))
 
   div(messages)
+

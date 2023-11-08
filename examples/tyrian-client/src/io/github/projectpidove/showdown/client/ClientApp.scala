@@ -3,7 +3,7 @@ package io.github.projectpidove.showdown.client
 import cats.effect.IO
 import io.github.projectpidove.showdown.ShowdownData
 import io.github.projectpidove.showdown.protocol.{CurrentUser, LoginResponse}
-import io.github.projectpidove.showdown.protocol.client.{AuthCommand, GlobalCommand}
+import io.github.projectpidove.showdown.protocol.client.{AuthCommand, BattleRoomCommand, ChoiceResponse, GlobalCommand}
 import io.github.projectpidove.showdown.protocol.server.GlobalMessage
 import io.github.projectpidove.showdown.tyrian.{TyrianLoginResponse, TyrianShowdownConnection}
 import io.github.projectpidove.showdown.protocol.server.ServerMessage
@@ -64,5 +64,11 @@ case class ClientApp(
 
     case ClientMessage.SendPrivateMessage(user, message) =>
       (this, connection.sendMessage(GlobalCommand.Msg(user, message)))
+
+    case ClientMessage.ChooseAction(room, choice, requestId) =>
+      (this, connection.sendMessage(room, BattleRoomCommand.Choose(ChoiceResponse(choice, requestId))))
+
+    case ClientMessage.Forfeit(room) =>
+      (this, connection.sendMessage(room, BattleRoomCommand.Forfeit))
 
     case _ => (this, Cmd.None)
