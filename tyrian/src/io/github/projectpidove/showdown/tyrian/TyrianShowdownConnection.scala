@@ -14,6 +14,12 @@ import tyrian.websocket.WebSocket
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+/**
+ * An open connection to a Pokemon Showdown.
+ *
+ * @param socket the web socket used to communicate with the server
+ * @tparam F the effect type of the Tyrian app
+ */
 case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F]):
 
   /**
