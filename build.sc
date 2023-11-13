@@ -27,7 +27,7 @@ object tyrian extends ProjectModule with ScalaJSModule {
 
   def scalaJSVersion = versions.scalaJS
 
-  def moduleDeps = Seq(main)
+  def moduleDeps = Seq(main.js)
 
   def ivyDeps = main.ivyDeps() ++ Agg(
     ivy"io.indigoengine::tyrian::0.8.0"
