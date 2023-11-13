@@ -32,7 +32,7 @@ enum ClientState:
     case main@Main(choice, openPMs, choiceInput, messageInput) =>
       val userInfo = app.showdownState.loggedUser match
         case Some(user) =>
-          div(
+          div(id := "userInfo")(
             label(s"Username: ${user.name}"),
             label(s"Avatar: ${user.avatar}"),
             label(s"Language: ${user.settings.language.getOrElse("None")}"),
@@ -43,28 +43,38 @@ enum ClientState:
         )
 
       val roomTabs = app.showdownState.joinedRooms.map: (id, room) =>
-        div(
-          div(onClick(ClientMessage.JoinRoom(id)))(
-            label(room.title.getOrElse("No title")),
-            label(id.value)
+        val tabClass =
+          choice match
+            case Some(TabChoice.Room(i)) if i == id => "tab opened"
+            case _ => "tab"
+
+        div(`class` := tabClass)(
+          div(`class` := "tabContent", onClick(ClientMessage.JoinRoom(id)))(
+            label(`class` := "tabTitle")(room.title.getOrElse("No title")),
+            label(`class` := "tabId")(id.value)
           ),
-          button(onClick(ClientMessage.LeaveRoom(id)))("X")
+          button(`class` := "closeTab", onClick(ClientMessage.LeaveRoom(id)))("X")
         )
 
       val pmTabs = openPMs.map: user =>
-        div(
-          div(onClick(ClientMessage.ChangeTab(TabChoice.PrivateMessage(user))))(
+        val tabClass =
+          choice match
+            case Some(TabChoice.PrivateMessage(name)) if name == user => "tab opened"
+            case _ => "tab"
+
+        div(`class` := tabClass)(
+          div(`class` := "tabContent", onClick(ClientMessage.ChangeTab(TabChoice.PrivateMessage(user))))(
             label(s"Discussion with $user"),
           ),
           button(onClick(ClientMessage.ClosePrivateMessages(user)))("X")
         )
 
-      val openedTabs = div(roomTabs.toList ++ pmTabs.toList)
+      val openedTabs = div(id := "tabs")(roomTabs.toList ++ pmTabs.toList)
 
       val displayedTab = choice.fold(div())(_.view(app, main))
           
       val roomChoice =
-        div(
+        div(id := "roomChoice")(
           label("Room/PMs choice:"),
           input(`type` := "text", name := "room_pm_choice", onInput(ClientMessage.UpdateRoomChoice.apply)),
           button(onClick(RoomId.option(choiceInput).fold(ClientMessage.None)(ClientMessage.JoinRoom.apply)))("Join"),

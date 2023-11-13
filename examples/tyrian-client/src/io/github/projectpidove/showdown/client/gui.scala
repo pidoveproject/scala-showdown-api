@@ -26,11 +26,10 @@ def viewChatRoom(room: JoinedRoom): Html[ClientMessage] =
       .chat
       .messages
       .flatMap(viewMessage)
-      .flatMap(List(_, br()))
 
   div(
     h3(s"${room.users.size} connected"),
-    div(messages)
+    div(`class` := "chat")(messages)
   )
 
 def viewTeamMember(isActive: Boolean)(pokemon: TeamMember): Html[ClientMessage] =
@@ -52,8 +51,8 @@ def viewTeamMember(isActive: Boolean)(pokemon: TeamMember): Html[ClientMessage] 
     if isActive then "active"
     else pokemon.condition.status.fold("inactive")(_.value)
 
-  div(`class` := status)(
-    label(pokemon.details.species.value),
+  div(`class` := s"$status member")(
+    label(`class` := "pokemonName")(pokemon.details.species.value),
     itemView,
     conditionView
   )
@@ -68,16 +67,19 @@ def viewTeam(activeSlots: Set[TeamSlot])(team: PlayerTeam): Html[ClientMessage] 
     for slot <- 1 to team.size.value yield
       team.getPokemon(TeamSlot.assume(slot)).fold(viewEmptySlot)(viewTeamMember(activeSlots.contains(TeamSlot.assume(slot))))
 
-  div(slots.toList)
+  div(`class` := "teamMembers")(slots.toList)
 
 def viewPlayer(player: Player, activeSlots: Set[TeamSlot]): Html[ClientMessage] =
-  div(
-    label(player.name.fold("???")(_.value)),
+  div(`class` := "playerTeam")(
+    label(`class` := "playerName")(player.name.fold("???")(_.value)),
     player.team.fold(div())(viewTeam(activeSlots))
   )
 
 def viewMoveChoice(room: RoomId, requestId: Option[Int])(choice: MoveChoice): Html[ClientMessage] =
-  button(onClick(ClientMessage.ChooseAction(room, BattleChoice.Move(choice.name, None, None), requestId)))(s"${choice.name} (${choice.pp}/${choice.maxPP})")
+  button(
+    `class` := "moveChoice",
+    onClick(ClientMessage.ChooseAction(room, BattleChoice.Move(choice.name, None, None), requestId))
+  )(s"${choice.name} (${choice.pp}/${choice.maxPP})")
 
 def viewTeamChoice(room: RoomId, requestId: Option[Int])(choice: PokemonChoice, slot: Int): Html[ClientMessage] =
   val condition = choice.condition match
@@ -85,6 +87,7 @@ def viewTeamChoice(room: RoomId, requestId: Option[Int])(choice: PokemonChoice, 
     case Condition(Health(min, max), Some(effect)) => s"$min/$max $effect"
 
   button(
+    `class` := "teamChoice",
     onClick(ClientMessage.ChooseAction(room, BattleChoice.Switch(TeamSlot.assume(slot+1)), requestId))
   )(s"${choice.details.species} ($condition)")
 
@@ -92,8 +95,8 @@ def viewActiveChoice(room: RoomId, requestId: Option[Int])(choice: ActiveChoice)
   div(choice.moves.map(viewMoveChoice(room, requestId)))
 
 def viewChoice(room: RoomId)(choice: ChoiceRequest): Html[ClientMessage] = div(
-  div(choice.team.pokemon.zipWithIndex.map(viewTeamChoice(room, choice.requestId))),
-  div(choice.active.map(viewActiveChoice(room, choice.requestId))),
+  div(id := "teamChoices")(choice.team.pokemon.zipWithIndex.map(viewTeamChoice(room, choice.requestId))),
+  div(id := "moveChoices")(choice.active.map(viewActiveChoice(room, choice.requestId))),
   button(onClick(ClientMessage.ChooseAction(room, BattleChoice.Undo, choice.requestId)))("Cancel")
 )
 
@@ -107,7 +110,7 @@ def viewBattle(room: RoomId)(battle: Battle): Html[ClientMessage] =
         }.toSet
       )
 
-  val teams = div(
+  val teams = div(id := "teams")(
     playersWithActive.map(viewPlayer).toList
   )
 
@@ -133,7 +136,6 @@ def viewPrivateMessages(chat: RoomChat): Html[ClientMessage] =
     chat
       .messages
       .flatMap(viewMessage)
-      .flatMap(List(_, br()))
 
-  div(messages)
+  div(`class` := "chat")(messages)
 

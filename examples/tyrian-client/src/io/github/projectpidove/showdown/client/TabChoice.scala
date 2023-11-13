@@ -18,19 +18,23 @@ enum TabChoice:
           .flatMap(_.privateMessages.find(_._1.name == user))
           .fold(RoomChat.empty)(_._2)
 
-      div(
+      div(`class` := "roomContent")(
         h2(s"Discussion with $user"),
-        input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
-        button(onClick(ChatContent.option(state.messageInput).fold(ClientMessage.None)(ClientMessage.SendPrivateMessage(user, _))))("Envoyer"),
-        viewPrivateMessages(chat)
+        viewPrivateMessages(chat),
+        div(`class` := "messageInput")(
+          input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
+          button(onClick(ChatContent.option(state.messageInput).fold(ClientMessage.None)(ClientMessage.SendPrivateMessage(user, _))))("Envoyer")
+        )
       )
 
     case Room(room) =>
       val joinedRoom = app.showdownState.getJoinedRoomOrEmpty(room)
 
-      div(
+      div(`class` := "roomContent")(
         h2(s"${joinedRoom.title.getOrElse(joinedRoom.id)}${joinedRoom.roomType.fold("")(tpe => s" ($tpe)")}"),
-        input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
-        button(onClick(ChatContent.option(state.messageInput).fold(ClientMessage.None)(ClientMessage.SendMessage(room, _))))("Envoyer"),
-        viewRoom(joinedRoom)
+        viewRoom(joinedRoom),
+        div(`class` := "messageInput")(
+          input(`type` := "text", name := "message", onInput(ClientMessage.UpdateChatInput.apply)),
+          button(onClick(ChatContent.option(state.messageInput).fold(ClientMessage.None)(ClientMessage.SendMessage(room, _))))("Envoyer")
+        )
       )
