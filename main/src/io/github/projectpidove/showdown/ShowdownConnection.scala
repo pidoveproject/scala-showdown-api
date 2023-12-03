@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown
 
 import io.github.projectpidove.showdown.protocol.LoginResponse
-import io.github.projectpidove.showdown.protocol.client.{BattleRoomCommand, ClientMessage, GlobalCommand, OptionCommand}
+import io.github.projectpidove.showdown.protocol.client.{ClientMessage, GlobalCommand, OptionCommand}
 import io.github.projectpidove.showdown.protocol.server.ServerMessage
 import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.user.Username
@@ -73,6 +73,11 @@ trait ShowdownConnection[Frame, Cmd[_]]:
    */
   def searchBattle(format: FormatName): Cmd[Unit] =
     sendMessage(GlobalCommand.Search(format))
+
+  /**
+   * Cancel the match search.
+   */
+  def cancelSearch(): Cmd[Unit] = sendMessage(GlobalCommand.CancelSearch)
 
   /**
    * Rename current user.
