@@ -1,7 +1,7 @@
 package io.github.projectpidove.showdown.testing.protocol.client
 
 import io.github.iltotore.iron.*
-import io.github.projectpidove.showdown.protocol.{MessageEncoder, MessageName}
+import io.github.projectpidove.showdown.protocol.{MessageEncoder, messageName}
 import io.github.projectpidove.showdown.protocol.client.*
 import io.github.projectpidove.showdown.room.{ChatContent, RoomId}
 import io.github.projectpidove.showdown.FormatName
