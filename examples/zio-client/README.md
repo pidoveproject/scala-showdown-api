@@ -10,6 +10,8 @@ To run the project, use the following command:
 ./millw examples.zio-client.run
 ```
 
+Note: use `./millw.bat` on Windows.
+
 ## Usage
 
 Here is the list of the commands provided by the client:

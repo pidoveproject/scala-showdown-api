@@ -100,7 +100,7 @@ class ZIOShowdownConnection(
             body = Body.fromURLEncodedForm(Form(
               FormField.simpleField("act", "getassertion"),
               FormField.simpleField("userid", name.value),
-              FormField.simpleField("act", challstr.value)
+              FormField.simpleField("challstr", challstr.value)
             ))
           )
           .toProtocolZIO

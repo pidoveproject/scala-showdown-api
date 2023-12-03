@@ -2,7 +2,7 @@ package io.github.projectpidove.showdown
 
 import io.github.projectpidove.showdown.protocol.server.query.ResponseContent.UserDetails
 import io.github.projectpidove.showdown.protocol.server.query.{BattleRoomInfo, BattleRooms, ChatRoomInfo, ChatRooms, ResponseContent, UserInfo}
-import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, ServerMessage}
+import io.github.projectpidove.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, RoomMessage, ServerMessage}
 import io.github.projectpidove.showdown.room.{ChatContent, ChatMessage, JoinedRoom, RoomId}
 import io.github.projectpidove.showdown.user.{LoggedUser, User, Username}
 
@@ -94,6 +94,7 @@ case class ShowdownData(
     case GlobalMessage.QueryResponse(ResponseContent.ChatRoomList(ChatRooms(rooms, sectionTitles, userCount, battleCount))) =>
       val roomMap = rooms.map(room => (room.title, room)).toMap
       this.copy(chatRooms = roomMap, userCount = Some(userCount), battleCount = Some(battleCount))
+    case RoomBoundMessage(id, RoomMessage.DeInit()) => this.copy(joinedRooms = joinedRooms.removed(id))
     case RoomBoundMessage(id, message) => this.copy(joinedRooms = joinedRooms.updated(id, getJoinedRoomOrEmpty(id).update(message)))
     case _ => this
 

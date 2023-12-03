@@ -19,6 +19,11 @@ enum RoomMessage derives MessageDecoder:
   case Init(roomType: RoomType)
 
   /**
+   * De-initialization message. Sent when the current user leaves the lobby.
+   */
+  case DeInit()
+
+  /**
    * An update on the title of the room.
    *
    * @param title the current title of the room

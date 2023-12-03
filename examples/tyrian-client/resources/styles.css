@@ -1,0 +1,159 @@
+.tab {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    border: solid black thin;
+    border-bottom: 0;
+    border-radius: 8px 8px 0px 0px;
+    padding: 2px 5px;
+}
+
+.opened {
+    border-bottom: solid black 2px;
+}
+
+.tab:hover {
+    background: lightgray;
+}
+
+.tabContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tabId {
+    font-style: italic;
+}
+
+.closeTab {
+    height: fit-content;
+}
+
+#tabs {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    border-bottom: solid black thin;
+}
+
+#roomChoice {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    padding: 5px;
+    align-items: center;
+}
+
+#userInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 5px;
+}
+
+.roomContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.messageInput {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+}
+
+.messageInput > input {
+    flex-grow: 9.5;
+}
+
+.messageInput > button {
+    flex-grow: 0.5;
+}
+
+.chat {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+    overflow-y: scroll;
+    max-height: 40vh;
+}
+
+.active {
+    background: lightgreen;
+}
+
+.inactive {
+    background-color: #ededed;
+}
+
+.fnt {
+    background: #ff9898;
+}
+
+.brn {
+    background-color: #ff6d43;
+}
+
+.frz {
+    background-color: #7ff0ff;
+}
+
+.par {
+    background-color: #ffda37;
+}
+
+.slp {
+    background-color: #d4d4d4;
+}
+
+.tox {
+    background-color: mediumpurple;
+}
+
+#teams {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.playerTeam {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.teamMembers {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.playerName {
+    font-weight: bold;
+    text-align: center;
+}
+
+.member {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.pokemonName {
+    font-weight: bold;
+}
+
+#teamChoices {
+    display: flex;
+    flex-direction: row;
+}
+
+#moveChoices {
+    display: flex;
+    flex-direction: row;
+}
