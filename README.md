@@ -22,13 +22,13 @@ bots and other tools.
 SBT:
 
 ```scala
-libraryDependencies += "io.github.projectpidove" %% "showdown-api" % "version"
+libraryDependencies += "io.github.projectpidove" %% "scala-showdown-api" % "version"
 ```
 
 Mill:
 
 ```scala
-ivy"io.github.projectpidove::showdown-api:version"
+ivy"io.github.projectpidove::scala-showdown-api:version"
 ```
 
 ## Usage
