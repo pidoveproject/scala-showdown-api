@@ -59,3 +59,7 @@ def update(app: ClientApp): ClientMessage => (ClientApp, Cmd[IO, ClientMessage])
   case ClientMessage.ShowdownEvent(TyrianServerEvent.Receive(messages)) => ???
 ```
 
+### Going further
+
+Check the [Scaladoc](https://pidove-project.github.io/scala-showdown-api/io/github/projectpidove/showdown/tyrian.html)
+for further methods.
