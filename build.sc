@@ -1,5 +1,6 @@
 import $ivy.`io.chris-kipp::mill-ci-release::0.1.9`
 import io.kipp.mill.ci.release.CiReleaseModule
+import de.tobiasroeser.mill.vcs.version.VcsVersion
 import mill._, define._, api.Result
 import scalalib._, scalalib.scalafmt._, scalalib.publish._, scalajslib._, scalanativelib._
 
@@ -8,7 +9,88 @@ object versions {
   val scalaJS = "1.13.2"
 }
 
+object docs extends ProjectModule {
+
+  def scalaVersion = versions.scala
+
+  def artifactName = "showdown-api-docs"
+
+  val modules: Seq[ScalaModule] = Seq(main, tyrian, zio)
+
+  def docSources = T.sources {
+    T.traverse(modules)(_.docSources)().flatten
+  }
+
+  def compileClasspath = T {
+    T.traverse(modules)(_.compileClasspath)().flatten
+  }
+
+  def gitTags = T {
+    os
+      .proc("git", "tag", "-l", "v*.*.*")
+      .call(VcsVersion.vcsBasePath)
+      .out
+      .trim()
+      .split("\n")
+      .reverse
+  }
+
+  def docVersions = T.source {
+    val targetDir = T.dest / "_assets"
+
+    val versions =
+      gitTags()
+        .filterNot(v => v.contains("-RC") || v.isBlank)
+        .map(_.substring(1))
+
+    def versionLink(version: String): String =
+      s"https://www.javadoc.io/doc/io.github.projectpidove/showdown-api-docs_3/$version/docs/index.html"
+
+    val links = versions.map(v => (v, ujson.Str(versionLink(v))))
+    val withNightly = links :+ ("Nightly", ujson.Str("https://iltotore.github.io/iron/docs/index.html"))
+    val json = ujson.Obj("versions" -> ujson.Obj.from(withNightly))
+
+    val versionsFile = targetDir / "versions.json"
+    os.write.over(versionsFile, ujson.write(json), createFolders = true)
+
+    T.dest
+  }
+
+  def docResources = T.sources(millSourcePath, docVersions().path)
+
+  def docRevision = T {
+    val version = main.publishVersion()
+    if(gitTags().contains(version)) version
+    else "main"
+  }
+
+  def externalMappings = Map.empty[String, (String, String)]
+
+  def scalaDocOptions = {
+    val externalMappingsFlag =
+      externalMappings
+        .map {
+          case (regex, (docType, link)) => s"$regex::$docType::$link"
+        }
+        .mkString(",")
+
+
+    Seq(
+      "-project", "Pokemon Showdown API",
+      "-project-version", main.publishVersion(),
+      "-versions-dictionary-url", "https://pidove-project.github.io/scala-showdown-api/versions.json",
+      "-source-links:github://Iltotore/iron",
+      "-revision", docRevision(),
+      "-snippet-compiler:nocompile",
+      s"-social-links:github::${main.pomSettings().url}"
+      //s"-external-mappings:$externalMappingsFlag"
+    )
+  }
+}
+
 object main extends ProjectModule {
+
+  def artifactName = "scala-showdown-api"
 
   def ivyDeps = Agg(
     ivy"io.github.iltotore::iron::2.2.0",
@@ -25,6 +107,8 @@ object main extends ProjectModule {
 
 object tyrian extends ProjectModule with ScalaJSModule {
 
+  def artifactName = "scala-showdown-api-tyrian"
+
   def scalaJSVersion = versions.scalaJS
 
   def moduleDeps = Seq(main.js)
@@ -35,6 +119,8 @@ object tyrian extends ProjectModule with ScalaJSModule {
 }
 
 object zio extends ProjectModule {
+
+  def artifactName = "scala-showdown-api-zio"
 
   def moduleDeps = Seq(main)
 
@@ -78,13 +164,14 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
 
   def pomSettings =
     PomSettings(
-      description = "Strong type constraints for Scala",
-      organization = "io.github.iltotore",
-      url = "https://github.com/Iltotore/iron",
+      description = "A Scala wrapper of Pokemon Showdown's API",
+      organization = "io.github.projectpidove",
+      url = "https://github.com/pidove-project/scala-showdown-api",
       licenses = Seq(License.`Apache-2.0`),
-      versionControl = VersionControl.github("Iltotore", "iron"),
+      versionControl = VersionControl.github("pidovve-project", "scala-showdown-api"),
       developers = Seq(
-        Developer("Iltotore", "Raphaël FROMENTIN", "https://github.com/Iltotore")
+        Developer("Iltotore", "Raphaël FROMENTIN", "https://github.com/Iltotore"),
+        Developer("pidove-project", "Pidove Project Team", "https://github.com/pidove-project")
       )
     )
 
