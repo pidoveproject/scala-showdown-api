@@ -12,9 +12,9 @@ bots and other tools.
 
 ## Table of contents
 
-- [How to import](#How-to-import)
-- [How to use](#How-to-use)
-- [How to contribute](#How-to-contribute)
+- [Importing the library](#Importing-the-library)
+- [Usage](#Usage)
+- [Contributing](#Contributing)
 - [Useful links](#Useful-links)
 
 ## Importing the library
