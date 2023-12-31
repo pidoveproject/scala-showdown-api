@@ -13,7 +13,7 @@ object docs extends ProjectModule {
 
   def scalaVersion = versions.scala
 
-  def artifactName = "showdown-api-docs"
+  def artifactName = "scala-showdown-api-docs"
 
   val modules: Seq[ScalaModule] = Seq(main, tyrian, zio)
 
@@ -44,10 +44,10 @@ object docs extends ProjectModule {
         .map(_.substring(1))
 
     def versionLink(version: String): String =
-      s"https://www.javadoc.io/doc/io.github.projectpidove/showdown-api-docs_3/$version/docs/index.html"
+      s"https://www.javadoc.io/doc/io.github.projectpidove/scala-showdown-api-docs_3/$version/"
 
     val links = versions.map(v => (v, ujson.Str(versionLink(v))))
-    val withNightly = links :+ ("Nightly", ujson.Str("https://iltotore.github.io/iron/docs/index.html"))
+    val withNightly = links :+ ("Nightly", ujson.Str("https://pidove-project.github.io/scala-showdown-api/"))
     val json = ujson.Obj("versions" -> ujson.Obj.from(withNightly))
 
     val versionsFile = targetDir / "versions.json"
