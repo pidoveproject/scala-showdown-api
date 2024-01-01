@@ -44,10 +44,10 @@ object docs extends ProjectModule {
         .map(_.substring(1))
 
     def versionLink(version: String): String =
-      s"https://www.javadoc.io/doc/io.github.projectpidove/scala-showdown-api-docs_3/$version/"
+      s"https://www.javadoc.io/doc/io.github.pidoveproject/scala-showdown-api-docs_3/$version/"
 
     val links = versions.map(v => (v, ujson.Str(versionLink(v))))
-    val withNightly = links :+ ("Nightly", ujson.Str("https://pidove-project.github.io/scala-showdown-api/"))
+    val withNightly = links :+ ("Nightly", ujson.Str("https://pidoveproject.github.io/scala-showdown-api/"))
     val json = ujson.Obj("versions" -> ujson.Obj.from(withNightly))
 
     val versionsFile = targetDir / "versions.json"
@@ -78,8 +78,8 @@ object docs extends ProjectModule {
     Seq(
       "-project", "Pokemon Showdown API",
       "-project-version", main.publishVersion(),
-      "-versions-dictionary-url", "https://pidove-project.github.io/scala-showdown-api/versions.json",
-      "-source-links:github://Iltotore/iron",
+      "-versions-dictionary-url", "https://pidoveproject.github.io/scala-showdown-api/versions.json",
+      "-source-links:github://pidoveproject/scala-showdown-api",
       "-revision", docRevision(),
       "-snippet-compiler:nocompile",
       s"-social-links:github::${main.pomSettings().url}"
@@ -171,7 +171,7 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
       versionControl = VersionControl.github("pidovve-project", "scala-showdown-api"),
       developers = Seq(
         Developer("Iltotore", "Raphaël FROMENTIN", "https://github.com/Iltotore"),
-        Developer("pidove-project", "Pidove Project Team", "https://github.com/pidove-project")
+        Developer("pidoveproject", "Pidove Project Team", "https://github.com/pidoveproject")
       )
     )
 
