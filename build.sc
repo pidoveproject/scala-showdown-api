@@ -1,5 +1,5 @@
 import $ivy.`io.chris-kipp::mill-ci-release::0.1.9`
-import io.kipp.mill.ci.release.CiReleaseModule
+import io.kipp.mill.ci.release.{CiReleaseModule, SonatypeHost}
 import de.tobiasroeser.mill.vcs.version.VcsVersion
 import mill._, define._, api.Result
 import scalalib._, scalalib.scalafmt._, scalalib.publish._, scalajslib._, scalanativelib._
@@ -165,6 +165,8 @@ object examples extends Module {
 trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule { outer =>
 
   def scalaVersion = versions.scala
+
+  override def sonatypeHost = Some(SonatypeHost.s01)
 
   def pomSettings =
     PomSettings(
