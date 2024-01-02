@@ -132,7 +132,9 @@ object zio extends ProjectModule {
 
 object examples extends Module {
 
-  object `zio-client` extends ProjectModule {
+  object `zio-client` extends ScalaModule {
+
+    def scalaVersion = versions.scala
 
     def moduleDeps = Seq(main, zio)
 
@@ -142,7 +144,9 @@ object examples extends Module {
     )
   }
 
-  object `tyrian-client` extends ProjectModule with ScalaJSModule {
+  object `tyrian-client` extends ScalaJSModule {
+
+    def scalaVersion = versions.scala
 
     def scalaJSVersion = versions.scalaJS
 
