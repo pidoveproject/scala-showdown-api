@@ -169,10 +169,10 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
   def pomSettings =
     PomSettings(
       description = "A Scala wrapper of Pokemon Showdown's API",
-      organization = "io.github.projectpidove",
-      url = "https://github.com/pidove-project/scala-showdown-api",
+      organization = "io.github.pidoveproject",
+      url = "https://github.com/pidoveproject/scala-showdown-api",
       licenses = Seq(License.`Apache-2.0`),
-      versionControl = VersionControl.github("pidovve-project", "scala-showdown-api"),
+      versionControl = VersionControl.github("pidovveproject", "scala-showdown-api"),
       developers = Seq(
         Developer("Iltotore", "Raphaël FROMENTIN", "https://github.com/Iltotore"),
         Developer("pidoveproject", "Pidove Project Team", "https://github.com/pidoveproject")
