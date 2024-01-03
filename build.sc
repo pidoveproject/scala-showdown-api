@@ -174,7 +174,7 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
       organization = "io.github.pidoveproject",
       url = "https://github.com/pidoveproject/scala-showdown-api",
       licenses = Seq(License.`Apache-2.0`),
-      versionControl = VersionControl.github("pidovveproject", "scala-showdown-api"),
+      versionControl = VersionControl.github("pidoveproject", "scala-showdown-api"),
       developers = Seq(
         Developer("Iltotore", "Raphaël FROMENTIN", "https://github.com/Iltotore"),
         Developer("pidoveproject", "Pidove Project Team", "https://github.com/pidoveproject")
