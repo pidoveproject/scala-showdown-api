@@ -53,7 +53,7 @@ solving [open issues](https://github.com/pidove-project/scala-showdown-api/issue
 If you want to contribute to the code or just compile the project yourself, you need to build the project:
 
 ```scala
-mill <module>.build
+mill <module>.compile
 ```
 
 Where `<module>` is either:
