@@ -196,6 +196,8 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
 
   trait CrossModule extends ScalaModule with ScalafmtModule with CiReleaseModule  {
 
+    override def sonatypeHost = outer.sonatypeHost
+
     def segment: String
 
     def sources = T.sources(outer.sources() :+ PathRef(millSourcePath / s"src-$segment"))
