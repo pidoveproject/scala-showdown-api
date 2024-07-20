@@ -142,7 +142,7 @@ object Main extends ZIOAppDefault:
    * @param appRef the reference to the state of the client
    * @param message the received message to process
    */
-  private def subscribeProgram(connection: ShowdownConnection[WebSocketFrame, ProtocolTask, Stream], appRef: Ref[ClientApp])(message: ServerMessage): ProtocolTask[Unit] =
+  private def subscribeProgram(connection: ShowdownConnection[WebSocketFrame, IO, Stream], appRef: Ref[ClientApp])(message: ServerMessage): IO[ProtocolError, Unit] =
     for
       app <- appRef.updateAndGet(a => a.copy(currentState = a.currentState.update(message)))
       _ <- ZIO.when(app.debugging)(Console.printLine(s"< $message").toProtocolZIO)
@@ -226,14 +226,14 @@ object Main extends ZIOAppDefault:
    * 
    * @param connection the connection to use
    */
-  private def connectionProgram(connection: ShowdownConnection[WebSocketFrame, ProtocolTask, Stream]): ProtocolTask[Unit] =
+  private def connectionProgram(connection: ShowdownConnection[WebSocketFrame, IO, Stream]): IO[ProtocolError, Unit] =
     for
       appRef <- Ref.make(ClientApp(ShowdownData.empty))
       _ <- commandProgram(appRef).provide(ZLayer.succeed(connection)) raceFirst connection.serverMessages.mapZIO(subscribeProgram(connection, appRef)).runDrain
     yield
       ()
 
-  override def run =
+  override def run: ZIO[Any, Throwable, Unit] =
     ZIOShowdownClient
       .openConnection(connectionProgram)
       .provide(

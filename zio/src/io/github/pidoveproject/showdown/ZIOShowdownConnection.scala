@@ -14,26 +14,26 @@ import zio.stream.*
 class ZIOShowdownConnection(
                              client: Client,
                              channel: WebSocketChannel
-) extends ShowdownConnection[WebSocketFrame, ProtocolTask, Stream]:
+) extends ShowdownConnection[WebSocketFrame, IO, Stream]:
 
-  override def sendRawMessage(message: WebSocketFrame): ProtocolTask[Unit] =
+  override def sendRawMessage(message: WebSocketFrame): IO[ProtocolError, Unit] =
     channel.send(ChannelEvent.Read(message)).toProtocolZIO
 
-  override def sendMessage(room: RoomId, message: ClientMessage): ProtocolTask[Unit] =
+  override def sendMessage(room: RoomId, message: ClientMessage): IO[ProtocolError, Unit] =
     for
       parts <- ZIO.fromEither(ClientMessage.encoder.encode(message))
       command = parts.mkString(s"$room|/", ",", "").replaceFirst(",", " ")
       _ <- sendRawMessage(WebSocketFrame.text(command))
     yield ()
 
-  override def sendMessage(message: ClientMessage): ProtocolTask[Unit] =
+  override def sendMessage(message: ClientMessage): IO[ProtocolError, Unit] =
     for
       parts <- ZIO.fromEither(MessageEncoder.derivedUnion[ClientMessage].encode(message))
       command = parts.mkString("|/", ",", "").replaceFirst(",", " ")
       _ <- sendRawMessage(WebSocketFrame.text(command))
     yield ()
 
-  override def disconnect(): ProtocolTask[Unit] = sendRawMessage(WebSocketFrame.close(Status.Ok.code))
+  override def disconnect(): IO[ProtocolError, Unit] = sendRawMessage(WebSocketFrame.close(Status.Ok.code))
 
   override val serverMessages: Stream[ProtocolError, ServerMessage] =
     def decode(text: String): Stream[ProtocolError, ServerMessage] =
@@ -55,7 +55,7 @@ class ZIOShowdownConnection(
         case ChannelEvent.Read(WebSocketFrame.Text(text)) => decode(text)
         case _ => ZStream.empty
 
-  override def login(challStr: ChallStr)(name: Username, password: String): ProtocolTask[LoginResponse] =
+  override def login(challStr: ChallStr)(name: Username, password: String): IO[ProtocolError, LoginResponse] =
     for
       response <- Client
         .request(
@@ -74,7 +74,7 @@ class ZIOShowdownConnection(
       _ <- sendMessage(AuthCommand.Trn(name, 0, data.assertion))
     yield data
 
-  override def loginGuest(challStr: ChallStr)(name: Username): ProtocolTask[String] =
+  override def loginGuest(challStr: ChallStr)(name: Username): IO[ProtocolError, String] =
     for
       response <-
         client
@@ -93,10 +93,10 @@ class ZIOShowdownConnection(
 
 object ZIOShowdownConnection:
   
-  private type ConnectionTask[+A] = ZIO[ShowdownConnection[WebSocketFrame, ProtocolTask, Stream], ProtocolError, A]
-  private type ConnectionStream[+A] = ZStream[ShowdownConnection[WebSocketFrame, ProtocolTask, Stream], ProtocolError, A]
+  private type ConnectionTask[+A] = ZIO[ShowdownConnection[WebSocketFrame, IO, Stream], ProtocolError, A]
+  private type ConnectionStream[+A] = ZStream[ShowdownConnection[WebSocketFrame, IO, Stream], ProtocolError, A]
 
-  def withHandler(client: Client, aliveRef: Ref[Boolean], handler: ShowdownConnection[WebSocketFrame, ProtocolTask, Stream] => ProtocolTask[Unit])(channel: WebSocketChannel): Task[ZIOShowdownConnection] =
+  def withHandler(client: Client, aliveRef: Ref[Boolean], handler: ShowdownConnection[WebSocketFrame, IO, Stream] => IO[ProtocolError, Unit])(channel: WebSocketChannel): Task[ZIOShowdownConnection] =
     val connection = ZIOShowdownConnection(client, channel)
     
     for
