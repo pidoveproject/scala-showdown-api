@@ -3,10 +3,11 @@ package io.github.pidoveproject.showdown
 import io.github.pidoveproject.showdown.protocol.ProtocolError
 import zio.*
 import zio.http.*
+import zio.stream.Stream
 
-class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClient[WebSocketFrame, ProtocolTask]:
+class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClient[WebSocketFrame, ProtocolTask, Stream]:
 
-  override def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit]): ProtocolTask[Unit] =
+  override def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask, Stream] => ProtocolTask[Unit]): ProtocolTask[Unit] =
 
     ZIO.scoped:
       for
@@ -20,15 +21,15 @@ class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClien
 
 object ZIOShowdownClient:
 
-  def layer(serverUrl: String = "wss://sim3.psim.us/showdown/websocket"): ZLayer[Client, Nothing, ShowdownClient[WebSocketFrame, ProtocolTask]] =
+  def layer(serverUrl: String = "wss://sim3.psim.us/showdown/websocket"): ZLayer[Client, Nothing, ShowdownClient[WebSocketFrame, ProtocolTask, Stream]] =
     ZLayer:
       for
         client <- ZIO.service[Client]
       yield
         ZIOShowdownClient(client, serverUrl)
 
-  def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask] => ProtocolTask[Unit]): ZIO[ShowdownClient[WebSocketFrame, ProtocolTask], ProtocolError, Unit] =
+  def openConnection(handler: ShowdownConnection[WebSocketFrame, ProtocolTask, Stream] => ProtocolTask[Unit]): ZIO[ShowdownClient[WebSocketFrame, ProtocolTask, Stream], ProtocolError, Unit] =
     ZIO.serviceWithZIO(_.openConnection(handler))
 
-  def openConnectionEnv(handler: ZIO[ShowdownConnection[WebSocketFrame, ProtocolTask], ProtocolError, Unit]): ZIO[ShowdownClient[WebSocketFrame, ProtocolTask], ProtocolError, Unit] =
+  def openConnectionEnv(handler: ZIO[ShowdownConnection[WebSocketFrame, ProtocolTask, Stream], ProtocolError, Unit]): ZIO[ShowdownClient[WebSocketFrame, ProtocolTask, Stream], ProtocolError, Unit] =
     openConnection(connection => handler.provide(ZLayer.succeed(connection)))
