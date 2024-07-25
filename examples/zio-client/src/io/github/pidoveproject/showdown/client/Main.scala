@@ -106,6 +106,8 @@ object Main extends ZIOAppDefault:
       yield
         app
 
+    case "" => ZIO.succeed(app)
+
     case message =>
       for
         _ <- ZIOShowdownConnection.sendRawMessage(WebSocketFrame.text(s"${app.currentRoom.fold("")(_.value)}|$message"))
@@ -227,16 +229,28 @@ object Main extends ZIOAppDefault:
    * @param connection the connection to use
    */
   private def connectionProgram(connection: ShowdownConnection[WebSocketFrame, IO, Stream]): IO[ProtocolError, Unit] =
+    def runStream(appRef: Ref[ClientApp]) =
+      val subscribe = subscribeProgram(connection, appRef)
+
+      connection
+        .serverMessages
+        .mapZIO:
+          case Right(message) => subscribe(message)
+          case Left(error) => Console.printLineError(s"Decoding error: $error").toProtocolZIO
+        .runDrain
+
     for
       appRef <- Ref.make(ClientApp(ShowdownData.empty))
-      _ <- commandProgram(appRef).provide(ZLayer.succeed(connection)) raceFirst connection.serverMessages.mapZIO(subscribeProgram(connection, appRef)).runDrain
+      _ <- commandProgram(appRef).provide(ZLayer.succeed(connection)) raceFirst runStream(appRef)
     yield
       ()
 
   override def run: ZIO[Any, Throwable, Unit] =
-    ZIOShowdownClient
-      .openConnection(connectionProgram)
-      .provide(
+    ZIO.scoped(
+      ZIOShowdownClient
+        .openConnection
+        .flatMap(connectionProgram)
+    ).provide(
         Client.default,
-        ZIOShowdownClient.layer()
+        ZIOShowdownClient.layer(),
       )

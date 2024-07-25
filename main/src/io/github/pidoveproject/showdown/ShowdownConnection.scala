@@ -1,8 +1,8 @@
 package io.github.pidoveproject.showdown
 
-import io.github.pidoveproject.showdown.protocol.{LoginResponse, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.client.{ClientMessage, GlobalCommand, OptionCommand}
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
+import io.github.pidoveproject.showdown.protocol.{LoginResponse, ProtocolError}
 import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.user.Username
 
@@ -116,7 +116,7 @@ trait ShowdownConnection[Frame, Task[_, _], Stream[_, _]]:
   /**
    * The stream of the received server messages
    */
-  def serverMessages: Stream[ProtocolError, ServerMessage]
+  def serverMessages: Stream[ProtocolError, Either[ProtocolError, ServerMessage]]
 
   /**
    * Login to a registered account.

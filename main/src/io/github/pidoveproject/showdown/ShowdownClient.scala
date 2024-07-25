@@ -9,11 +9,9 @@ import io.github.pidoveproject.showdown.protocol.ProtocolError
  * @tparam Task the type of a task
  * @return the authentication response sent by the server
  */
-trait ShowdownClient[Frame, Task[_, _], Stream[_, _]]:
+trait ShowdownClient[Frame, Task[+_, +_], Stream[+_, +_], Resource[+_]]:
 
   /**
    * Open a connection to the pokemon showdown server.
-   *
-   * @param handler the program to execute while the connection is active. The connection ends when the handler finishes.
    */
-  def openConnection(handler: ShowdownConnection[Frame, Task, Stream] => Task[ProtocolError, Unit]): Task[ProtocolError, Unit]
+  def openConnection: Resource[ShowdownConnection[Frame, Task, Stream]]

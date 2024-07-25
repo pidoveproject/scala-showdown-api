@@ -1,8 +1,7 @@
 package io.github.pidoveproject.showdown.client
 
-import io.github.pidoveproject.showdown.{ShowdownData, ZIOShowdownConnection}
+import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.battle.Battle
-import io.github.pidoveproject.showdown.protocol.server.choice.ChoiceRequest
 import io.github.pidoveproject.showdown.room.RoomId
 
 /**

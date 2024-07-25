@@ -1,14 +1,14 @@
 package io.github.pidoveproject.showdown
 
 import io.github.iltotore.iron.*
+import io.github.pidoveproject.showdown.protocol.*
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.pidoveproject.showdown.protocol.server.{GlobalMessage, ServerMessage}
-import io.github.pidoveproject.showdown.protocol.*
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.Username
 import zio.*
-import zio.json.*
 import zio.http.*
+import zio.json.*
 import zio.stream.*
 
 class ZIOShowdownConnection(
@@ -35,8 +35,8 @@ class ZIOShowdownConnection(
 
   override def disconnect(): IO[ProtocolError, Unit] = sendRawMessage(WebSocketFrame.close(Status.Ok.code))
 
-  override val serverMessages: Stream[ProtocolError, ServerMessage] =
-    def decode(text: String): Stream[ProtocolError, ServerMessage] =
+  override val serverMessages: Stream[ProtocolError, Either[ProtocolError, ServerMessage]] =
+    def decode(text: String): Stream[ProtocolError, Either[ProtocolError, ServerMessage]] =
       ZStream
         .fromZIO(
           text.split(raw"(\r\n|\r|\n)").toList match
@@ -46,7 +46,12 @@ class ZIOShowdownConnection(
         .flatMap((messages, room) =>
           ZStream
             .fromIterable(messages)
-            .mapZIO(message => ServerMessage.decoder.decodeZPure(MessageInput.fromInput(message, room)).toZIO)
+            .map(message =>
+              ServerMessage
+                .decoder
+                .decodeZPure(MessageInput.fromInput(message, room))
+                .runEither
+            )
         )
     
     ZStream
@@ -95,15 +100,6 @@ object ZIOShowdownConnection:
   
   private type ConnectionTask[+A] = ZIO[ShowdownConnection[WebSocketFrame, IO, Stream], ProtocolError, A]
   private type ConnectionStream[+A] = ZStream[ShowdownConnection[WebSocketFrame, IO, Stream], ProtocolError, A]
-
-  def withHandler(client: Client, aliveRef: Ref[Boolean], handler: ShowdownConnection[WebSocketFrame, IO, Stream] => IO[ProtocolError, Unit])(channel: WebSocketChannel): Task[ZIOShowdownConnection] =
-    val connection = ZIOShowdownConnection(client, channel)
-    
-    for
-      _ <- handler(connection)
-      _ <- aliveRef.set(false)
-    yield
-      connection
       
   def sendRawMessage(message: WebSocketFrame): ConnectionTask[Unit] = ZIO.serviceWithZIO(_.sendRawMessage(message))
     
@@ -114,7 +110,7 @@ object ZIOShowdownConnection:
     
   def disconnect(): ConnectionTask[Unit] = ZIO.serviceWithZIO(_.disconnect())
 
-  def serverMessages: ConnectionStream[ServerMessage] =
+  def serverMessages: ConnectionStream[Either[ProtocolError, ServerMessage]] =
     ZStream.serviceWithStream(_.serverMessages)
 
   def login(challStr: ChallStr)(name: Username, password: String): ConnectionTask[LoginResponse] =
