@@ -105,6 +105,21 @@ object main extends ProjectModule {
   object test extends Tests
 }
 
+object cats extends ProjectModule {
+
+  def artifactName = "scala-showdown-api-cats"
+
+  def moduleDeps = Seq(main)
+
+  def ivyDeps = main.ivyDeps() ++ Agg(
+    ivy"co.fs2::fs2-core::3.10.2",
+    ivy"org.typelevel::cats-core::2.12.0",
+    ivy"org.typelevel::cats-effect::3.5.4",
+    ivy"org.http4s::http4s-core::0.23.27",
+    ivy"org.http4s::http4s-client::0.23.27"
+  )
+}
+
 object tyrian extends ProjectModule with ScalaJSModule {
 
   def artifactName = "scala-showdown-api-tyrian"

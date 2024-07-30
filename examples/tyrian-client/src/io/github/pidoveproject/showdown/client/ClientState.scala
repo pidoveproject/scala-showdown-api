@@ -3,7 +3,6 @@ package io.github.pidoveproject.showdown.client
 import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, RoomMessage, ServerMessage}
 import io.github.pidoveproject.showdown.room.{ChatContent, RoomChat, RoomId}
-import io.github.pidoveproject.showdown.tyrian.TyrianLoginResponse
 import io.github.pidoveproject.showdown.user.{User, Username}
 import tyrian.Html
 import tyrian.Html.*

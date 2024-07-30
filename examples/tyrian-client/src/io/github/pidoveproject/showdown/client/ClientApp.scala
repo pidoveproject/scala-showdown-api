@@ -5,7 +5,7 @@ import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse}
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, BattleRoomCommand, ChoiceResponse, GlobalCommand}
 import io.github.pidoveproject.showdown.protocol.server.GlobalMessage
-import io.github.pidoveproject.showdown.tyrian.{TyrianLoginResponse, TyrianShowdownConnection}
+import io.github.pidoveproject.showdown.tyrian.TyrianShowdownConnection
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.{ChatContent, ChatMessage, RoomId}
 import io.github.pidoveproject.showdown.user.{User, Username}
@@ -48,9 +48,9 @@ case class ClientApp(
       showdownState
         .challStr
         .fold((this, Cmd.None)): challStr =>
-          (this, connection.login(challStr, username, password).map(ClientMessage.LoggingIn.apply))
+          (this, connection.login(challStr)(username, password).map(ClientMessage.LoggingIn.apply))
 
-    case ClientMessage.LoggingIn(TyrianLoginResponse.LogUser(LoginResponse(_, assertion, CurrentUser(_, name, _)))) =>
+    case ClientMessage.LoggingIn(LoginResponse(_, assertion, CurrentUser(_, name, _))) =>
       (this, connection.sendMessage(AuthCommand.Trn(Username.assume(name), 0, assertion)))
 
     case ClientMessage.JoinRoom(room) =>

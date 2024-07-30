@@ -9,7 +9,7 @@ import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse}
 import io.github.pidoveproject.showdown.protocol.server.GlobalMessage
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.Username
-import io.github.pidoveproject.showdown.tyrian.{TyrianConnectEvent, TyrianLoginResponse, TyrianServerEvent, TyrianShowdownClient}
+import io.github.pidoveproject.showdown.tyrian.{TyrianConnectEvent, TyrianLoginResponse, TyrianServerEvent}
 import tyrian.Html.*
 import tyrian.*
 

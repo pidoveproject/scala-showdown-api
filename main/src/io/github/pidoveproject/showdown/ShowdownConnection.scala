@@ -116,7 +116,7 @@ trait ShowdownConnection[Frame, Task[_, _], Stream[_, _]]:
   /**
    * The stream of the received server messages
    */
-  def serverMessages: Stream[ProtocolError, Either[ProtocolError, ServerMessage]]
+  def serverMessages: Stream[ProtocolError, ServerMessage]
 
   /**
    * Login to a registered account.

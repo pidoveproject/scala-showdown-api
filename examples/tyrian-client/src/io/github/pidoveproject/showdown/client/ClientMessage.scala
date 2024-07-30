@@ -1,21 +1,23 @@
 package io.github.pidoveproject.showdown.client
 
 import cats.effect.IO
+import io.github.pidoveproject.showdown.protocol.{LoginResponse, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.client.BattleChoice
-import io.github.pidoveproject.showdown.tyrian.{TyrianLoginResponse, TyrianShowdownEvent}
+import io.github.pidoveproject.showdown.protocol.server.ServerMessage
+import io.github.pidoveproject.showdown.tyrian.TyrianConnectionEvent
 import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.user.Username
 import tyrian.websocket.WebSocketEvent
 
 enum ClientMessage:
-  case ShowdownEvent(event: TyrianShowdownEvent[IO])
+  case ShowdownEvent(event: TyrianConnectionEvent[ProtocolError, ServerMessage])
   case UpdateUsername(username: String)
   case UpdatePassword(password: String)
   case UpdateRoomChoice(room: String)
   case UpdateChatInput(message: String)
   case Connect
   case Login(username: Username, password: String)
-  case LoggingIn(response: TyrianLoginResponse)
+  case LoggingIn(response: LoginResponse)
   case JoinRoom(room: RoomId)
   case LeaveRoom(room: RoomId)
   case OpenPrivateMessages(user: Username)
