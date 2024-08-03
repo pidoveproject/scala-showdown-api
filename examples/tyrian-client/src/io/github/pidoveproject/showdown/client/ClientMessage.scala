@@ -4,13 +4,14 @@ import cats.effect.IO
 import io.github.pidoveproject.showdown.protocol.{LoginResponse, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.client.BattleChoice
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
-import io.github.pidoveproject.showdown.tyrian.TyrianConnectionEvent
+import io.github.pidoveproject.showdown.tyrian.{TyrianConnectionEvent, TyrianShowdownConnection}
 import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.user.Username
 import tyrian.websocket.WebSocketEvent
 
 enum ClientMessage:
-  case ShowdownEvent(event: TyrianConnectionEvent[ProtocolError, ServerMessage])
+  case Open(connection: TyrianShowdownConnection[IO])
+  case ShowdownEvent(event: TyrianConnectionEvent[Either[ProtocolError, ServerMessage]])
   case UpdateUsername(username: String)
   case UpdatePassword(password: String)
   case UpdateRoomChoice(room: String)

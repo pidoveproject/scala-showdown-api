@@ -5,7 +5,7 @@ import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse}
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, BattleRoomCommand, ChoiceResponse, GlobalCommand}
 import io.github.pidoveproject.showdown.protocol.server.GlobalMessage
-import io.github.pidoveproject.showdown.tyrian.TyrianShowdownConnection
+import io.github.pidoveproject.showdown.tyrian.{TyrianShowdownClient, TyrianShowdownConnection}
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.{ChatContent, ChatMessage, RoomId}
 import io.github.pidoveproject.showdown.user.{User, Username}
@@ -13,6 +13,7 @@ import tyrian.Cmd
 
 case class ClientApp(
     state: ClientState,
+    client: TyrianShowdownClient[IO],
     connection: Option[TyrianShowdownConnection[IO]],
     showdownState: ShowdownData
 ):

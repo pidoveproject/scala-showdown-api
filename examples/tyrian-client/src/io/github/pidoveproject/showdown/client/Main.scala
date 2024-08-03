@@ -5,11 +5,12 @@ import cats.implicits.*
 import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.client.ClientState.Main
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, GlobalCommand}
-import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse}
+import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.server.GlobalMessage
+import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.Username
-import io.github.pidoveproject.showdown.tyrian.{TyrianConnectEvent, TyrianLoginResponse, TyrianServerEvent}
+import io.github.pidoveproject.showdown.tyrian.{TyrianConnectionEvent, TyrianShowdownClient}
 import tyrian.Html.*
 import tyrian.*
 
@@ -21,28 +22,41 @@ object Main extends TyrianApp[ClientMessage, ClientApp]:
   def router: Location => ClientMessage = Routing.none(ClientMessage.None)
 
   def init(flags: Map[String, String]): (ClientApp, Cmd[IO, ClientMessage]) =
-    (ClientApp(ClientState.Connect, None, ShowdownData.empty), Cmd.None)
+    (
+      ClientApp(
+        state = ClientState.Connect,
+        client = TyrianShowdownClient("wss://sim3.psim.us/showdown/websocket"),
+        connection = None,
+        showdownState = ShowdownData.empty
+      ),
+      Cmd.None
+    )
 
   def update(app: ClientApp): ClientMessage => (ClientApp, Cmd[IO, ClientMessage]) =
     case ClientMessage.Combine(messages) =>
       (app, messages.map(Cmd.emit).foldLeft[Cmd[IO, ClientMessage]](Cmd.None)(_ |+| _))
 
-    case ClientMessage.ShowdownEvent(TyrianServerEvent.Receive(messages)) =>
+    case ClientMessage.ShowdownEvent(TyrianConnectionEvent.Receive(messages)) =>
       println(messages.mkString("> ", "\n> ", ""))
 
       val validMessages = messages.collect:
-        case Right(message) => message
+        case Right(message: ServerMessage) => message
 
       validMessages.foldLeft[(ClientApp, Cmd[IO, ClientMessage])]((app, Cmd.None)):
         case ((state, cmd), message) =>
           val (newState, newCmd) = state.updateShowdown(message)
           (newState, cmd |+| newCmd)
 
-    case ClientMessage.ShowdownEvent(TyrianConnectEvent.Open(connection)) =>
+    case ClientMessage.Open(connection) =>
       (app.connected(connection), Cmd.None)
 
     case ClientMessage.Connect =>
-      (app, TyrianShowdownClient.openConnection[IO]("wss://sim3.psim.us/showdown/websocket").map(ClientMessage.ShowdownEvent.apply))
+      (
+        app,
+        app.client.openConnection.map:
+          case Right(connection) => ClientMessage.Open(connection)
+          case Left(error) => ClientMessage.None
+      )
 
     case msg =>
       val updated = app.updateState(msg)
@@ -53,4 +67,4 @@ object Main extends TyrianApp[ClientMessage, ClientApp]:
     app.state.view(app)
 
   def subscriptions(model: ClientApp): Sub[IO, ClientMessage] =
-    model.connection.fold(Sub.None)(_.subscribe(ClientMessage.ShowdownEvent.apply))
+    model.connection.fold(Sub.None)(_.serverMessages.map(ClientMessage.ShowdownEvent.apply))

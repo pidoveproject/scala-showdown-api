@@ -18,7 +18,7 @@ import org.http4s.client.Client
 import org.http4s.client.websocket.{WSConnection, WSFrame}
 import zio.json.*
 
-case class CatsShowdownConnection[F[_] : Concurrent](client: Client[F], connection: WSConnection[F])
+class CatsShowdownConnection[F[_] : Concurrent](client: Client[F], connection: WSConnection[F])
   extends ShowdownConnection[WSFrame, [e, r] =>> F[r], [r] =>> Stream[F, r]]:
 
   override def sendRawMessage(message: WSFrame): F[Unit] =

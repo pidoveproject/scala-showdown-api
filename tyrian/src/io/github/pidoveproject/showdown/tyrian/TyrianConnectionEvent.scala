@@ -1,11 +1,8 @@
 package io.github.pidoveproject.showdown.tyrian
 
-import io.github.pidoveproject.showdown.protocol.ProtocolError
-import io.github.pidoveproject.showdown.protocol.server.ServerMessage
-
-enum TyrianConnectionEvent[+E, +A]:
+enum TyrianConnectionEvent[+A]:
   case Open
   case Close(code: Int, reason: String)
-  case Receive(message: A)
-  case Error(error: E)
+  case Receive(messages: List[A])
+  case Error(error: String)
   case Heartbeat
