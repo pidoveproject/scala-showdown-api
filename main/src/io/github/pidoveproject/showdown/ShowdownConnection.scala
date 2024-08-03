@@ -13,7 +13,7 @@ import io.github.pidoveproject.showdown.user.Username
  * @tparam Task the type of a task
  * @tparam Stream the type of a stream
  */
-trait ShowdownConnection[Frame, Task[_, _], Stream[_, _]]:
+trait ShowdownConnection[Frame, Task[_, _], Stream[_]]:
 
   /**
    * Send a socket frame to the server.
@@ -116,7 +116,7 @@ trait ShowdownConnection[Frame, Task[_, _], Stream[_, _]]:
   /**
    * The stream of the received server messages
    */
-  def serverMessages: Stream[ProtocolError, ServerMessage]
+  def serverMessages: Stream[Either[ProtocolError, ServerMessage]]
 
   /**
    * Login to a registered account.

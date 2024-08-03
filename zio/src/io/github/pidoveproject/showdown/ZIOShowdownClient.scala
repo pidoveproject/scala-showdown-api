@@ -5,7 +5,7 @@ import zio.*
 import zio.http.*
 import zio.stream.Stream
 
-class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClient[WebSocketFrame, IO, Stream, [x] =>> ZIO[Scope, ProtocolError, x]]:
+class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClient[WebSocketFrame, IO, [r] =>> Stream[Throwable, r], [x] =>> ZIO[Scope, ProtocolError, x]]:
 
   override def openConnection: ZIO[Scope, ProtocolError, ZIOShowdownConnection] =
     def socketApp(promise: Promise[ProtocolError, ZIOShowdownConnection]) =

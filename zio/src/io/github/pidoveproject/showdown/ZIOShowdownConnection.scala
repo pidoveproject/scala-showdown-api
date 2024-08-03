@@ -14,7 +14,7 @@ import zio.stream.*
 class ZIOShowdownConnection(
                              client: Client,
                              channel: WebSocketChannel
-) extends ShowdownConnection[WebSocketFrame, IO, Stream]:
+) extends ShowdownConnection[WebSocketFrame, IO, [r] =>> Stream[Throwable, r]]:
 
   override def sendRawMessage(message: WebSocketFrame): IO[ProtocolError, Unit] =
     channel.send(ChannelEvent.Read(message)).toProtocolZIO
@@ -35,29 +35,26 @@ class ZIOShowdownConnection(
 
   override def disconnect(): IO[ProtocolError, Unit] = sendRawMessage(WebSocketFrame.close(Status.Ok.code))
 
-  override val serverMessages: Stream[ProtocolError, Either[ProtocolError, ServerMessage]] =
-    def decode(text: String): Stream[ProtocolError, Either[ProtocolError, ServerMessage]] =
-      ZStream
-        .fromZIO(
-          text.split(raw"(\r\n|\r|\n)").toList match
-            case s">$room" :: tail => RoomId.applyZIO(room).map((tail, _))
-            case messages => ZIO.succeed((messages, RoomId("lobby")))
-        )
-        .flatMap((messages, room) =>
-          ZStream
-            .fromIterable(messages)
-            .map(message =>
-              ServerMessage
-                .decoder
-                .decodeZPure(MessageInput.fromInput(message, room))
-                .runEither
-            )
-        )
-    
+  override val serverMessages: Stream[Throwable, Either[ProtocolError, ServerMessage]] =
     ZStream
-      .repeatZIO(channel.receive.toProtocolZIO)
+      .repeatZIO(channel.receive)
       .flatMap:
-        case ChannelEvent.Read(WebSocketFrame.Text(text)) => decode(text)
+        case ChannelEvent.Read(WebSocketFrame.Text(text)) =>
+          text
+            .split(raw"(\r\n|\r|\n)")
+            .toList
+            .match
+              case s">$room" :: tail => RoomId.either(room).map((tail, _))
+              case messages => Right((messages, RoomId("lobby")))
+            .match
+              case Right((messages, room)) => ZStream.fromIterable(messages).map(message =>
+                ServerMessage
+                  .decoder
+                  .decodeZPure(MessageInput.fromInput(message, room))
+                  .runEither
+              )
+
+              case Left(error) => ZStream.from(Left(ProtocolError.InvalidInput(text, error)))
         case _ => ZStream.empty
 
   override def login(challStr: ChallStr)(name: Username, password: String): IO[ProtocolError, LoginResponse] =
@@ -98,23 +95,23 @@ class ZIOShowdownConnection(
 
 object ZIOShowdownConnection:
   
-  private type ConnectionTask[+A] = ZIO[ShowdownConnection[WebSocketFrame, IO, Stream], ProtocolError, A]
-  private type ConnectionStream[+A] = ZStream[ShowdownConnection[WebSocketFrame, IO, Stream], ProtocolError, A]
+  private type ConnectionTask[+A] = ZIO[ZIOShowdownConnection, ProtocolError, A]
+  private type ConnectionStream[+A] = ZStream[ZIOShowdownConnection, ProtocolError, A]
       
-  def sendRawMessage(message: WebSocketFrame): ConnectionTask[Unit] = ZIO.serviceWithZIO(_.sendRawMessage(message))
+  def sendRawMessage(message: WebSocketFrame): ZIO[ZIOShowdownConnection, ProtocolError, Unit] = ZIO.serviceWithZIO(_.sendRawMessage(message))
     
-  def sendMessage(room: RoomId, message: ClientMessage): ConnectionTask[Unit] =
+  def sendMessage(room: RoomId, message: ClientMessage): ZIO[ZIOShowdownConnection, ProtocolError, Unit] =
     ZIO.serviceWithZIO(_.sendMessage(room, message))
     
-  def sendMessage(message: ClientMessage): ConnectionTask[Unit] = ZIO.serviceWithZIO(_.sendMessage(message))
+  def sendMessage(message: ClientMessage): ZIO[ZIOShowdownConnection, ProtocolError, Unit] = ZIO.serviceWithZIO(_.sendMessage(message))
     
-  def disconnect(): ConnectionTask[Unit] = ZIO.serviceWithZIO(_.disconnect())
+  def disconnect(): ZIO[ZIOShowdownConnection, ProtocolError, Unit] = ZIO.serviceWithZIO(_.disconnect())
 
-  def serverMessages: ConnectionStream[Either[ProtocolError, ServerMessage]] =
+  def serverMessages: ZStream[ZIOShowdownConnection, Throwable, Either[ProtocolError, ServerMessage]] =
     ZStream.serviceWithStream(_.serverMessages)
 
-  def login(challStr: ChallStr)(name: Username, password: String): ConnectionTask[LoginResponse] =
+  def login(challStr: ChallStr)(name: Username, password: String):  ZIO[ZIOShowdownConnection, ProtocolError, LoginResponse] =
     ZIO.serviceWithZIO(_.login(challStr)(name, password))
 
-  def loginGuest(challStr: ChallStr)(name: Username): ConnectionTask[String] =
+  def loginGuest(challStr: ChallStr)(name: Username):  ZIO[ZIOShowdownConnection, ProtocolError, String] =
     ZIO.serviceWithZIO(_.loginGuest(challStr)(name))
