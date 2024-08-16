@@ -11,9 +11,9 @@ import io.github.pidoveproject.showdown.team.*
 import utest.*
 
 object BattleMajorActionSuite:
-  
+
   val tests = Tests:
-    
+
     val decoder = summon[MessageDecoder[BattleMajorActionMessage]]
 
     test("move") - assertDecodeString(

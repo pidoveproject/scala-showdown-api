@@ -19,7 +19,6 @@ object PlayerId:
       for
         validNumber <- PlayerNumber.fromString(number)
         validName <- Username.either(name).toInvalidInput(name)
-      yield
-        PlayerId(validNumber, validName)
+      yield PlayerId(validNumber, validName)
 
     case value => Left(ProtocolError.InvalidInput(value, "Invalid player position"))

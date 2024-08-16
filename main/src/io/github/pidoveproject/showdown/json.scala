@@ -24,7 +24,6 @@ object json:
 
     override def unsafeFromJsonAST(trace: List[JsonError], json: Json): List[A] = decoder.unsafeFromJsonAST(trace, json)
 
-
   given someOrEmptyEncoder[A](using encoder: JsonEncoder[A]): JsonEncoder[Option[A]] =
     new JsonEncoder[Option[A]]:
 

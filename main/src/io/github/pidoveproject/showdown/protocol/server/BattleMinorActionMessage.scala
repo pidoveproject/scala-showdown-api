@@ -1,8 +1,7 @@
 package io.github.pidoveproject.showdown.protocol.server
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.Count
-import io.github.pidoveproject.showdown.battle.{Weather as WeatherEffect, *, given}
+import io.github.pidoveproject.showdown.battle.{Weather as WeatherEffect, *}
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError, messageName, messagePrefix}
 import io.github.pidoveproject.showdown.room.{ChatContent, given}
 import io.github.pidoveproject.showdown.team.*
@@ -55,7 +54,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * Flip side of field effects (aka Court Change).
    */
   case SwapSideConditions
-  
+
   /**
    * An item was revealed.
    *
@@ -162,8 +161,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    */
   case Message(message: ChatContent)
 
-
 object BattleMinorActionMessage:
-      
+
   given (using weatherDecoder: MessageDecoder[Weather]): MessageDecoder[Option[Weather]] =
     MessageDecoder.word("none").map(_ => None) <> weatherDecoder.map(Some.apply)

@@ -5,8 +5,8 @@ import mill._, define._, api.Result
 import scalalib._, scalalib.scalafmt._, scalalib.publish._, scalajslib._, scalanativelib._
 
 object versions {
-  val scala = "3.3.0"
-  val scalaJS = "1.13.2"
+  val scala = "3.3.3"
+  val scalaJS = "1.16.0"
 }
 
 object docs extends ProjectModule {
@@ -105,6 +105,23 @@ object main extends ProjectModule {
   object test extends Tests
 }
 
+object cats extends ProjectModule {
+
+  def artifactName = "scala-showdown-api-cats"
+
+  def moduleDeps = Seq(main)
+
+  def ivyDeps = main.ivyDeps() ++ Agg(
+    ivy"co.fs2::fs2-core::3.10.2",
+    ivy"org.typelevel::cats-core::2.12.0",
+    ivy"org.typelevel::cats-effect::3.5.4",
+    ivy"org.http4s::http4s-core::0.23.27",
+    ivy"org.http4s::http4s-client::0.23.27"
+  )
+
+  object js extends JSCrossModule
+}
+
 object tyrian extends ProjectModule with ScalaJSModule {
 
   def artifactName = "scala-showdown-api-tyrian"
@@ -150,11 +167,12 @@ object examples extends Module {
 
     def scalaJSVersion = versions.scalaJS
 
-    def moduleDeps = Seq(main.js, tyrian)
+    def moduleDeps = Seq(main.js, tyrian, cats.js)
 
     def ivyDeps = main.ivyDeps() ++ Agg(
       ivy"io.indigoengine::tyrian::0.8.0",
-      ivy"io.indigoengine::tyrian-io::0.8.0"
+      ivy"io.indigoengine::tyrian-io::0.8.0",
+      ivy"org.http4s::http4s-ember-client::0.23.27"
     )
 
     def moduleKind = T(mill.scalajslib.api.ModuleKind.ESModule)
@@ -182,7 +200,8 @@ trait ProjectModule extends ScalaModule with ScalafmtModule with CiReleaseModule
     )
 
   def scalacOptions = super.scalacOptions() ++ Seq(
-    "-Xmax-inlines", "64"
+    "-Xmax-inlines", "64",
+    "-Wunused:imports"
   )
 
   trait Tests extends ScalaTests with ScalafmtModule {

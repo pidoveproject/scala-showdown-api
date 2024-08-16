@@ -9,7 +9,7 @@ enum BattleResult:
 
   /**
    * A user won the game.
-   * 
+   *
    * @param winner the user who won
    */
   case Win(winner: Username)

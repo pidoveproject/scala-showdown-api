@@ -2,7 +2,6 @@ package io.github.pidoveproject.showdown.testing.protocol.server
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
-import io.github.pidoveproject.showdown.Count
 import io.github.pidoveproject.showdown.battle.*
 import io.github.pidoveproject.showdown.battle.ActivePosition.pos
 import io.github.pidoveproject.showdown.protocol.MessageDecoder
@@ -14,9 +13,9 @@ import io.github.pidoveproject.showdown.user.Username
 import utest.*
 
 object BattleMinorActionSuite extends TestSuite:
-  
+
   val tests = Tests:
-    
+
     val decoder = summon[MessageDecoder[BattleMinorActionMessage]]
 
     test("weather") - assertDecodeString(
@@ -64,7 +63,11 @@ object BattleMinorActionSuite extends TestSuite:
     test("ability") - assertDecodeString(
       decoder,
       "|-ability|p1a: Gardevoir|Fire Flash|[from] ability: Trace",
-      BattleMinorActionMessage.Ability(ActiveId(pos"p1a", Surname("Gardevoir")), AbilityName("Fire Flash"), Some(Effect.Ability(AbilityName("Trace"))))
+      BattleMinorActionMessage.Ability(
+        ActiveId(pos"p1a", Surname("Gardevoir")),
+        AbilityName("Fire Flash"),
+        Some(Effect.Ability(AbilityName("Trace")))
+      )
     )
 
     test("endAbility") - assertDecodeString(

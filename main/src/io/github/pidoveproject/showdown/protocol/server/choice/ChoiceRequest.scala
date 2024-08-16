@@ -6,7 +6,7 @@ import zio.json.*
 
 /**
  * A choice request sent by the server.
- * 
+ *
  * @param active the choices related to the active pokemon
  * @param team the choice related to the team (e.g switching)
  * @param requestId the id of the request, used to ensure the sent decision is not confused with another one

@@ -1,13 +1,15 @@
 package io.github.pidoveproject.showdown.client
 
-import zio.ZIO
+import zio.{IO, ZIO}
 import zio.http.WebSocketFrame
-import io.github.pidoveproject.showdown.{ProtocolTask, ShowdownConnection}
+import zio.stream.Stream
+import io.github.pidoveproject.showdown.ShowdownConnection
 import io.github.pidoveproject.showdown.protocol.ProtocolError
+import io.github.pidoveproject.showdown.zio.{ZIOShowdownClient, ZIOShowdownConnection}
 
 /**
  * A protocol task depending on a [[ShowdownConnection]].
  * 
  * @tparam A the return type of this program
  */
-type ConnectionTask[+A] = ZIO[ShowdownConnection[WebSocketFrame, ProtocolTask], ProtocolError, A]
+type ConnectionTask[+A] = ZIO[ZIOShowdownClient & ZIOShowdownConnection, ProtocolError, A]

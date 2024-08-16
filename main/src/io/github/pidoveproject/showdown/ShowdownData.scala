@@ -4,7 +4,7 @@ import io.github.pidoveproject.showdown.protocol.server.query.ResponseContent.Us
 import io.github.pidoveproject.showdown.protocol.server.query.{BattleRoomInfo, BattleRooms, ChatRoomInfo, ChatRooms, ResponseContent, UserInfo}
 import io.github.pidoveproject.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, RoomMessage, ServerMessage}
 import io.github.pidoveproject.showdown.room.{ChatContent, ChatMessage, JoinedRoom, RoomId}
-import io.github.pidoveproject.showdown.user.{LoggedUser, User, Username}
+import io.github.pidoveproject.showdown.user.{LoggedUser, Username}
 
 /**
  * The state of the Showdown connection.
@@ -64,12 +64,12 @@ case class ShowdownData(
    * @return a new [[ShowdownData]] updated according to the given message
    */
   def update(message: ServerMessage): ShowdownData = message match
-    case GlobalMessage.UserCount(count)                          => this.copy(userCount = Some(count))
-    case GlobalMessage.ChallStr(challStr)                        => this.copy(challStr = Some(challStr))
+    case GlobalMessage.UserCount(count)   => this.copy(userCount = Some(count))
+    case GlobalMessage.ChallStr(challStr) => this.copy(challStr = Some(challStr))
     case GlobalMessage.UpdateUser(user, named, avatar, settings) =>
       val result = loggedUser match
         case Some(value) => value.copy(name = user.name, avatar = avatar, isGuest = !named, settings = settings)
-        case None => LoggedUser(user.name, avatar, !named, settings, Map.empty, Map.empty)
+        case None        => LoggedUser(user.name, avatar, !named, settings, Map.empty, Map.empty)
 
       this.copy(loggedUser = Some(result))
     case GlobalMessage.PrivateMessage(sender, receiver, message) if isLoggedAs(sender.name) || isLoggedAs(receiver.name) =>
@@ -87,16 +87,16 @@ case class ShowdownData(
         case _ =>
           val updatedChat = user.getPrivateChat(key).withChatMessage(ChatMessage.Sent(sender, message))
           this.copy(loggedUser = Some(user.withPrivateChat(key, updatedChat)))
-    case GlobalMessage.UpdateSearch(search) => this.copy(gameSearch = search)
-    case GlobalMessage.Formats(categories) => this.copy(formatCategories = categories)
+    case GlobalMessage.UpdateSearch(search)                             => this.copy(gameSearch = search)
+    case GlobalMessage.Formats(categories)                              => this.copy(formatCategories = categories)
     case GlobalMessage.QueryResponse(ResponseContent.UserDetails(info)) => this.copy(userDetails = userDetails.updated(info.id, info))
     case GlobalMessage.QueryResponse(ResponseContent.BattleRoomList(BattleRooms(rooms))) => this.copy(battleRooms = rooms)
     case GlobalMessage.QueryResponse(ResponseContent.ChatRoomList(ChatRooms(rooms, sectionTitles, userCount, battleCount))) =>
       val roomMap = rooms.map(room => (room.title, room)).toMap
       this.copy(chatRooms = roomMap, userCount = Some(userCount), battleCount = Some(battleCount))
     case RoomBoundMessage(id, RoomMessage.DeInit()) => this.copy(joinedRooms = joinedRooms.removed(id))
-    case RoomBoundMessage(id, message) => this.copy(joinedRooms = joinedRooms.updated(id, getJoinedRoomOrEmpty(id).update(message)))
-    case _ => this
+    case RoomBoundMessage(id, message)              => this.copy(joinedRooms = joinedRooms.updated(id, getJoinedRoomOrEmpty(id).update(message)))
+    case _                                          => this
 
 object ShowdownData:
 

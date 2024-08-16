@@ -31,4 +31,4 @@ object messageName:
 
     typeSymbol.getAnnotation(annotationSymbol).map(_.asExpr) match
       case Some('{ new `messageName`($name: String, $aliases*) }) => '{ $aliases.prepended($name) }
-      case _ =>                                                      '{ Seq.empty }
+      case _                                                      => '{ Seq.empty }

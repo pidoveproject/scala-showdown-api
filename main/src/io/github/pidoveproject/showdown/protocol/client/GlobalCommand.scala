@@ -2,8 +2,8 @@ package io.github.pidoveproject.showdown.protocol.client
 
 import io.github.pidoveproject.showdown.protocol.MessageEncoder
 import io.github.pidoveproject.showdown.FormatName
-import io.github.pidoveproject.showdown.room.{ChatContent, RoomId, given}
-import io.github.pidoveproject.showdown.user.{Username, given}
+import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
+import io.github.pidoveproject.showdown.user.{Username}
 
 /**
  * A command that can be sent in any room.

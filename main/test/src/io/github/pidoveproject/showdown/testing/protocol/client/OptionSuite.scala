@@ -1,13 +1,12 @@
 package io.github.pidoveproject.showdown.testing.protocol.client
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.FormatName
 import io.github.pidoveproject.showdown.protocol.MessageEncoder
 import io.github.pidoveproject.showdown.protocol.client.*
-import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.testing.protocol.*
 import io.github.pidoveproject.showdown.user.{AvatarName, Username}
 import utest.*
+import io.github.pidoveproject.showdown.room.RoomId
 
 object OptionSuite extends TestSuite:
 
@@ -24,7 +23,11 @@ object OptionSuite extends TestSuite:
     test("busy") - assertEncode(encoder, OptionCommand.Busy, List("busy"))
     test("doNotDisturb") - assertEncode(encoder, OptionCommand.DoNotDisturb, List("donotdisturb"))
     test("back") - assertEncode(encoder, OptionCommand.Back, List("back"))
-    test("timestamps") - assertEncode(encoder, OptionCommand.Timestamps(TimestampTarget.All, TimeInterval.Minutes), List("timestamps", "all", "minutes"))
+    test("timestamps") - assertEncode(
+      encoder,
+      OptionCommand.Timestamps(TimestampTarget.All, TimeInterval.Minutes),
+      List("timestamps", "all", "minutes")
+    )
     test("showJoins") - assertEncode(encoder, OptionCommand.ShowJoins(Some(RoomId("lobby"))), List("showjoins", "lobby"))
     test("hideJoins") - assertEncode(encoder, OptionCommand.HideJoins(Some(RoomId("lobby"))), List("hidejoins", "lobby"))
     test("blockChallenges") - assertEncode(encoder, OptionCommand.BlockChallenges, List("blockchallenges"))

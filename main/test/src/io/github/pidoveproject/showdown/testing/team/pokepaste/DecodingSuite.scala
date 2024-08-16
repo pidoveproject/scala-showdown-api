@@ -74,33 +74,61 @@ object DecodingSuite extends TestSuite:
 
     test("ivs"):
       test("single") - assertParse(ivsSyntax, "IVs: 31 HP", Map(StatType.Health -> IV(31)))
-      test("multiple") - assertParse(ivsSyntax, "IVs: 31 HP / 31 Atk / 30 Def", Map(
-        StatType.Health -> IV(31),
-        StatType.Attack -> IV(31),
-        StatType.Defense -> IV(30)
-      ))
+      test("multiple") - assertParse(
+        ivsSyntax,
+        "IVs: 31 HP / 31 Atk / 30 Def",
+        Map(
+          StatType.Health -> IV(31),
+          StatType.Attack -> IV(31),
+          StatType.Defense -> IV(30)
+        )
+      )
       test("missingSep") - assertFail(ivsSyntax, "IVs: 31 HP 31 Atk")
 
     test("evs"):
       test("single") - assertParse(evsSyntax, "EVs: 31 HP", Map(StatType.Health -> EV(31)))
-      test("multiple") - assertParse(evsSyntax, "EVs: 31 HP / 31 Atk / 30 Def", Map(
-        StatType.Health -> EV(31),
-        StatType.Attack -> EV(31),
-        StatType.Defense -> EV(30)
-      ))
+      test("multiple") - assertParse(
+        evsSyntax,
+        "EVs: 31 HP / 31 Atk / 30 Def",
+        Map(
+          StatType.Health -> EV(31),
+          StatType.Attack -> EV(31),
+          StatType.Defense -> EV(30)
+        )
+      )
       test("missingSep") - assertFail(evsSyntax, "EVs: 31 HP 31 Atk")
 
     test("speciesLine"):
       test("species") - assertParse(speciesSurnameGenderSyntax(), "Heracross", (SpeciesName("Heracross"), None, None))
       test("speciesGender") - assertParse(speciesSurnameGenderSyntax(), "Heracross (M)", (SpeciesName("Heracross"), Some(Gender.Male), None))
       test("speciesSurname"):
-        test("standard") - assertParse(speciesSurnameGenderSyntax(), "Heracles (Heracross)", (SpeciesName("Heracross"), None, Some(Surname("Heracles"))))
-        test("withParentheses") - assertParse(speciesSurnameGenderSyntax(), "Heracles (Hey) (Heracross)", (SpeciesName("Heracross"), None, Some(Surname("Heracles (Hey)"))))
-      test("speciesSurnameGender") - assertParse(speciesSurnameGenderSyntax(), "Heracles (Heracross) (M)", (SpeciesName("Heracross"), Some(Gender.Male), Some(Surname("Heracles"))))
+        test("standard") - assertParse(
+          speciesSurnameGenderSyntax(),
+          "Heracles (Heracross)",
+          (SpeciesName("Heracross"), None, Some(Surname("Heracles")))
+        )
+        test("withParentheses") - assertParse(
+          speciesSurnameGenderSyntax(),
+          "Heracles (Hey) (Heracross)",
+          (SpeciesName("Heracross"), None, Some(Surname("Heracles (Hey)")))
+        )
+      test("speciesSurnameGender") - assertParse(
+        speciesSurnameGenderSyntax(),
+        "Heracles (Heracross) (M)",
+        (SpeciesName("Heracross"), Some(Gender.Male), Some(Surname("Heracles")))
+      )
 
     test("firstLine"):
-      test("withoutSpace") - assertParse(firstLineSyntax, "Heracross @ Heracrossite", (SpeciesName("Heracross"), None, None, Some(ItemName("Heracrossite"))))
-      test("withSpace") - assertParse(firstLineSyntax, "Heracross @ Choice Scarf", (SpeciesName("Heracross"), None, None, Some(ItemName("Choice Scarf"))))
+      test("withoutSpace") - assertParse(
+        firstLineSyntax,
+        "Heracross @ Heracrossite",
+        (SpeciesName("Heracross"), None, None, Some(ItemName("Heracrossite")))
+      )
+      test("withSpace") - assertParse(
+        firstLineSyntax,
+        "Heracross @ Choice Scarf",
+        (SpeciesName("Heracross"), None, None, Some(ItemName("Choice Scarf")))
+      )
 
     test("ability") - assertParse(abilityLineSyntax, "Ability: Hyper Cutter", AbilityName("Hyper Cutter"))
 
@@ -131,7 +159,7 @@ object DecodingSuite extends TestSuite:
           |- Surf
           |- Shadow Ball
           |- Aqua Jet
-          |- Ice Beam""".stripMargin,
+          |- Ice Beam""".stripMargin
       )
 
     test("pokemon"):

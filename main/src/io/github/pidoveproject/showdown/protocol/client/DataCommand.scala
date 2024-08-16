@@ -110,8 +110,8 @@ object DataCommand:
 
   given MessageEncoder[EVBoost] =
     case EVBoost.Neutral(value) => Right(List(s"${value}ev"))
-    case EVBoost.Buffed(value) => Right(List(s"${value}ev+"))
-    case EVBoost.Nerfed(value) => Right(List(s"${value}ev-"))
+    case EVBoost.Buffed(value)  => Right(List(s"${value}ev+"))
+    case EVBoost.Nerfed(value)  => Right(List(s"${value}ev-"))
 
   given MessageEncoder[Generation] =
     MessageEncoder.string.contramap(gen => s"gen$gen")
@@ -121,4 +121,3 @@ object DataCommand:
 
   given MessageEncoder[IV] =
     MessageEncoder.string.contramap(iv => s"${iv}iv")
-

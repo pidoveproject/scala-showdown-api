@@ -1,7 +1,6 @@
 package io.github.pidoveproject.showdown.protocol
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.protocol.{MessageInput, ProtocolError}
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.util.UnionTypeMirror
 import zio.Zippable
@@ -170,22 +169,21 @@ object MessageDecoder:
     val decoder =
       for
         input <- ZPure.get[MessageInput]
-        decoderOption =casesMap.collectFirst(Function.unlift: (keyDecoder, caseDecoder) =>
-            val result = keyDecoder.toZPure.runAll(input)
-            result match
-              case (_, Right((newInput, _))) => Some(caseDecoder.toZPure.provideState(newInput))
-              case (_, Left(_)) => None
+        decoderOption = casesMap.collectFirst(Function.unlift: (keyDecoder, caseDecoder) =>
+          val result = keyDecoder.toZPure.runAll(input)
+          result match
+            case (_, Right((newInput, _))) => Some(caseDecoder.toZPure.provideState(newInput))
+            case (_, Left(_))              => None
         )
         result <-
           decoderOption
             .getOrElse(ZPure.fail(input.peek.map(in => ProtocolError.InvalidInput(in, "No suitable case found")).merge))
-      yield
-        result
+      yield result
 
     MessageDecoder(decoder)
 
   private inline def summonUnionDecoder[T <: Tuple]: MessageDecoder[T] = inline erasedValue[T] match
-    case _: EmptyTuple     => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
+    case _: EmptyTuple => next.mapEither(x => Left(ProtocolError.InvalidInput(x, "Cannot decode union")))
     case _: (head *: tail) =>
       val headDecoder = summonInline[MessageDecoder[head]]
       val tailDecoder = summonUnionDecoder[tail]
@@ -194,7 +192,7 @@ object MessageDecoder:
         headDecoder.recoverWith: err =>
           tailDecoder.mapError:
             case ProtocolError.Multiple(errors) => ProtocolError.Multiple(errors :+ err)
-            case other => ProtocolError.Multiple(List(other, err))
+            case other                          => ProtocolError.Multiple(List(other, err))
 
       resultDecoder.asInstanceOf[MessageDecoder[T]]
 
@@ -231,13 +229,12 @@ object MessageDecoder:
         result <- ZPure.fromEither(input.peek)
         _ <- ZPure.set(input.skip)
       yield result
-      
+
   val currentRoom: MessageDecoder[RoomId] =
     MessageDecoder:
       for
         input <- ZPure.get[MessageInput]
-      yield
-        input.roomId
+      yield input.roomId
 
   inline given ironType[A, C](using inline decoder: MessageDecoder[A], constraint: Constraint[A, C]): MessageDecoder[A :| C] =
     decoder
@@ -248,10 +245,10 @@ object MessageDecoder:
     summonInline[MessageDecoder[mirror.IronType]].asInstanceOf[MessageDecoder[T]]
 
   given string: MessageDecoder[String] = next
-  
+
   given char: MessageDecoder[Char] = string.mapEither:
     case chr if chr.length == 1 => Right(chr.head)
-    case value => Left(ProtocolError.InvalidInput(value, "Not a single char"))
+    case value                  => Left(ProtocolError.InvalidInput(value, "Not a single char"))
 
   /**
    * A decoder accepting a keyword.

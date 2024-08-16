@@ -7,7 +7,7 @@ import zio.json.JsonDecoder
 
 /**
  * The health and status of a pokemon.
- * 
+ *
  * @param health the health of the pokemon
  * @param status the status of the pokemon or `None` if healthy.
  */
@@ -32,7 +32,7 @@ object Condition:
 
   /**
    * Parse the pokemon condition from [[String]].
-   * 
+   *
    * @param value the text to parse
    * @return the read pokemon condition or a [[ProtocolError]] if it failed
    */
@@ -41,8 +41,7 @@ object Condition:
       for
         health <- Health.fromString(healthValue)
         status <- StatusEffect.either(statusValue).toInvalidInput(statusValue)
-      yield
-        Condition(health, Some(status))
+      yield Condition(health, Some(status))
 
     case _ =>
       Health.fromString(value).map(Condition(_))
@@ -50,4 +49,3 @@ object Condition:
   given MessageDecoder[Condition] = MessageDecoder.string.mapEither(fromString)
 
   given JsonDecoder[Condition] = JsonDecoder.string.mapOrFail(fromString(_).left.map(_.getMessage))
-

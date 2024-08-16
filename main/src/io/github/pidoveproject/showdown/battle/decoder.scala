@@ -1,7 +1,6 @@
 package io.github.pidoveproject.showdown.battle
 
-import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError}
-import MessageDecoder.*
+import io.github.pidoveproject.showdown.protocol.MessageDecoder
 import zio.json.JsonDecoder
 
 given MessageDecoder[PlayerNumber] = MessageDecoder.string.mapEither(PlayerNumber.fromString)

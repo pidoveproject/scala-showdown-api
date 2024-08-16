@@ -3,14 +3,21 @@ package io.github.pidoveproject.showdown.testing.protocol.server
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import io.github.pidoveproject.showdown.battle.*
-import io.github.pidoveproject.showdown.battle.ActivePosition.pos
 import io.github.pidoveproject.showdown.protocol.MessageDecoder
 import io.github.pidoveproject.showdown.protocol.server.BattleProgressMessage
 import io.github.pidoveproject.showdown.room.ChatContent
 import io.github.pidoveproject.showdown.testing.protocol.*
 import io.github.pidoveproject.showdown.user.Username
 import io.github.pidoveproject.showdown.Timestamp
-import io.github.pidoveproject.showdown.protocol.server.choice.{ActiveChoice, ChoiceError, ChoiceRequest, MoveChoice, MoveRange, PokemonChoice, TeamChoice}
+import io.github.pidoveproject.showdown.protocol.server.choice.{
+  ActiveChoice,
+  ChoiceError,
+  ChoiceRequest,
+  MoveChoice,
+  MoveRange,
+  PokemonChoice,
+  TeamChoice
+}
 import io.github.pidoveproject.showdown.team.*
 import utest.*
 

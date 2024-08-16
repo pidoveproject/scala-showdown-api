@@ -4,10 +4,8 @@ import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.{FormatName, Generation}
 import io.github.pidoveproject.showdown.protocol.MessageEncoder
 import io.github.pidoveproject.showdown.protocol.client.*
-import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.team.{SpeciesName, Tier}
 import io.github.pidoveproject.showdown.testing.protocol.*
-import io.github.pidoveproject.showdown.user.Username
 import utest.*
 
 object InformationSuite extends TestSuite:

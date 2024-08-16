@@ -1,6 +1,6 @@
 package io.github.pidoveproject.showdown.protocol.server.tournament
 
-import zio.json.{JsonDecoder, jsonHint}
+import zio.json.JsonDecoder
 
 /**
  * The type of a bracket

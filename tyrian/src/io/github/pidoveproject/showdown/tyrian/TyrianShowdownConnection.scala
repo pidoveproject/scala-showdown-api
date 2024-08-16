@@ -1,18 +1,15 @@
 package io.github.pidoveproject.showdown.tyrian
 
 import cats.effect.Async
-import io.github.pidoveproject.showdown.protocol.{LoginResponse, MessageDecoder, MessageEncoder, ProtocolError}
-import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, ClientMessage}
+import cats.syntax.all.*
+import io.github.iltotore.iron.*
+import io.github.pidoveproject.showdown.protocol.{MessageInput, ProtocolError}
+import io.github.pidoveproject.showdown.protocol.client.ClientMessage
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomId
-import io.github.pidoveproject.showdown.user.Username
-import io.github.pidoveproject.showdown.ChallStr
+import io.github.pidoveproject.showdown.ShowdownConnection
 import tyrian.{Cmd, Sub}
-import tyrian.http.{Body, Decoder, Header, Http, Request, RequestCredentials}
-import tyrian.websocket.WebSocket
-
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import tyrian.websocket.{WebSocket, WebSocketEvent}
 
 /**
  * An open connection to a Pokemon Showdown.
@@ -20,97 +17,52 @@ import java.nio.charset.StandardCharsets
  * @param socket the web socket used to communicate with the server
  * @tparam F the effect type of the Tyrian app
  */
-case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F]):
+case class TyrianShowdownConnection[F[_]: Async](socket: WebSocket[F])
+    extends ShowdownConnection[String, [e, r] =>> Cmd[F, UnitToNothing[r]], [r] =>> Sub[F, TyrianConnectionEvent[r]]]:
 
-  /**
-   * Send a socket frame to the server.
-   *
-   * @param message the socket message to send
-   */
-  def sendRawMessage[Msg](message: String): Cmd[F, Msg] = socket.publish(message)
+  override def sendRawMessage(message: String): Cmd[F, Nothing] =
+    socket.publish(message)
 
-  /**
-   * Send client-bound message to the server.
-   *
-   * @param room    the room to send the message to
-   * @param message the message to send
-   */
-  def sendMessage[Msg](room: RoomId, message: ClientMessage): Cmd[F, Msg] =
-    MessageEncoder.derivedUnion[ClientMessage].encode(message) match
-      case Right(parts) => sendRawMessage(parts.mkString(s"$room|/", ",", "").replaceFirst(",", " "))
-      case Left(error) => Cmd.None
-
-  /**
-   * Send client-bound message to the server.
-   *
-   * @param message the message to send
-   */
-  def sendMessage[Msg](message: ClientMessage): Cmd[F, Msg] =
-    MessageEncoder.derivedUnion[ClientMessage].encode(message) match
-      case Right(parts) => sendRawMessage(parts.mkString(s"|/", ",", "").replaceFirst(",", " "))
-      case Left(error) => Cmd.None
-
-  /**
-   * Disconnect from the server.
-   */
-  def disconnect[Msg]: Cmd[F, Msg] = socket.disconnect
-
-  /**
-   * Subscribe to the connection to receive messages.
-   *
-   * @param handler the message handler
-   */
-  def subscribe[Msg](handler: TyrianServerEvent => Msg): Sub[F, Msg] =
-    socket
-      .subscribe(TyrianServerEvent.fromTyrian(_)(using MessageDecoder.derivedUnion[ServerMessage]))
-      .map(handler)
-
-  /**
-   * Login to a registered account.
-   *
-   * @param name     the name of the account
-   * @param password the password of the account
-   * @return the authentification response sent by the server
-   */
-  def login(challStr: ChallStr, name: Username, password: String): Cmd[F, TyrianLoginResponse] =
-    val encodedName = URLEncoder.encode(name.value, StandardCharsets.UTF_8)
-    val encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8)
-    val encodedChallStr = URLEncoder.encode(challStr.value, StandardCharsets.UTF_8)
-
-    val request = Request.post(
-      url = "https://play.pokemonshowdown.com/action.php",
-      body = Body.PlainText(
-        contentType = "application/x-www-form-urlencoded; charset=UTF-8",
-        s"act=login&name=$encodedName&pass=$encodedPassword&challstr=$encodedChallStr"
+  override def sendMessage(room: RoomId, message: ClientMessage): Cmd[F, Nothing] =
+    ClientMessage.encoder
+      .encode(message)
+      .fold(
+        err => Cmd.SideEffect(Async[F].raiseError(err)),
+        msg => sendRawMessage(msg.mkString(s"$room|/", ",", "").replaceFirst(",", " "))
       )
-    )
-      .withHeaders(Header("Sec-Fetch-Site", "cross-site"))
 
-    val decoder = Decoder(
-      onResponse = TyrianLoginResponse.fromUserLoginResponse,
-      onError = TyrianLoginResponse.fromError
-    )
-
-    Http.send(request, decoder)
-
-  /**
-   * Login as guest.
-   *
-   * @param name the name to take in game
-   */
-  def loginGuest(challStr: ChallStr, name: Username): Cmd[F, TyrianLoginResponse] =
-    val request = Request.post(
-      url = "https://play.pokemonshowdown.com/action.php",
-      body = Body.plainText(
-        s"""act: getassertion
-           |userid: $name
-           |challstr: $challStr""".stripMargin
+  override def sendMessage(message: ClientMessage): Cmd[F, Nothing] =
+    ClientMessage.encoder
+      .encode(message)
+      .fold(
+        err => Cmd.SideEffect(Async[F].raiseError(err)),
+        msg => sendRawMessage(msg.mkString(s"|/", ",", "").replaceFirst(",", " "))
       )
-    )
 
-    val decoder = Decoder(
-      onResponse = TyrianLoginResponse.fromGuestLoginResponse,
-      onError = TyrianLoginResponse.fromError
-    )
+  override def disconnect(): Cmd[F, Nothing] = socket.disconnect
 
-    Http.send(request, decoder)
+  override val serverMessages: Sub[F, TyrianConnectionEvent[Either[ProtocolError, ServerMessage]]] =
+    socket.subscribe:
+      case WebSocketEvent.Receive(text) =>
+        text
+          .split(raw"(\r\n|\r|\n)")
+          .toList
+          .match
+            case s">$room" :: tail => RoomId.either(room).map((tail, _))
+            case messages          => Right((messages, RoomId("lobby")))
+          .match
+            case Right((messages, room)) => TyrianConnectionEvent.Receive(
+                messages.map(message =>
+                  ServerMessage
+                    .decoder
+                    .decodeZPure(MessageInput.fromInput(message, room))
+                    .runEither
+                )
+              )
+
+            case Left(error) => TyrianConnectionEvent.Receive(List(Left(ProtocolError.InvalidInput(text, error))))
+
+      case WebSocketEvent.Open                => TyrianConnectionEvent.Open
+      case WebSocketEvent.Close(code, reason) => TyrianConnectionEvent.Close(code, reason)
+      case WebSocketEvent.Error(error)        => TyrianConnectionEvent.Error(error)
+      case WebSocketEvent.Heartbeat           => TyrianConnectionEvent.Heartbeat

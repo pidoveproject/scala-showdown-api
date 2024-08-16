@@ -10,26 +10,29 @@ import io.github.pidoveproject.showdown.protocol.server.choice.{ActiveChoice, Ch
 import io.github.pidoveproject.showdown.protocol.server.*
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.*
-import zio.*
-import zio.http.*
+import io.github.pidoveproject.showdown.zio.*
+import _root_.zio.*
+import _root_.zio.http.*
+import _root_.zio.stream.*
 
 object Main extends ZIOAppDefault:
 
   /**
    * Login to an account.
    */
-  private val loginProgram: ConnectionTask[Unit] =
+  private def loginProgram(challStr: ChallStr): ConnectionTask[Unit] =
     for
       _ <- Console.printLine("Logging in...").toProtocolZIO
       username <- Console.readLine("Username: ").toProtocolZIO.flatMap(Username.applyZIO(_)).retryN(3)
       password <- Console.readLine("Password: ").toProtocolZIO
-      _ <- ZIOShowdownConnection.login(username, password)
+      response <- ZIOShowdownClient.login(challStr)(username, password)
+      _ <- ZIOShowdownConnection.confirmLogin(response.currentUser.username, response.assertion)
     yield
       ()
 
   private def showTeams(app: ClientApp): ConnectionTask[Unit] =
     for
-      battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
+      battle <- ZIO.fromOption(app.currentBattle).mapError(_ => ProtocolError.Miscellaneous("No battle in current room"))
       teams =
         battle
           .players
@@ -57,8 +60,7 @@ object Main extends ZIOAppDefault:
     case s"use $room" =>
       for
         roomId <- RoomId.applyZIO(room)
-        clientState <- ZIOShowdownConnection.currentState
-        _ <- ZIO.unless(clientState.joinedRooms.contains(roomId))(ZIOShowdownConnection.sendMessage(GlobalCommand.Join(roomId)))
+        _ <- ZIO.unless(app.currentState.joinedRooms.contains(roomId))(ZIOShowdownConnection.sendMessage(GlobalCommand.Join(roomId)))
         _ <- Console.printLine(s"Using room $room").toProtocolZIO
       yield
         app.copy(currentRoom = Some(roomId))
@@ -71,7 +73,7 @@ object Main extends ZIOAppDefault:
 
     case "show team" =>
       for
-        battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
+        battle <- ZIO.fromOption(app.currentBattle).mapError(_ => ProtocolError.Miscellaneous("No battle in current room"))
         team = battle.currentRequest match
           case Some(choice) => showFullTeamChoice(choice.team)
           case None => "No team choice"
@@ -81,17 +83,17 @@ object Main extends ZIOAppDefault:
 
     case "show active" =>
       for
-        battle <- app.currentBattle.someOrFail(ProtocolError.Miscellaneous("No battle in current room"))
+        battle <- ZIO.fromOption(app.currentBattle).mapError(_ => ProtocolError.Miscellaneous("No battle in current room"))
         _ <- Console.printLine(showAllActive(battle)).toProtocolZIO
       yield
         app
 
     case "login" =>
       for
-        state <- ZIOShowdownConnection.currentState
         _ <-
-          if state.challStr.isDefined then loginProgram.catchAll(err => Console.printLine(err.getMessage).toProtocolZIO)
-          else Console.printLine("Cannot login at the moment: handshaked is not finished.").toProtocolZIO
+          app.currentState.challStr match
+            case Some(challStr) => loginProgram(challStr).catchAll(err => Console.printLine(err.getMessage).toProtocolZIO)
+            case None => Console.printLine("Cannot login at the moment: handshake is not finished.").toProtocolZIO
       yield
         app
 
@@ -99,13 +101,14 @@ object Main extends ZIOAppDefault:
 
     case "choice" =>
       for
-        battle <- app.currentBattle
         choice <-
-          battle.flatMap(_.currentRequest) match
-            case Some(choice) => Console.printLine(showBattleState(battle.get, choice)).toProtocolZIO
+          app.currentBattle.flatMap(_.currentRequest) match
+            case Some(choice) => Console.printLine(showBattleState(app.currentBattle.get, choice)).toProtocolZIO
             case None => Console.printLine("No choice request to display.").toProtocolZIO
       yield
         app
+
+    case "" => ZIO.succeed(app)
 
     case message =>
       for
@@ -143,9 +146,9 @@ object Main extends ZIOAppDefault:
    * @param appRef the reference to the state of the client
    * @param message the received message to process
    */
-  private def subscribeProgram(connection: ShowdownConnection[WebSocketFrame, ProtocolTask], appRef: Ref[ClientApp])(message: ServerMessage): ProtocolTask[Unit] =
+  private def subscribeProgram(appRef: Ref[ClientApp])(message: ServerMessage): ConnectionTask[Unit] =
     for
-      app <- appRef.get
+      app <- appRef.updateAndGet(a => a.copy(currentState = a.currentState.update(message)))
       _ <- ZIO.when(app.debugging)(Console.printLine(s"< $message").toProtocolZIO)
       _ <- message match
         case GlobalMessage.ChallStr(challstr) =>
@@ -157,7 +160,7 @@ object Main extends ZIOAppDefault:
 
         case RoomBoundMessage(room, BattleInitializationMessage.StartPreview()) =>
           Console.printLine(s"===== Preview Start =====").toProtocolZIO
-            *> showTeams(app).provide(ZLayer.succeed(connection))
+            *> showTeams(app)
             *> appRef.update(_.copy(currentRoom = Some(room)))
 
         case RoomBoundMessage(room, BattleInitializationMessage.Start()) =>
@@ -172,8 +175,8 @@ object Main extends ZIOAppDefault:
 
         case RoomBoundMessage(room, BattleMajorActionMessage.Move(attackerPos, move, _)) =>
           for
-            state <- connection.currentState
-            battle <- ZIO.fromOption(state.getJoinedRoomOrEmpty(room).battle).orElseFail(ProtocolError.Miscellaneous("Received request from unjoined room"))
+            app <- appRef.get
+            battle <- ZIO.fromOption(app.currentState.getJoinedRoomOrEmpty(room).battle).orElseFail(ProtocolError.Miscellaneous("Received request from unjoined room"))
             attacker <- ZIO.fromOption(battle.getTeamMemberAt(attackerPos.position)).orElseFail(ProtocolError.Miscellaneous(s"Missing pokemon at $attackerPos"))
             _ <- Console.printLine(s"${attacker.details.species} used $move").toProtocolZIO
           yield
@@ -227,17 +230,29 @@ object Main extends ZIOAppDefault:
    * 
    * @param connection the connection to use
    */
-  private def connectionProgram(connection: ShowdownConnection[WebSocketFrame, ProtocolTask]): ProtocolTask[Unit] =
+  private def connectionProgram: ZIO[ZIOShowdownClient & ZIOShowdownConnection, Throwable, Unit] =
+    def runStream(appRef: Ref[ClientApp]) =
+      val subscribe = subscribeProgram(appRef)
+
+      ZIOShowdownConnection
+        .serverMessages
+        .mapZIO:
+          case Right(message) => subscribe(message)
+          case Left(error) => Console.printLineError(s"Decoding error: $error").toProtocolZIO
+        .runDrain
+
     for
-      appRef <- Ref.make(ClientApp())
-      _ <- commandProgram(appRef).provide(ZLayer.succeed(connection)) raceFirst connection.subscribe(subscribeProgram(connection, appRef))
+      appRef <- Ref.make(ClientApp(ShowdownData.empty))
+      _ <- commandProgram(appRef) raceFirst runStream(appRef)
     yield
       ()
 
-  override def run =
-    ZIOShowdownClient
-      .openConnection(connectionProgram)
-      .provide(
+  override def run: ZIO[Any, Throwable, Unit] =
+    ZIO.scoped(
+      ZIOShowdownClient
+        .openConnection()
+        .flatMap(connection => connectionProgram.provideSome[ZIOShowdownClient](ZLayer.succeed(connection)))
+    ).provide(
         Client.default,
-        ZIOShowdownClient.layer()
+        ZIOShowdownClient.layer
       )

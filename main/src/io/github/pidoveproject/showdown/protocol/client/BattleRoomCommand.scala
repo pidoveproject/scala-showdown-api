@@ -1,9 +1,8 @@
 package io.github.pidoveproject.showdown.protocol.client
 
 import io.github.pidoveproject.showdown.protocol.MessageEncoder
-import io.github.pidoveproject.showdown.FormatName
-import io.github.pidoveproject.showdown.room.{ChatContent, RoomId, given}
-import io.github.pidoveproject.showdown.user.{Username, given}
+import io.github.pidoveproject.showdown.room.RoomId
+import io.github.pidoveproject.showdown.user.Username
 
 /**
  * A command bound to a battle room.
@@ -60,7 +59,7 @@ enum BattleRoomCommand derives MessageEncoder:
 
   /**
    * Enable the timer
-   * 
+   *
    * @param isOn `true` to enable the timer, `false` to disable.
    */
   case Timer(isOn: Boolean)

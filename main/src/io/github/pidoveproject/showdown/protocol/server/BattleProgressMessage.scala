@@ -2,12 +2,11 @@ package io.github.pidoveproject.showdown.protocol.server
 
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.Timestamp as TimestampValue
-import io.github.pidoveproject.showdown.battle.{*, given}
+import io.github.pidoveproject.showdown.battle.*
 import io.github.pidoveproject.showdown.protocol.client.BattleChoice
 import io.github.pidoveproject.showdown.protocol.server.choice.{ChoiceError, ChoiceRequest}
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, messageName}
 import io.github.pidoveproject.showdown.room.ChatContent
-import io.github.pidoveproject.showdown.team.MoveName
 import io.github.pidoveproject.showdown.user.{User, Username}
 
 /**

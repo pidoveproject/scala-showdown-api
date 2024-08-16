@@ -30,7 +30,7 @@ trait MessageEncoder[-A]:
    *
    * @param f the function to apply to the input value
    * @tparam B the new type to serialize
-   * @return a new encoder 
+   * @return a new encoder
    */
   def contramap[B](f: B => A): MessageEncoder[B] = value => encode(f(value))
 

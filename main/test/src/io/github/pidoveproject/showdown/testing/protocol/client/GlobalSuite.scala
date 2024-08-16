@@ -1,10 +1,11 @@
 package io.github.pidoveproject.showdown.testing.protocol.client
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.protocol.{MessageEncoder, messageName}
-import io.github.pidoveproject.showdown.protocol.client.*
-import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.FormatName
+import io.github.pidoveproject.showdown.protocol.MessageEncoder
+import io.github.pidoveproject.showdown.protocol.client.*
+import io.github.pidoveproject.showdown.room.ChatContent
+import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.testing.protocol.*
 import io.github.pidoveproject.showdown.user.Username
 import utest.*
@@ -44,6 +45,10 @@ object GlobalSuite extends TestSuite:
     test("join") - assertEncode(encoder, GlobalCommand.UserAuth(Username("Il_totore")), List("userauth", "Il_totore"))
     test("roomAuth") - assertEncode(encoder, GlobalCommand.RoomAuth(RoomId("gen9ou1234")), List("roomauth", "gen9ou1234"))
     test("query"):
-      test("userDetails") - assertEncode(encoder, GlobalCommand.Query(QueryRequest.UserDetails(Username("Il_totore"))), List("query", "userdetails", "Il_totore"))
+      test("userDetails") - assertEncode(
+        encoder,
+        GlobalCommand.Query(QueryRequest.UserDetails(Username("Il_totore"))),
+        List("query", "userdetails", "Il_totore")
+      )
       test("battleRooms") - assertEncode(encoder, GlobalCommand.Query(QueryRequest.BattleRooms()), List("query", "roomlist"))
       test("chatRooms") - assertEncode(encoder, GlobalCommand.Query(QueryRequest.ChatRooms()), List("query", "rooms"))

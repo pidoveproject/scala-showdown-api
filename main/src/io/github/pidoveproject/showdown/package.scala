@@ -6,7 +6,7 @@ import io.github.pidoveproject.showdown.util.NumericTypeOps
 
 opaque type Timestamp = Long :| GreaterEqual[0]
 object Timestamp extends RefinedTypeOpsImpl[Long, GreaterEqual[0], Timestamp]:
-  
+
   def zero: Timestamp = 0
 
 opaque type Count = Int :| GreaterEqual[0]

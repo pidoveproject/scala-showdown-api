@@ -9,7 +9,7 @@ object messagePrefix:
 
   inline def getMessagePrefix[T]: Option[String] = ${ getMessagePrefixImpl[T] }
 
-  def getMessagePrefixImpl[T : Type](using Quotes): Expr[Option[String]] =
+  def getMessagePrefixImpl[T: Type](using Quotes): Expr[Option[String]] =
     import quotes.reflect.*
 
     val repr = TypeRepr.of[T]
@@ -19,4 +19,4 @@ object messagePrefix:
 
     typeSymbol.getAnnotation(annotationSymbol).map(_.asExpr) match
       case Some('{ new `messagePrefix`($prefix: String) }) => '{ Some($prefix) }
-      case _ => '{ None }
+      case _                                               => '{ None }

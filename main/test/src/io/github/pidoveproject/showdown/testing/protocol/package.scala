@@ -7,8 +7,8 @@ def assertDecode[T](decoder: MessageDecoder[T], input: MessageInput, expected: T
   assert(
     result == Right(expected),
     s"""Decoding failed.
-      |Input: $input
-      |Result: $result""".stripMargin
+       |Input: $input
+       |Result: $result""".stripMargin
   )
 
 def assertDecodeString[T](decoder: MessageDecoder[T], input: String, expected: T): Unit =
@@ -25,5 +25,5 @@ def assertEncode[T](encoder: MessageEncoder[T], input: T, expected: List[String]
   assert(
     result == Right(expected),
     s"""Expected: $expected
-      |Result: $result""".stripMargin
+       |Result: $result""".stripMargin
   )

@@ -5,7 +5,7 @@ import io.github.pidoveproject.showdown.room.RoomId
 
 /**
  * A room message with the associated room.
- * 
+ *
  * @param id the id of the room the message is bound to
  * @param message the message sent from the room
  */
@@ -17,5 +17,4 @@ object RoomBoundMessage:
     for
       id <- MessageDecoder.currentRoom
       message <- MessageDecoder.derivedUnion[RoomMessage | BattleMessage]
-    yield
-      RoomBoundMessage(id, message)
+    yield RoomBoundMessage(id, message)

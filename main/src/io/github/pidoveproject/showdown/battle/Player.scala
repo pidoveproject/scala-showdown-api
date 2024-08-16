@@ -12,9 +12,9 @@ import io.github.pidoveproject.showdown.user.{AvatarName, Username}
  * @param team this player's pokemon team
  */
 case class Player(
-     number: PlayerNumber,
-     name: Option[Username],
-     avatar: Option[AvatarName],
-     rating: Option[Rating],
-     team: Option[PlayerTeam] = None
+    number: PlayerNumber,
+    name: Option[Username],
+    avatar: Option[AvatarName],
+    rating: Option[Rating],
+    team: Option[PlayerTeam] = None
 )

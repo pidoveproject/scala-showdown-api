@@ -34,4 +34,5 @@ object StatType:
   given JsonFieldEncoder[StatType] = JsonFieldEncoder.string.contramap(_.shortName.toLowerCase)
   given JsonFieldDecoder[StatType] = JsonFieldDecoder.string.mapOrFail(name => fromShortName(name).toRight(s"Invalid stat name: $name"))
 
-  given MessageDecoder[StatType] = MessageDecoder.string.mapEither(name => fromShortName(name).toRight(ProtocolError.InvalidInput(name, "Invalid stat name")))
+  given MessageDecoder[StatType] =
+    MessageDecoder.string.mapEither(name => fromShortName(name).toRight(ProtocolError.InvalidInput(name, "Invalid stat name")))

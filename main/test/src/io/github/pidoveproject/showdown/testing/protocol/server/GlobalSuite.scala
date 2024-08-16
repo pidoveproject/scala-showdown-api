@@ -23,22 +23,35 @@ object GlobalSuite extends TestSuite:
       test("newline") - assertDecodeString(decoder, "|popup|hello||world", GlobalMessage.Popup(PopupMessage(s"hello${br}world".assume)))
 
     test("pm"):
-      test("noPipe") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|Wanna play?", GlobalMessage.PrivateMessage(
-        User(Username("Il_totore"), None),
-        User(Username("Zarel"), Some('*')),
-        ChatContent("Wanna play?")
-      ))
+      test("noPipe") - assertDecodeString(
+        decoder,
+        "|pm| Il_totore|*Zarel|Wanna play?",
+        GlobalMessage.PrivateMessage(
+          User(Username("Il_totore"), None),
+          User(Username("Zarel"), Some('*')),
+          ChatContent("Wanna play?")
+        )
+      )
 
-      test("withPipes") - assertDecodeString(decoder, "|pm| Il_totore|*Zarel|I like pipes `|`", GlobalMessage.PrivateMessage(
-        User(Username("Il_totore"), None),
-        User(Username("Zarel"), Some('*')),
-        ChatContent("I like pipes `|`")
-      ))
+      test("withPipes") - assertDecodeString(
+        decoder,
+        "|pm| Il_totore|*Zarel|I like pipes `|`",
+        GlobalMessage.PrivateMessage(
+          User(Username("Il_totore"), None),
+          User(Username("Zarel"), Some('*')),
+          ChatContent("I like pipes `|`")
+        )
+      )
 
     test("usercount") - assertDecodeString(decoder, "|usercount|21838", GlobalMessage.UserCount(Count(21838)))
-    test("nametaken") - assertDecodeString(decoder, "|nametaken|Il_totore|Name already taken", GlobalMessage.NameTaken("Il_totore", "Name already taken"))
+    test("nametaken") - assertDecodeString(
+      decoder,
+      "|nametaken|Il_totore|Name already taken",
+      GlobalMessage.NameTaken("Il_totore", "Name already taken")
+    )
     test("challstr"):
-      inline val challstr = "4|38c34d953aa819f57405006c102b13e480c07ad9c87245228dc23be2f22b403050f989ca5c65aac92326d185547f4154be9e7f6c79b233a8e933fbcd98728bb349942fb0d2c4faee5fe88581d25906885a1d5006831b84a6672134d72c689883a4d071a2454a5aab2a39aaf34933060c439438e4443887ffcce6d69fbe5f9deb"
+      inline val challstr =
+        "4|38c34d953aa819f57405006c102b13e480c07ad9c87245228dc23be2f22b403050f989ca5c65aac92326d185547f4154be9e7f6c79b233a8e933fbcd98728bb349942fb0d2c4faee5fe88581d25906885a1d5006831b84a6672134d72c689883a4d071a2454a5aab2a39aaf34933060c439438e4443887ffcce6d69fbe5f9deb"
       assertDecodeString(decoder, s"|challstr|$challstr", GlobalMessage.ChallStr(ChallStr(challstr)))
 
     test("updateuser"):
@@ -98,11 +111,11 @@ object GlobalSuite extends TestSuite:
           column = 2,
           formats = List(
             Format(FormatName("[Gen 9] Almost Any Ability"), random = true),
-            Format(FormatName("[Gen 9] Balanced Hackmons"), random = true),
+            Format(FormatName("[Gen 9] Balanced Hackmons"), random = true)
           )
         )
-      )
-    ))
+      ))
+    )
 
     test("updatesearch"):
       test("empty") - assertDecodeString(

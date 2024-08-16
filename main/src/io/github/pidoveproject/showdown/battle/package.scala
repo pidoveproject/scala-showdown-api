@@ -15,8 +15,7 @@ object PlayerNumber extends NumericTypeOps[Int, Positive, PlayerNumber]:
       for
         number <- numberString.toIntOption.toRight(ProtocolError.InvalidInput(numberString, "Expected an int"))
         result <- PlayerNumber.either(number).toInvalidInput(value)
-      yield
-        result
+      yield result
 
     case value => Left(ProtocolError.InvalidInput(value, "Invalid player number"))
 
@@ -64,7 +63,7 @@ object Weather extends RefinedTypeOpsImpl[String, Not[Blank], Weather]:
   val Sandstorm: Weather = "sandstorm"
   val Snow: Weather = "snow"
   val Sun: Weather = "sun"
-  
+
 opaque type FieldEffect = String :| Not[Blank]
 object FieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], FieldEffect]
 
@@ -73,9 +72,9 @@ object SideFieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], SideFieldE
 
 opaque type VolatileStatus = String :| Not[Blank]
 object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]:
-  
+
   def fromMove(move: MoveName): VolatileStatus = VolatileStatus.assume(move.toString)
-  
+
   val Confusion: VolatileStatus = "Confusion"
   val MustRecharge: VolatileStatus = "Must recharge"
   val Waiting: VolatileStatus = "Waiting"

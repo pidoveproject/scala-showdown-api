@@ -7,10 +7,8 @@ import io.github.pidoveproject.showdown.battle.*
 import io.github.pidoveproject.showdown.battle.ActivePosition.pos
 import io.github.pidoveproject.showdown.protocol.MessageDecoder
 import io.github.pidoveproject.showdown.protocol.server.BattleAttackMessage
-import io.github.pidoveproject.showdown.room.ChatContent
 import io.github.pidoveproject.showdown.testing.protocol.*
 import io.github.pidoveproject.showdown.team.*
-import io.github.pidoveproject.showdown.user.Username
 import utest.*
 
 object BattleAttackSuite extends TestSuite:

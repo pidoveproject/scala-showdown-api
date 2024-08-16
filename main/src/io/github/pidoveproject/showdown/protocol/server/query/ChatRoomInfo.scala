@@ -6,7 +6,7 @@ import zio.json.*
 
 /**
  * Informations on a chat room.
- * 
+ *
  * @param title the title of the room
  * @param description the description of the room
  * @param userCount the number of users in the room
@@ -15,10 +15,10 @@ import zio.json.*
  * @param privacy the privacy settings of the room if any
  */
 case class ChatRoomInfo(
-  title: String,
-  @jsonField("desc") description: String,
-  userCount: Count,
-  section: Option[String] = None,
-  subRooms: Option[List[String]] = None,
-  privacy: Option[String] = None
+    title: String,
+    @jsonField("desc") description: String,
+    userCount: Count,
+    section: Option[String] = None,
+    subRooms: Option[List[String]] = None,
+    privacy: Option[String] = None
 ) derives JsonDecoder

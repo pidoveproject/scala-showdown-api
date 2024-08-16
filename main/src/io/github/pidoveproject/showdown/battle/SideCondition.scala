@@ -18,7 +18,7 @@ case class SideCondition(effects: Map[SideFieldEffect, Count]):
    * @return a copy of the side's condition with the given effect
    */
   def withEffect(effect: SideFieldEffect): SideCondition =
-    this.copy(effects = effects.updated(effect, effects.getOrElse(effect, Count(0))+Count(1)))
+    this.copy(effects = effects.updated(effect, effects.getOrElse(effect, Count(0)) + Count(1)))
 
   /**
    * Remove an effect to the the side.

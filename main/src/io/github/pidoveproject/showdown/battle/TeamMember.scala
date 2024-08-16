@@ -11,10 +11,10 @@ import io.github.pidoveproject.showdown.team.{AbilityName, ItemName}
  * @param ability the ability of this pokemon
  */
 case class TeamMember(
-  details: PokemonDetails,
-  condition: Condition = Condition.Healthy,
-  item: HeldItem = HeldItem.Unknown,
-  ability: Option[AbilityName] = None
+    details: PokemonDetails,
+    condition: Condition = Condition.Healthy,
+    item: HeldItem = HeldItem.Unknown,
+    ability: Option[AbilityName] = None
 ):
 
   /**
