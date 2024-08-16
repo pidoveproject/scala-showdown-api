@@ -5,7 +5,8 @@ import zio.*
 import zio.http.*
 import zio.stream.Stream
 
-class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClient[WebSocketFrame, IO, [r] =>> Stream[Throwable, r], [x] =>> ZIO[Scope, ProtocolError, x]]:
+class ZIOShowdownClient(client: Client, serverUrl: String)
+    extends ShowdownClient[WebSocketFrame, IO, [r] =>> Stream[Throwable, r], [x] =>> ZIO[Scope, ProtocolError, x]]:
 
   override def openConnection: ZIO[Scope, ProtocolError, ZIOShowdownConnection] =
     def socketApp(promise: Promise[ProtocolError, ZIOShowdownConnection]) =
@@ -16,8 +17,7 @@ class ZIOShowdownClient(client: Client, serverUrl: String) extends ShowdownClien
       connectionPromise <- Promise.make[ProtocolError, ZIOShowdownConnection]
       _ <- client.socket(url = url, headers = Headers.empty, app = socketApp(connectionPromise)).toProtocolZIO
       connection <- connectionPromise.await
-    yield
-      connection
+    yield connection
 
 object ZIOShowdownClient:
 
@@ -25,8 +25,7 @@ object ZIOShowdownClient:
     ZLayer:
       for
         client <- ZIO.service[Client]
-      yield
-        ZIOShowdownClient(client, serverUrl)
+      yield ZIOShowdownClient(client, serverUrl)
 
   def openConnection: ZIO[ZIOShowdownClient & Scope, ProtocolError, ZIOShowdownConnection] =
     ZIO.serviceWithZIO[ZIOShowdownClient](_.openConnection)

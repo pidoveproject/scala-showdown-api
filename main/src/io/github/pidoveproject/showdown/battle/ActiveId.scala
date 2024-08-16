@@ -25,10 +25,8 @@ object ActiveId:
       for
         position <- ActivePosition.fromString(stringPos)
         surname <- Surname.either(stringName).toInvalidInput(stringName)
-      yield
-        ActiveId(position, surname)
-  
+      yield ActiveId(position, surname)
+
     case _ => Left(ProtocolError.InvalidInput(value, "Invalid pokemon ID"))
-  
+
   given MessageDecoder[ActiveId] = MessageDecoder.string.mapEither(fromString)
-    

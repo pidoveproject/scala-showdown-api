@@ -17,14 +17,14 @@ import scala.math.Integral.Implicits.infixIntegralOps
  * @param transformedSpecies the new species of the pokemon, `None` indicates that it still has its base species
  */
 case class ActivePokemon(
-                          teamSlot: TeamSlot,
-                          boosts: Map[StatType, StatBoost] = Map.empty,
-                          volatileStatus: Set[VolatileStatus] = Set.empty,
-                          nextMoveStatus: Set[VolatileStatus] = Set.empty,
-                          nextTurnStatus: Set[VolatileStatus] = Set.empty,
-                          modifiedAbility: Option[RevealedAbility] = None,
-                          transformedSpecies: Option[SpeciesName] = None,
-                          isTerastallized: Boolean = false
+    teamSlot: TeamSlot,
+    boosts: Map[StatType, StatBoost] = Map.empty,
+    volatileStatus: Set[VolatileStatus] = Set.empty,
+    nextMoveStatus: Set[VolatileStatus] = Set.empty,
+    nextTurnStatus: Set[VolatileStatus] = Set.empty,
+    modifiedAbility: Option[RevealedAbility] = None,
+    transformedSpecies: Option[SpeciesName] = None,
+    isTerastallized: Boolean = false
 ):
 
   /**
@@ -94,23 +94,24 @@ case class ActivePokemon(
 
   /**
    * Remove all status that should end the next time this pokemon uses a move.
-   * 
+   *
    * @return a copy of this pokemon without any "next move status"
    */
   def clearNextMoveStatus: ActivePokemon = this.copy(nextMoveStatus = Set.empty)
 
   /**
    * Change the ability of this pokemon.
-   * 
+   *
    * @param ability the new ability to give
    * @param cause the cause of the ability change
    * @return a copy of this pokemon with the given ability
    */
-  def withModifiedAbility(ability: AbilityName, cause: Effect): ActivePokemon = this.copy(modifiedAbility = Some(RevealedAbility.Modified(ability, cause)))
+  def withModifiedAbility(ability: AbilityName, cause: Effect): ActivePokemon =
+    this.copy(modifiedAbility = Some(RevealedAbility.Modified(ability, cause)))
 
   /**
    * Disable the ability of this pokemon.
-   * 
+   *
    * @return a copy of this pokemon with the ability [[RevealedAbility.Disabled]]
    */
   def disabledAbility: ActivePokemon = this.copy(modifiedAbility = Some(RevealedAbility.Disabled))

@@ -5,7 +5,7 @@ import io.github.pidoveproject.showdown.protocol.MessageDecoder.toInvalidInput
 
 /**
  * The relative position of an active pokemon.
- * 
+ *
  * @param side the relative side of the pokemon
  * @param slot the slot of the pokemon
  */
@@ -25,14 +25,12 @@ object RelativePosition:
       for
         intSlot <- slot.toIntOption.toRight(ProtocolError.InvalidInput(slot, "Invalid int"))
         pokemonSlot <- PokemonSlot.either(intSlot).toInvalidInput(slot)
-      yield
-        RelativePosition(RelativeSide.Enemy, pokemonSlot)
+      yield RelativePosition(RelativeSide.Enemy, pokemonSlot)
 
     case s"-$slot" =>
       for
         intSlot <- slot.toIntOption.toRight(ProtocolError.InvalidInput(slot, "Invalid int"))
         pokemonSlot <- PokemonSlot.either(intSlot).toInvalidInput(slot)
-      yield
-        RelativePosition(RelativeSide.Ally, pokemonSlot)
+      yield RelativePosition(RelativeSide.Ally, pokemonSlot)
 
     case value => Left(ProtocolError.InvalidInput(value, "Invalid relative position"))

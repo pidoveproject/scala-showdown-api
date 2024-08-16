@@ -54,7 +54,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    * Flip side of field effects (aka Court Change).
    */
   case SwapSideConditions
-  
+
   /**
    * An item was revealed.
    *
@@ -161,8 +161,7 @@ enum BattleMinorActionMessage derives MessageDecoder:
    */
   case Message(message: ChatContent)
 
-
 object BattleMinorActionMessage:
-      
+
   given (using weatherDecoder: MessageDecoder[Weather]): MessageDecoder[Option[Weather]] =
     MessageDecoder.word("none").map(_ => None) <> weatherDecoder.map(Some.apply)

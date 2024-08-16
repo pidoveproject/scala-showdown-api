@@ -23,8 +23,8 @@ import java.nio.charset.StandardCharsets
  * @param socket the web socket used to communicate with the server
  * @tparam F the effect type of the Tyrian app
  */
-case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F])
-  extends ShowdownConnection[String, [e, r] =>> Cmd[F, UnitToNothing[r]], [r] =>> Sub[F, TyrianConnectionEvent[r]]]:
+case class TyrianShowdownConnection[F[_]: Async](socket: WebSocket[F])
+    extends ShowdownConnection[String, [e, r] =>> Cmd[F, UnitToNothing[r]], [r] =>> Sub[F, TyrianConnectionEvent[r]]]:
 
   override def sendRawMessage(message: String): Cmd[F, Nothing] =
     socket.publish(message)
@@ -55,23 +55,23 @@ case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F])
           .toList
           .match
             case s">$room" :: tail => RoomId.either(room).map((tail, _))
-            case messages => Right((messages, RoomId("lobby")))
+            case messages          => Right((messages, RoomId("lobby")))
           .match
             case Right((messages, room)) => TyrianConnectionEvent.Receive(
-              messages.map(message =>
-                ServerMessage
-                  .decoder
-                  .decodeZPure(MessageInput.fromInput(message, room))
-                  .runEither
+                messages.map(message =>
+                  ServerMessage
+                    .decoder
+                    .decodeZPure(MessageInput.fromInput(message, room))
+                    .runEither
+                )
               )
-            )
 
             case Left(error) => TyrianConnectionEvent.Receive(List(Left(ProtocolError.InvalidInput(text, error))))
 
-      case WebSocketEvent.Open => TyrianConnectionEvent.Open
+      case WebSocketEvent.Open                => TyrianConnectionEvent.Open
       case WebSocketEvent.Close(code, reason) => TyrianConnectionEvent.Close(code, reason)
-      case WebSocketEvent.Error(error) => TyrianConnectionEvent.Error(error)
-      case WebSocketEvent.Heartbeat => TyrianConnectionEvent.Heartbeat
+      case WebSocketEvent.Error(error)        => TyrianConnectionEvent.Error(error)
+      case WebSocketEvent.Heartbeat           => TyrianConnectionEvent.Heartbeat
 
   override def login(challStr: ChallStr)(name: Username, password: String): Cmd[F, LoginResponse] =
     val encodedName = URLEncoder.encode(name.value, StandardCharsets.UTF_8)
@@ -79,20 +79,20 @@ case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F])
     val encodedChallStr = URLEncoder.encode(challStr.value, StandardCharsets.UTF_8)
 
     val request = Request.post(
-        url = "https://play.pokemonshowdown.com/action.php",
-        body = Body.PlainText(
-          contentType = "application/x-www-form-urlencoded; charset=UTF-8",
-          s"act=login&name=$encodedName&pass=$encodedPassword&challstr=$encodedChallStr"
-        )
+      url = "https://play.pokemonshowdown.com/action.php",
+      body = Body.PlainText(
+        contentType = "application/x-www-form-urlencoded; charset=UTF-8",
+        s"act=login&name=$encodedName&pass=$encodedPassword&challstr=$encodedChallStr"
       )
+    )
       .withHeaders(Header("Sec-Fetch-Site", "cross-site"))
 
     val decoder = Decoder(
       onResponse = _.body.substring(1).fromJson[LoginResponse].left.map(ProtocolError.Miscellaneous.apply),
       onError =
         case HttpError.BadRequest(msg) => Left(ProtocolError.AuthentificationFailed(msg))
-        case HttpError.Timeout => Left(ProtocolError.Miscellaneous("timeout"))
-        case HttpError.NetworkError => Left(ProtocolError.Miscellaneous("network error"))
+        case HttpError.Timeout         => Left(ProtocolError.Miscellaneous("timeout"))
+        case HttpError.NetworkError    => Left(ProtocolError.Miscellaneous("network error"))
     )
 
     Cmd.Run(Http.send(request, decoder).toTask.rethrow)
@@ -111,8 +111,8 @@ case class TyrianShowdownConnection[F[_] : Async](socket: WebSocket[F])
       onResponse = r => Right(r.body),
       onError =
         case HttpError.BadRequest(msg) => Left(ProtocolError.AuthentificationFailed(msg))
-        case HttpError.Timeout => Left(ProtocolError.Miscellaneous("timeout"))
-        case HttpError.NetworkError => Left(ProtocolError.Miscellaneous("network error"))
+        case HttpError.Timeout         => Left(ProtocolError.Miscellaneous("timeout"))
+        case HttpError.NetworkError    => Left(ProtocolError.Miscellaneous("network error"))
     )
 
     Cmd.Run(Http.send(request, decoder).toTask.rethrow)

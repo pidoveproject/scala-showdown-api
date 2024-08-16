@@ -40,7 +40,7 @@ object DecodingSuite extends TestSuite:
     test("tuple"):
       test("empty") - assertDecodeString(emptyTuple, "", EmptyTuple)
       test("nonEmpty") - assertDecodeString(nonEmptyTuple[String, (Int, Double)], "abcd|1234|1.234", ("abcd", 1234, 1.234))
-      
+
     test("derivation"):
       test("product"):
         val decoder = MessageDecoder.derived[Person]

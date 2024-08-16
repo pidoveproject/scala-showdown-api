@@ -16,8 +16,8 @@ import org.http4s.client.Client
 import org.http4s.client.websocket.{WSConnection, WSFrame}
 import zio.json.*
 
-class CatsShowdownConnection[F[_] : Concurrent](client: Client[F], connection: WSConnection[F])
-  extends ShowdownConnection[WSFrame, [e, r] =>> F[r], [r] =>> Stream[F, r]]:
+class CatsShowdownConnection[F[_]: Concurrent](client: Client[F], connection: WSConnection[F])
+    extends ShowdownConnection[WSFrame, [e, r] =>> F[r], [r] =>> Stream[F, r]]:
 
   override def sendRawMessage(message: WSFrame): F[Unit] =
     connection.send(message)
@@ -48,14 +48,14 @@ class CatsShowdownConnection[F[_] : Concurrent](client: Client[F], connection: W
             .toList
             .match
               case s">$room" :: tail => RoomId.either(room).map((tail, _))
-              case messages => Right((messages, RoomId("lobby")))
+              case messages          => Right((messages, RoomId("lobby")))
             .match
               case Right((messages, room)) => Stream.emits(messages).map(message =>
-                ServerMessage
-                  .decoder
-                  .decodeZPure(MessageInput.fromInput(message, room))
-                  .runEither
-              )
+                  ServerMessage
+                    .decoder
+                    .decodeZPure(MessageInput.fromInput(message, room))
+                    .runEither
+                )
 
               case Left(error) => Stream.emit(Left(ProtocolError.InvalidInput(text, error)))
 
@@ -73,8 +73,8 @@ class CatsShowdownConnection[F[_] : Concurrent](client: Client[F], connection: W
         "challstr" -> challStr.value
       )).asInstanceOf[Request[F]]
     ).map(body => body.fromJson[LoginResponse].left.map(msg => ProtocolError.InvalidInput(body, msg)))
-    .rethrow
-    .flatTap(data => sendMessage(AuthCommand.Trn(name, 0, data.assertion)))
+      .rethrow
+      .flatTap(data => sendMessage(AuthCommand.Trn(name, 0, data.assertion)))
 
   override def loginGuest(challStr: ChallStr)(name: Username): F[String] =
     client.expect[String](

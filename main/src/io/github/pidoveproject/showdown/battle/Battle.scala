@@ -3,7 +3,15 @@ package io.github.pidoveproject.showdown.battle
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.protocol.server.choice.ChoiceRequest
 import io.github.pidoveproject.showdown.{FormatName, Generation}
-import io.github.pidoveproject.showdown.protocol.server.{BattleAttackMessage, BattleInitializationMessage, BattleMajorActionMessage, BattleMessage, BattleMinorActionMessage, BattleProgressMessage, BattleStatusMessage}
+import io.github.pidoveproject.showdown.protocol.server.{
+  BattleAttackMessage,
+  BattleInitializationMessage,
+  BattleMajorActionMessage,
+  BattleMessage,
+  BattleMinorActionMessage,
+  BattleProgressMessage,
+  BattleStatusMessage
+}
 import io.github.pidoveproject.showdown.user.Username
 
 import scala.math.Integral.Implicits.infixIntegralOps
@@ -28,20 +36,20 @@ import scala.math.Ordering.Implicits.infixOrderingOps
  * @param sides the currently active side-bound effects
  */
 case class Battle(
-                   state: BattleState,
-                   activePokemon: Map[ActivePosition, ActivePokemon],
-                   battleType: Option[BattleType],
-                   players: Map[PlayerNumber, Player],
-                   generation: Option[Generation],
-                   format: Option[FormatName],
-                   rules: Set[BattleRule],
-                   timerEnabled: Boolean,
-                   currentTurn: Option[TurnNumber],
-                   result: Option[BattleResult],
-                   currentRequest: Option[ChoiceRequest],
-                   weather: Option[Weather],
-                   field: Map[FieldEffect, TurnNumber],
-                   sides: Map[PlayerId, SideCondition]
+    state: BattleState,
+    activePokemon: Map[ActivePosition, ActivePokemon],
+    battleType: Option[BattleType],
+    players: Map[PlayerNumber, Player],
+    generation: Option[Generation],
+    format: Option[FormatName],
+    rules: Set[BattleRule],
+    timerEnabled: Boolean,
+    currentTurn: Option[TurnNumber],
+    result: Option[BattleResult],
+    currentRequest: Option[ChoiceRequest],
+    weather: Option[Weather],
+    field: Map[FieldEffect, TurnNumber],
+    sides: Map[PlayerId, SideCondition]
 ):
 
   /**
@@ -113,8 +121,7 @@ case class Battle(
       owner <- players.get(player)
       team <- owner.team
       teamPokemon <- team.getPokemon(slot)
-    yield
-      teamPokemon
+    yield teamPokemon
 
   /**
    * Set the inactive information of a pokemon currently active at a given position.
@@ -169,8 +176,7 @@ case class Battle(
       player <- players.get(playerNumber)
       team <- player.team
       slot <- team.getSlotByDetails(details)
-    yield
-      slot
+    yield slot
 
   /**
    * Declare a new team member.
@@ -245,7 +251,7 @@ case class Battle(
    */
   def update(message: BattleMessage): Battle = message match
 
-    //Initialization
+    // Initialization
     case BattleInitializationMessage.Player(number, name, avatar, rating) =>
       players.get(number) match
         case Some(player) => this.copy(players = players.updated(number, player.copy(name = name, avatar = avatar, rating = rating)))
@@ -254,23 +260,23 @@ case class Battle(
     case BattleInitializationMessage.TeamSize(player, size) =>
       this.updatePlayer(player, _.copy(team = Some(PlayerTeam(size))))
     case BattleInitializationMessage.GameType(battleType) => this.copy(battleType = Some(battleType))
-    case BattleInitializationMessage.Gen(generation) => this.copy(generation = Some(generation))
-    case BattleInitializationMessage.Tier(format) => this.copy(format = Some(format))
-    case BattleInitializationMessage.Rule(rule) => this.copy(rules = rules + rule)
-    case BattleInitializationMessage.StartPreview() => this.copy(state = BattleState.Preview)
-    case BattleInitializationMessage.Start() => this.copy(state = BattleState.Playing)
+    case BattleInitializationMessage.Gen(generation)      => this.copy(generation = Some(generation))
+    case BattleInitializationMessage.Tier(format)         => this.copy(format = Some(format))
+    case BattleInitializationMessage.Rule(rule)           => this.copy(rules = rules + rule)
+    case BattleInitializationMessage.StartPreview()       => this.copy(state = BattleState.Preview)
+    case BattleInitializationMessage.Start()              => this.copy(state = BattleState.Playing)
     case BattleInitializationMessage.DeclarePokemon(player, details, item) =>
       this.declareTeamMember(player, TeamMember(details, item = item.fold(HeldItem.Unknown)(HeldItem.Revealed(_, None))))._2
 
-    //Progress
-    case BattleProgressMessage.TimerMessage(_) => this.copy(timerEnabled = true)
+    // Progress
+    case BattleProgressMessage.TimerMessage(_)  => this.copy(timerEnabled = true)
     case BattleProgressMessage.TimerDisabled(_) => this.copy(timerEnabled = false)
-    case BattleProgressMessage.Turn(turn) => this.copy(currentTurn = Some(turn))
-    case BattleProgressMessage.Win(user) => this.copy(result = Some(BattleResult.Win(user)))
-    case BattleProgressMessage.Tie() => this.copy(result = Some(BattleResult.Tie))
+    case BattleProgressMessage.Turn(turn)       => this.copy(currentTurn = Some(turn))
+    case BattleProgressMessage.Win(user)        => this.copy(result = Some(BattleResult.Win(user)))
+    case BattleProgressMessage.Tie()            => this.copy(result = Some(BattleResult.Tie))
     case BattleProgressMessage.Request(request) => this.copy(currentRequest = request)
 
-    //Major action
+    // Major action
     case BattleMajorActionMessage.Switch(pokemon, details, condition, _) =>
       val playerNumber = pokemon.position.player
       getTeamSlot(playerNumber, details) match
@@ -278,7 +284,7 @@ case class Battle(
         case None =>
           declareTeamMember(playerNumber, TeamMember(details, condition)) match
             case (Some(slot), battle) => battle.withActivePokemon(pokemon.position, ActivePokemon(slot))
-            case (None, battle) => battle
+            case (None, battle)       => battle
 
     case BattleMajorActionMessage.DetailsChange(pokemon, details, condition) =>
       this.updateTeamMemberAt(pokemon.position): p =>
@@ -290,7 +296,7 @@ case class Battle(
     case BattleMajorActionMessage.Faint(pokemon) =>
       this.updateTeamMemberAt(pokemon.position)(p => p.copy(condition = p.condition.faint))
 
-    //Attack
+    // Attack
     case BattleAttackMessage.Waiting(pokemon, _) =>
       this.updateActivePokemon(pokemon.position)(_.withNextMoveStatus(VolatileStatus.Waiting))
     case BattleAttackMessage.Prepare(pokemon, move, _) =>
@@ -298,7 +304,7 @@ case class Battle(
     case BattleAttackMessage.MustRecharge(pokemon) =>
       this.updateActivePokemon(pokemon.position)(_.withNextMoveStatus(VolatileStatus.MustRecharge))
 
-    //Status
+    // Status
     case BattleStatusMessage.Damage(pokemon, condition) =>
       this.updateTeamMemberAt(pokemon.position)(_.copy(condition = condition))
     case BattleStatusMessage.Heal(pokemon, condition) =>
@@ -329,7 +335,7 @@ case class Battle(
       this.updateActivePokemon(pokemon.position): pkmn =>
         getActivePokemon(target.position) match
           case Some(targetPkmn) => pkmn.copy(boosts = targetPkmn.boosts)
-          case None => pkmn
+          case None             => pkmn
     case BattleStatusMessage.VolatileStatusStart(pokemon, status) =>
       this.updateActivePokemon(pokemon.position)(_.withVolatileStatus(status))
     case BattleStatusMessage.VolatileStatusEnd(pokemon, status) =>
@@ -339,7 +345,7 @@ case class Battle(
     case BattleStatusMessage.SingleTurn(pokemon, move) =>
       this.updateActivePokemon(pokemon.position)(_.withNextTurnStatus(VolatileStatus.fromMove(move)))
 
-    //Minor action
+    // Minor action
     case BattleMinorActionMessage.Weather(weather, _) => this.copy(weather = weather)
     case BattleMinorActionMessage.FieldStart(fieldEffect) =>
       this.copy(field = field.updated(fieldEffect, currentTurn.getOrElse(TurnNumber(1))))
@@ -372,7 +378,6 @@ case class Battle(
       val centeredPokemon = activePokemon.map((k, v) => (k.copy(slot = PokemonSlot(0)), v))
       this.copy(activePokemon = centeredPokemon)
 
-
     case _ => this
 
 object Battle:
@@ -394,5 +399,5 @@ object Battle:
     currentRequest = None,
     weather = None,
     field = Map.empty,
-    sides = Map.empty,
+    sides = Map.empty
   )

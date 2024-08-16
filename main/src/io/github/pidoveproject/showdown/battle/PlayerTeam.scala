@@ -53,4 +53,3 @@ case class PlayerTeam(size: Count, members: Map[TeamSlot, TeamMember] = Map.empt
   def firstAvailableSlot: Option[TeamSlot] =
     Range.inclusive(1, size.value).map(TeamSlot.assume(_)).collectFirst:
       case slot if !members.contains(slot) => slot
-

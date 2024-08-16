@@ -11,14 +11,14 @@ enum ChoiceError:
 
   /**
    * The sent decision is invalid.
-   * 
+   *
    * @param message the error message
    */
   case Invalid(message: ChatContent)
 
   /**
    * The sent decision is unavailable (e.g due to a ability like Magnet Pull).
-   * 
+   *
    * @param message the error message
    */
   case Unavailable(message: ChatContent)

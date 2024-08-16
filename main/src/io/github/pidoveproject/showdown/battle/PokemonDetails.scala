@@ -18,11 +18,11 @@ import zio.json.JsonDecoder
  * @param teraType the tera type of the pokememon
  */
 case class PokemonDetails(
-  species: SpeciesName,
-  shiny: Boolean = false,
-  level: Option[Level] = None,
-  gender: Option[Gender] = None,
-  teraType: Option[Type] = None
+    species: SpeciesName,
+    shiny: Boolean = false,
+    level: Option[Level] = None,
+    gender: Option[Gender] = None,
+    teraType: Option[Type] = None
 ):
 
   /**
@@ -42,11 +42,11 @@ case class PokemonDetails(
 
   private def isSpeciesCompatibleWith(otherSpecies: SpeciesName): Boolean = (species, otherSpecies) match
     case (s"$baseSpecies-*", s"$otherBaseSpecies-$_") => baseSpecies == otherBaseSpecies
-    case _ => species == otherSpecies
+    case _                                            => species == otherSpecies
 
   /**
    * Check if these details are compatible with the given ones.
-   * 
+   *
    * @param details the details to compare
    * @return whether the given details might represent the same pokemon or not
    */
@@ -63,7 +63,7 @@ case class PokemonDetails(
   def ~=(details: PokemonDetails): Boolean = isCompatible(details)
 
 object PokemonDetails:
-  
+
   private def parse(species: SpeciesName, details: String): Either[ProtocolError, PokemonDetails] =
     val parts = details.split(", ")
 
@@ -76,16 +76,16 @@ object PokemonDetails:
             val validLevel = Level.refineOrBreak(parsedLevel)
 
             state.copy(level = Some(validLevel))
-          case "M" => state.copy(gender = Some(Gender.Male))
-          case "F" => state.copy(gender = Some(Gender.Female))
+          case "M"          => state.copy(gender = Some(Gender.Male))
+          case "F"          => state.copy(gender = Some(Gender.Female))
           case s"tera:$tpe" => state.copy(teraType = Some(Type.fromName(tpe).getOrBreak(ProtocolError.InvalidInput(tpe, "Invalid type"))))
-          case _ => break(Left(ProtocolError.InvalidInput(part, "Invalid detail")))
+          case _            => break(Left(ProtocolError.InvalidInput(part, "Invalid detail")))
 
       Right(result)
 
   /**
    * Parse the details of a pokemon from a [[String]].
-   * 
+   *
    * @param value the text to parse
    * @return the parsed details or a [[ProtocolError]] if it failed
    */
@@ -94,13 +94,11 @@ object PokemonDetails:
       for
         validSpecies <- SpeciesName.either(species).toInvalidInput(species)
         result <- parse(validSpecies, details)
-      yield
-        result
+      yield result
 
     case species =>
       SpeciesName.either(species).toInvalidInput(species).map(PokemonDetails(_))
 
   given MessageDecoder[PokemonDetails] = MessageDecoder.string.mapEither(fromString)
-  
+
   given JsonDecoder[PokemonDetails] = JsonDecoder.string.mapOrFail(fromString(_).left.map(_.getMessage))
-    

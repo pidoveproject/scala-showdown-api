@@ -1,9 +1,8 @@
 package io.github.pidoveproject.showdown.protocol.client
 
 import io.github.pidoveproject.showdown.protocol.{MessageEncoder, messageName}
-import io.github.pidoveproject.showdown.FormatName
-import io.github.pidoveproject.showdown.room.{ChatContent, RoomId, given}
-import io.github.pidoveproject.showdown.user.{AvatarName, Username, given}
+import io.github.pidoveproject.showdown.room.RoomId
+import io.github.pidoveproject.showdown.user.{AvatarName, Username}
 
 /**
  * Command related to user settings.
@@ -73,7 +72,7 @@ enum OptionCommand derives MessageEncoder:
 
   /**
    * Show join messages.
-   * 
+   *
    * @param room the room to enable join messages from or all if absent.
    */
   case ShowJoins(room: Option[RoomId])
@@ -97,7 +96,7 @@ enum OptionCommand derives MessageEncoder:
 
   /**
    * Block private messages.
-   * 
+   *
    * @param exceptGroup the groups still allowed to PM the current user
    */
   @messageName("blockpms") case BlockPrivateMessages(exceptGroup: Option[PrivateMessageGroup])

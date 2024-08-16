@@ -8,7 +8,7 @@ import zio.json.*
 
 /**
  * Represent a selectable move.
- * 
+ *
  * @param name the name of the move
  * @param id the internal id of the move (lower-cased and without spaces)
  * @param pp the remaining PP of the move

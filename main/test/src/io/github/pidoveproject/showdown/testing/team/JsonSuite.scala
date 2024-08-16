@@ -8,8 +8,8 @@ import zio.json.*
 
 object JsonSuite extends TestSuite:
 
-  def assertEncode[T : JsonEncoder](value: T, result: String): Unit = assert(value.toJson == result)
-  def assertEncodeStr[T : JsonEncoder](value: T, result: String): Unit = assertEncode(value, s"\"$result\"")
+  def assertEncode[T: JsonEncoder](value: T, result: String): Unit = assert(value.toJson == result)
+  def assertEncodeStr[T: JsonEncoder](value: T, result: String): Unit = assertEncode(value, s"\"$result\"")
 
   val tests = Tests:
 

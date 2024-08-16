@@ -12,14 +12,14 @@ import io.github.pidoveproject.showdown.room.RoomChat
  * @param settings this user's settings
  */
 case class LoggedUser(
-  name: Username,
-  avatar: AvatarName,
-  isGuest: Boolean,
-  settings: UserSettings,
-  privateMessages: Map[User, RoomChat],
-  challenges: Map[User, FormatName]
+    name: Username,
+    avatar: AvatarName,
+    isGuest: Boolean,
+    settings: UserSettings,
+    privateMessages: Map[User, RoomChat],
+    challenges: Map[User, FormatName]
 ):
-  
+
   def getPrivateChat(user: User): RoomChat = privateMessages.getOrElse(user, RoomChat.empty)
 
   def withPrivateChat(user: User, chat: RoomChat): LoggedUser = this.copy(privateMessages = privateMessages.updated(user, chat))
@@ -27,5 +27,5 @@ case class LoggedUser(
   def getChallenge(opponent: User): Option[FormatName] = challenges.get(opponent)
 
   def withChallenge(opponent: User, format: FormatName): LoggedUser = this.copy(challenges = challenges.updated(opponent, format))
-  
+
   def removeChallenge(opponent: User): LoggedUser = this.copy(challenges = challenges.removed(opponent))

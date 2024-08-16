@@ -12,7 +12,7 @@ enum RelativeSide:
 
   /**
    * The opposite side.
-   * 
+   *
    * @note some formats like Free-for-All have multiple opposite sides
    */
   case Enemy
