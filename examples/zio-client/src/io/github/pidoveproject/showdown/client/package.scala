@@ -5,7 +5,7 @@ import zio.http.WebSocketFrame
 import zio.stream.Stream
 import io.github.pidoveproject.showdown.ShowdownConnection
 import io.github.pidoveproject.showdown.protocol.ProtocolError
-import io.github.pidoveproject.showdown.{ZIOShowdownClient, ZIOShowdownConnection}
+import io.github.pidoveproject.showdown.zio.{ZIOShowdownClient, ZIOShowdownConnection}
 
 /**
  * A protocol task depending on a [[ShowdownConnection]].

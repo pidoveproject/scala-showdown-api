@@ -10,9 +10,10 @@ import io.github.pidoveproject.showdown.protocol.server.choice.{ActiveChoice, Ch
 import io.github.pidoveproject.showdown.protocol.server.*
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.*
-import zio.*
-import zio.http.*
-import zio.stream.*
+import io.github.pidoveproject.showdown.zio.*
+import _root_.zio.*
+import _root_.zio.http.*
+import _root_.zio.stream.*
 
 object Main extends ZIOAppDefault:
 

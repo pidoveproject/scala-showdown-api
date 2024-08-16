@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown
+package io.github.pidoveproject.showdown.zio
 
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.protocol.*
@@ -9,6 +9,7 @@ import zio.*
 import zio.http.*
 import zio.stream.*
 import io.github.pidoveproject.showdown.user.Username
+import io.github.pidoveproject.showdown.ShowdownConnection
 
 class ZIOShowdownConnection(
     client: Client,

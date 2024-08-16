@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown
+package io.github.pidoveproject.showdown.zio
 
 import io.github.pidoveproject.showdown.protocol.ProtocolError
 import zio.*
@@ -11,6 +11,8 @@ import io.github.iltotore.iron.autoRefine
 import io.github.pidoveproject.showdown.user.Username
 import io.github.pidoveproject.showdown.protocol.LoginResponse
 import io.github.pidoveproject.showdown.protocol.Assertion
+import io.github.pidoveproject.showdown.ChallStr
+import io.github.pidoveproject.showdown.ShowdownClient
 
 class ZIOShowdownClient(client: Client)
     extends ShowdownClient[WebSocketFrame, IO, [r] =>> Stream[Throwable, r], [x] =>> ZIO[Scope, ProtocolError, x]]:
