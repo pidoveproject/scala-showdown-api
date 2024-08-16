@@ -49,10 +49,10 @@ case class ClientApp(
       showdownState
         .challStr
         .fold((this, Cmd.None)): challStr =>
-          (this, connection.login(challStr)(username, password).map(ClientMessage.LoggingIn.apply))
+          (this, client.login(challStr)(username, password).map(ClientMessage.LoggingIn.apply))
 
     case ClientMessage.LoggingIn(LoginResponse(_, assertion, CurrentUser(_, name, _))) =>
-      (this, connection.sendMessage(AuthCommand.Trn(Username.assume(name), 0, assertion)))
+      (this, connection.confirmLogin(name, assertion))
 
     case ClientMessage.JoinRoom(room) =>
       (this, connection.sendMessage(GlobalCommand.Join(room)) |+| Cmd.emit(ClientMessage.ChangeTab(TabChoice.Room(room))))

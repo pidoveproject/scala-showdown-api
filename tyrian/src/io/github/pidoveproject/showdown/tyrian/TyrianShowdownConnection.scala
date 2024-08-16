@@ -3,19 +3,13 @@ package io.github.pidoveproject.showdown.tyrian
 import cats.effect.Async
 import cats.syntax.all.*
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.protocol.{LoginResponse, MessageInput, ProtocolError}
+import io.github.pidoveproject.showdown.protocol.{MessageInput, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.client.ClientMessage
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomId
-import io.github.pidoveproject.showdown.user.Username
-import io.github.pidoveproject.showdown.{ChallStr, ShowdownConnection}
+import io.github.pidoveproject.showdown.ShowdownConnection
 import tyrian.{Cmd, Sub}
-import tyrian.http.{Body, Decoder, Header, Http, HttpError, Request}
 import tyrian.websocket.{WebSocket, WebSocketEvent}
-import zio.json.*
-
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 /**
  * An open connection to a Pokemon Showdown.
@@ -72,47 +66,3 @@ case class TyrianShowdownConnection[F[_]: Async](socket: WebSocket[F])
       case WebSocketEvent.Close(code, reason) => TyrianConnectionEvent.Close(code, reason)
       case WebSocketEvent.Error(error)        => TyrianConnectionEvent.Error(error)
       case WebSocketEvent.Heartbeat           => TyrianConnectionEvent.Heartbeat
-
-  override def login(challStr: ChallStr)(name: Username, password: String): Cmd[F, LoginResponse] =
-    val encodedName = URLEncoder.encode(name.value, StandardCharsets.UTF_8)
-    val encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8)
-    val encodedChallStr = URLEncoder.encode(challStr.value, StandardCharsets.UTF_8)
-
-    val request = Request.post(
-      url = "https://play.pokemonshowdown.com/action.php",
-      body = Body.PlainText(
-        contentType = "application/x-www-form-urlencoded; charset=UTF-8",
-        s"act=login&name=$encodedName&pass=$encodedPassword&challstr=$encodedChallStr"
-      )
-    )
-      .withHeaders(Header("Sec-Fetch-Site", "cross-site"))
-
-    val decoder = Decoder(
-      onResponse = _.body.substring(1).fromJson[LoginResponse].left.map(ProtocolError.Miscellaneous.apply),
-      onError =
-        case HttpError.BadRequest(msg) => Left(ProtocolError.AuthentificationFailed(msg))
-        case HttpError.Timeout         => Left(ProtocolError.Miscellaneous("timeout"))
-        case HttpError.NetworkError    => Left(ProtocolError.Miscellaneous("network error"))
-    )
-
-    Cmd.Run(Http.send(request, decoder).toTask.rethrow)
-
-  override def loginGuest(challStr: ChallStr)(name: Username): Cmd[F, String] =
-    val request = Request.post(
-      url = "https://play.pokemonshowdown.com/action.php",
-      body = Body.plainText(
-        s"""act: getassertion
-           |userid: $name
-           |challstr: $challStr""".stripMargin
-      )
-    )
-
-    val decoder = Decoder(
-      onResponse = r => Right(r.body),
-      onError =
-        case HttpError.BadRequest(msg) => Left(ProtocolError.AuthentificationFailed(msg))
-        case HttpError.Timeout         => Left(ProtocolError.Miscellaneous("timeout"))
-        case HttpError.NetworkError    => Left(ProtocolError.Miscellaneous("network error"))
-    )
-
-    Cmd.Run(Http.send(request, decoder).toTask.rethrow)

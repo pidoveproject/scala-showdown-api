@@ -2,9 +2,11 @@ package io.github.pidoveproject.showdown
 
 import io.github.pidoveproject.showdown.protocol.client.{ClientMessage, GlobalCommand, OptionCommand}
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
-import io.github.pidoveproject.showdown.protocol.{LoginResponse, ProtocolError}
+import io.github.pidoveproject.showdown.protocol.ProtocolError
 import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.user.Username
+import io.github.pidoveproject.showdown.protocol.Assertion
+import io.github.pidoveproject.showdown.protocol.client.AuthCommand
 
 /**
  * A connection established with a Pokemon Showdown server.
@@ -45,6 +47,15 @@ trait ShowdownConnection[Frame, Task[_, _], Stream[_]]:
    */
   def sendPrivateMessage(recipient: Username, message: ChatContent): Task[ProtocolError, Unit] =
     sendMessage(GlobalCommand.Msg(recipient, message))
+
+  /**
+   * Confirm login process by sending the assertion received from [[ShowdownClient#login]] or [[ShowdownClient#loginGuest]].
+   *
+   * @param name the username to take
+   * @param assertion the assertion got from the authentication process
+   */
+  def confirmLogin(name: Username, assertion: Assertion): Task[ProtocolError, Unit] =
+    sendMessage(AuthCommand.Trn(name, 0, assertion))
 
   /**
    * Disconnect the user
@@ -117,23 +128,3 @@ trait ShowdownConnection[Frame, Task[_, _], Stream[_]]:
    * The stream of the received server messages
    */
   def serverMessages: Stream[Either[ProtocolError, ServerMessage]]
-
-  /**
-   * Login to a registered account.
-   *
-   * @param challStr the token used for authentication
-   * @param name the name of the account
-   * @param password the password of the account
-   * @return the authentication response sent by the server
-   */
-  def login(challStr: ChallStr)(name: Username, password: String): Task[ProtocolError, LoginResponse]
-
-  /**
-   * Login as guest.
-   *
-   * @param challStr the token used for authentication
-   * @param name the name to take in game
-   *
-   * @return the guest's name if the authentication succeeds
-   */
-  def loginGuest(challStr: ChallStr)(name: Username): Task[ProtocolError, String]

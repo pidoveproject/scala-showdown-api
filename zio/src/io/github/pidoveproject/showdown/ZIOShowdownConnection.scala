@@ -5,11 +5,10 @@ import io.github.pidoveproject.showdown.protocol.*
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, ClientMessage}
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomId
-import io.github.pidoveproject.showdown.user.Username
 import zio.*
 import zio.http.*
-import zio.json.*
 import zio.stream.*
+import io.github.pidoveproject.showdown.user.Username
 
 class ZIOShowdownConnection(
     client: Client,
@@ -57,42 +56,6 @@ class ZIOShowdownConnection(
               case Left(error) => ZStream.from(Left(ProtocolError.InvalidInput(text, error)))
         case _ => ZStream.empty
 
-  override def login(challStr: ChallStr)(name: Username, password: String): IO[ProtocolError, LoginResponse] =
-    for
-      response <- Client
-        .request(
-          url = "https://play.pokemonshowdown.com/action.php",
-          method = Method.POST,
-          content = Body.fromURLEncodedForm(Form(
-            FormField.simpleField("act", "login"),
-            FormField.simpleField("name", name.value),
-            FormField.simpleField("pass", password),
-            FormField.simpleField("challstr", challStr.value)
-          ))
-        ).provide(ZLayer.succeed(client))
-        .toProtocolZIO
-      body <- response.body.asString.map(_.tail).toProtocolZIO
-      data <- ZIO.fromEither(body.fromJson[LoginResponse]).mapError(msg => ProtocolError.InvalidInput(body, msg))
-      _ <- sendMessage(AuthCommand.Trn(name, 0, data.assertion))
-    yield data
-
-  override def loginGuest(challStr: ChallStr)(name: Username): IO[ProtocolError, String] =
-    for
-      response <-
-        client
-          .post(
-            pathSuffix = "https://play.pokemonshowdown.com/action.php",
-            body = Body.fromURLEncodedForm(Form(
-              FormField.simpleField("act", "getassertion"),
-              FormField.simpleField("userid", name.value),
-              FormField.simpleField("challstr", challStr.value)
-            ))
-          )
-          .toProtocolZIO
-      assertion <- response.body.asString.toProtocolZIO
-      _ <- sendMessage(AuthCommand.Trn(name, 0, assertion))
-    yield assertion
-
 object ZIOShowdownConnection:
 
   private type ConnectionTask[+A] = ZIO[ZIOShowdownConnection, ProtocolError, A]
@@ -105,13 +68,10 @@ object ZIOShowdownConnection:
 
   def sendMessage(message: ClientMessage): ZIO[ZIOShowdownConnection, ProtocolError, Unit] = ZIO.serviceWithZIO(_.sendMessage(message))
 
+  def confirmLogin(name: Username, assertion: Assertion): ZIO[ZIOShowdownConnection, ProtocolError, Unit] =
+    ZIO.serviceWithZIO(_.confirmLogin(name, assertion))
+
   def disconnect(): ZIO[ZIOShowdownConnection, ProtocolError, Unit] = ZIO.serviceWithZIO(_.disconnect())
 
   def serverMessages: ZStream[ZIOShowdownConnection, Throwable, Either[ProtocolError, ServerMessage]] =
     ZStream.serviceWithStream(_.serverMessages)
-
-  def login(challStr: ChallStr)(name: Username, password: String): ZIO[ZIOShowdownConnection, ProtocolError, LoginResponse] =
-    ZIO.serviceWithZIO(_.login(challStr)(name, password))
-
-  def loginGuest(challStr: ChallStr)(name: Username): ZIO[ZIOShowdownConnection, ProtocolError, String] =
-    ZIO.serviceWithZIO(_.loginGuest(challStr)(name))

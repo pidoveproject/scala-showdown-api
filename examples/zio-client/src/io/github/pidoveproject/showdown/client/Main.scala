@@ -24,7 +24,8 @@ object Main extends ZIOAppDefault:
       _ <- Console.printLine("Logging in...").toProtocolZIO
       username <- Console.readLine("Username: ").toProtocolZIO.flatMap(Username.applyZIO(_)).retryN(3)
       password <- Console.readLine("Password: ").toProtocolZIO
-      _ <- ZIOShowdownConnection.login(challStr)(username, password)
+      response <- ZIOShowdownClient.login(challStr)(username, password)
+      _ <- ZIOShowdownConnection.confirmLogin(response.currentUser.username, response.assertion)
     yield
       ()
 
@@ -144,7 +145,7 @@ object Main extends ZIOAppDefault:
    * @param appRef the reference to the state of the client
    * @param message the received message to process
    */
-  private def subscribeProgram(connection: ZIOShowdownConnection, appRef: Ref[ClientApp])(message: ServerMessage): IO[ProtocolError, Unit] =
+  private def subscribeProgram(appRef: Ref[ClientApp])(message: ServerMessage): ConnectionTask[Unit] =
     for
       app <- appRef.updateAndGet(a => a.copy(currentState = a.currentState.update(message)))
       _ <- ZIO.when(app.debugging)(Console.printLine(s"< $message").toProtocolZIO)
@@ -158,7 +159,7 @@ object Main extends ZIOAppDefault:
 
         case RoomBoundMessage(room, BattleInitializationMessage.StartPreview()) =>
           Console.printLine(s"===== Preview Start =====").toProtocolZIO
-            *> showTeams(app).provide(ZLayer.succeed(connection))
+            *> showTeams(app)
             *> appRef.update(_.copy(currentRoom = Some(room)))
 
         case RoomBoundMessage(room, BattleInitializationMessage.Start()) =>
@@ -228,11 +229,11 @@ object Main extends ZIOAppDefault:
    * 
    * @param connection the connection to use
    */
-  private def connectionProgram(connection: ZIOShowdownConnection): IO[Throwable, Unit] =
+  private def connectionProgram: ZIO[ZIOShowdownClient & ZIOShowdownConnection, Throwable, Unit] =
     def runStream(appRef: Ref[ClientApp]) =
-      val subscribe = subscribeProgram(connection, appRef)
+      val subscribe = subscribeProgram(appRef)
 
-      connection
+      ZIOShowdownConnection
         .serverMessages
         .mapZIO:
           case Right(message) => subscribe(message)
@@ -241,16 +242,16 @@ object Main extends ZIOAppDefault:
 
     for
       appRef <- Ref.make(ClientApp(ShowdownData.empty))
-      _ <- commandProgram(appRef).provide(ZLayer.succeed(connection)) raceFirst runStream(appRef)
+      _ <- commandProgram(appRef) raceFirst runStream(appRef)
     yield
       ()
 
   override def run: ZIO[Any, Throwable, Unit] =
     ZIO.scoped(
       ZIOShowdownClient
-        .openConnection
-        .flatMap(connectionProgram)
+        .openConnection()
+        .flatMap(connection => connectionProgram.provideSome[ZIOShowdownClient](ZLayer.succeed(connection)))
     ).provide(
         Client.default,
-        ZIOShowdownClient.layer(),
+        ZIOShowdownClient.layer
       )

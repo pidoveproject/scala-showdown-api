@@ -25,7 +25,7 @@ object Main extends TyrianApp[ClientMessage, ClientApp]:
     (
       ClientApp(
         state = ClientState.Connect,
-        client = TyrianShowdownClient("wss://sim3.psim.us/showdown/websocket"),
+        client = TyrianShowdownClient[IO],
         connection = None,
         showdownState = ShowdownData.empty
       ),
@@ -53,7 +53,7 @@ object Main extends TyrianApp[ClientMessage, ClientApp]:
     case ClientMessage.Connect =>
       (
         app,
-        app.client.openConnection.map:
+        app.client.openConnection().map:
           case Right(connection) => ClientMessage.Open(connection)
           case Left(error) => ClientMessage.None
       )
