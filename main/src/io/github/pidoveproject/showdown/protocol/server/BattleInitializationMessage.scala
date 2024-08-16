@@ -1,7 +1,7 @@
 package io.github.pidoveproject.showdown.protocol.server
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.{Count, FormatName, Generation, Timestamp as TimestampValue}
+import io.github.pidoveproject.showdown.{Count, FormatName, Generation}
 import io.github.pidoveproject.showdown.battle.{*, given}
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, messageName}
 import io.github.pidoveproject.showdown.room.ChatContent

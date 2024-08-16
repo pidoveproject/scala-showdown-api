@@ -3,8 +3,6 @@ package io.github.pidoveproject.showdown.battle
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError}
 
-import scala.quoted.Expr
-
 /**
  * The position of an active pokemon.
  * 

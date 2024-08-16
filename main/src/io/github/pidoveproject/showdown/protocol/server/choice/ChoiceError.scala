@@ -1,7 +1,7 @@
 package io.github.pidoveproject.showdown.protocol.server.choice
 
 import io.github.pidoveproject.showdown.protocol.MessageDecoder.toInvalidInput
-import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError}
+import io.github.pidoveproject.showdown.protocol.MessageDecoder
 import io.github.pidoveproject.showdown.room.ChatContent
 
 /**

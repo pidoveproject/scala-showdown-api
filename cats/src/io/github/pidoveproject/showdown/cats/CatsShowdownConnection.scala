@@ -1,7 +1,5 @@
 package io.github.pidoveproject.showdown.cats
 
-import cats.{Monad, MonadError}
-import cats.effect.IO
 import cats.effect.kernel.Concurrent
 import cats.syntax.all.*
 import fs2.Stream

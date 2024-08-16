@@ -1,7 +1,6 @@
 package io.github.pidoveproject.showdown.protocol
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.protocol.{MessageInput, ProtocolError}
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.util.UnionTypeMirror
 import zio.Zippable

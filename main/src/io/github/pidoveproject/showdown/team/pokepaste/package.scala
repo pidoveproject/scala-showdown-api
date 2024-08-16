@@ -7,8 +7,6 @@ import io.github.pidoveproject.showdown.team.*
 import zio.parser.*
 import zio.parser.internal.{PUnzippable, PZippable}
 
-import scala.collection.mutable
-
 val surnameSyntax = nonBlankSyntax(Syntax.end | Syntax.char('(')).refined(Surname)
 
 val abilitySyntax = nonBlankSyntax().refined(AbilityName)

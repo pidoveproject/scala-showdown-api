@@ -1,6 +1,5 @@
 package io.github.pidoveproject.showdown.tyrian
 
-import cats.Foldable
 import cats.effect.Async
 import io.github.pidoveproject.showdown.ShowdownClient
 import tyrian.websocket.{WebSocket, WebSocketConnect}

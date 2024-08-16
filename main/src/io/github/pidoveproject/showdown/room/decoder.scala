@@ -2,13 +2,8 @@ package io.github.pidoveproject.showdown.room
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
-import io.github.pidoveproject.showdown.protocol.{MessageDecoder, MessageInput, ProtocolError}
+import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.pidoveproject.showdown.room.ChatContent
-import io.github.pidoveproject.showdown.user.User
-
-import scala.collection.mutable.ListBuffer
-import scala.util.boundary
-import scala.util.boundary.break
 
 given chatDecoder: MessageDecoder[ChatContent] =
   MessageDecoder.string

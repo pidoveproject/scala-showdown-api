@@ -3,7 +3,6 @@ package io.github.pidoveproject.showdown.room
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.Timestamp
 import io.github.pidoveproject.showdown.user.UserList
-import io.github.iltotore.iron.constraint.collection.MaxLength
 import io.github.pidoveproject.showdown.battle.Battle
 import io.github.pidoveproject.showdown.protocol.server.{BattleMessage, RoomMessage}
 import io.github.pidoveproject.showdown.user.User

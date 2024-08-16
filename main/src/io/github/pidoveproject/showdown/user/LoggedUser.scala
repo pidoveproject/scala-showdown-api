@@ -1,7 +1,6 @@
 package io.github.pidoveproject.showdown.user
 
 import io.github.pidoveproject.showdown.FormatName
-import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomChat
 
 /**

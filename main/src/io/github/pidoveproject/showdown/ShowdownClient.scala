@@ -1,7 +1,5 @@
 package io.github.pidoveproject.showdown
 
-import io.github.pidoveproject.showdown.protocol.ProtocolError
-
 /**
  * A client to communicate with a Pokemon Showdown server. This is the main entry point of the API.
  *

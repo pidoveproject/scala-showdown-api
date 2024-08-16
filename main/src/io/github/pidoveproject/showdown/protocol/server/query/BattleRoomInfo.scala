@@ -1,6 +1,5 @@
 package io.github.pidoveproject.showdown.protocol.server.query
 
-import io.github.pidoveproject.showdown.protocol.{MessageDecoder, given}
 import zio.json.*
 
 /**

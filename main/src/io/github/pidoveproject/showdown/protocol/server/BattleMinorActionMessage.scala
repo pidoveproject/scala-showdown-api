@@ -1,8 +1,7 @@
 package io.github.pidoveproject.showdown.protocol.server
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.Count
-import io.github.pidoveproject.showdown.battle.{Weather as WeatherEffect, *, given}
+import io.github.pidoveproject.showdown.battle.{Weather as WeatherEffect, *}
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError, messageName, messagePrefix}
 import io.github.pidoveproject.showdown.room.{ChatContent, given}
 import io.github.pidoveproject.showdown.team.*

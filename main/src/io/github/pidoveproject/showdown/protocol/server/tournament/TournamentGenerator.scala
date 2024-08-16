@@ -2,7 +2,6 @@ package io.github.pidoveproject.showdown.protocol.server.tournament
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
-import io.github.iltotore.iron.zioJson.given
 import io.github.pidoveproject.showdown.Count
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.MessageDecoder.{given, *}

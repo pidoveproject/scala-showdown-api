@@ -1,8 +1,6 @@
 package io.github.pidoveproject.showdown.battle
 
 import io.github.pidoveproject.showdown.Count
-import io.github.pidoveproject.showdown.protocol.server.{BattleInitializationMessage, BattleMessage}
-import io.github.pidoveproject.showdown.team.Surname
 
 /**
  * The pokemon team of a player.

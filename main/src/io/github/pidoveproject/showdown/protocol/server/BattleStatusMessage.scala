@@ -1,10 +1,8 @@
 package io.github.pidoveproject.showdown.protocol.server
 
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.Count
 import io.github.pidoveproject.showdown.battle.{*, given}
 import io.github.pidoveproject.showdown.protocol.{MessageDecoder, ProtocolError, messageName, messagePrefix}
-import io.github.pidoveproject.showdown.room.{ChatContent, given}
 import io.github.pidoveproject.showdown.team.*
 import io.github.pidoveproject.showdown.util.either.*
 

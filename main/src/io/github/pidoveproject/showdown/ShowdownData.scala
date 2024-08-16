@@ -4,7 +4,7 @@ import io.github.pidoveproject.showdown.protocol.server.query.ResponseContent.Us
 import io.github.pidoveproject.showdown.protocol.server.query.{BattleRoomInfo, BattleRooms, ChatRoomInfo, ChatRooms, ResponseContent, UserInfo}
 import io.github.pidoveproject.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, RoomMessage, ServerMessage}
 import io.github.pidoveproject.showdown.room.{ChatContent, ChatMessage, JoinedRoom, RoomId}
-import io.github.pidoveproject.showdown.user.{LoggedUser, User, Username}
+import io.github.pidoveproject.showdown.user.{LoggedUser, Username}
 
 /**
  * The state of the Showdown connection.

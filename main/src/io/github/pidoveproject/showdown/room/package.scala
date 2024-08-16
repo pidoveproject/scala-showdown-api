@@ -2,10 +2,6 @@ package io.github.pidoveproject.showdown.room
 
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
-import io.github.pidoveproject.showdown.protocol.{MessageDecoder, MessageInput, ProtocolError}
-import io.github.pidoveproject.showdown.user.User
-import scala.collection.mutable.ListBuffer
-import scala.util.boundary, boundary.break
 
 opaque type RoomId = String :| Not[Blank]
 object RoomId extends RefinedTypeOpsImpl[String, Not[Blank], RoomId]

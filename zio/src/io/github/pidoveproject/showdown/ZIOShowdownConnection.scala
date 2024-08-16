@@ -3,7 +3,7 @@ package io.github.pidoveproject.showdown
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.protocol.*
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, ClientMessage}
-import io.github.pidoveproject.showdown.protocol.server.{GlobalMessage, ServerMessage}
+import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.Username
 import zio.*
