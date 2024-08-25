@@ -13,7 +13,7 @@ import io.github.pidoveproject.showdown.client.zio.ZIOShowdownConnection
 import io.github.iltotore.iron.*
 
 class SyncShowdownClient(runtime: Runtime[ZIOShowdownClient])
-  extends ShowdownClient[String, [e, r] =>> r, [r] =>> PartialFunction[r, Boolean] => Unit, [r] =>> (r => Unit) => Unit]:
+    extends ShowdownClient[String, [e, r] =>> r, [r] =>> PartialFunction[r, Boolean] => Unit, [r] =>> (r => Unit) => Unit]:
 
   override def openConnection(serverUrl: URL = URL("wss://sim3.psim.us/showdown/websocket")): (SyncShowdownConnection => Unit) => Unit = f =>
     ZIO.scoped(
@@ -33,10 +33,10 @@ class SyncShowdownClient(runtime: Runtime[ZIOShowdownClient])
 object SyncShowdownClient:
 
   private val defaultRuntime: ZIO[Scope, Throwable, Runtime[ZIOShowdownClient]] =
-      ZClient
-        .default
-        .to(ZIOShowdownClient.layer)
-        .toRuntime
+    ZClient
+      .default
+      .to(ZIOShowdownClient.layer)
+      .toRuntime
 
   def use(f: SyncShowdownClient => Unit): Unit =
     ZIO
