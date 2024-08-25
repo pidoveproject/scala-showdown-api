@@ -1,11 +1,10 @@
 package io.github.pidoveproject.showdown.client
 
-import zio.{IO, ZIO}
-import zio.http.WebSocketFrame
-import zio.stream.Stream
-import io.github.pidoveproject.showdown.ShowdownConnection
+import _root_.zio.{IO, ZIO}
+import _root_.zio.http.WebSocketFrame
+import _root_.zio.stream.Stream
 import io.github.pidoveproject.showdown.protocol.ProtocolError
-import io.github.pidoveproject.showdown.zio.{ZIOShowdownClient, ZIOShowdownConnection}
+import io.github.pidoveproject.showdown.client.zio.{ZIOShowdownClient, ZIOShowdownConnection}
 
 /**
  * A protocol task depending on a [[ShowdownConnection]].

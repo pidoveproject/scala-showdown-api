@@ -10,7 +10,7 @@ import io.github.pidoveproject.showdown.protocol.server.choice.{ActiveChoice, Ch
 import io.github.pidoveproject.showdown.protocol.server.*
 import io.github.pidoveproject.showdown.room.RoomId
 import io.github.pidoveproject.showdown.user.*
-import io.github.pidoveproject.showdown.zio.*
+import io.github.pidoveproject.showdown.client.zio.*
 import _root_.zio.*
 import _root_.zio.http.*
 import _root_.zio.stream.*

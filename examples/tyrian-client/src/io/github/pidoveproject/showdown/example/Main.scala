@@ -1,9 +1,8 @@
-package io.github.pidoveproject.showdown.client
+package io.github.pidoveproject.showdown.example
 
 import cats.effect.IO
 import cats.implicits.*
 import io.github.pidoveproject.showdown.ShowdownData
-import io.github.pidoveproject.showdown.client.ClientState.Main
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, GlobalCommand}
 import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.server.GlobalMessage

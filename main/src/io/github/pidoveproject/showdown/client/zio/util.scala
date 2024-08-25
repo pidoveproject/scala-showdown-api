@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.zio
+package io.github.pidoveproject.showdown.client.zio
 
 import io.github.iltotore.iron.{Constraint, RefinedTypeOpsImpl}
 import io.github.pidoveproject.showdown.protocol.ProtocolError

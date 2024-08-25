@@ -1,6 +1,6 @@
-package io.github.pidoveproject.showdown.client
+package io.github.pidoveproject.showdown.example
 
-import cats.effect.IO
+import _root_.cats.effect.IO
 import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.protocol.{CurrentUser, LoginResponse}
 import io.github.pidoveproject.showdown.protocol.client.{AuthCommand, BattleRoomCommand, ChoiceResponse, GlobalCommand}

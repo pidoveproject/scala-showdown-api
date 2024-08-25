@@ -2,7 +2,7 @@ package io.github.pidoveproject.showdown.tyrian
 
 import cats.syntax.monadError.*
 import cats.effect.Async
-import io.github.pidoveproject.showdown.ShowdownClient
+import io.github.pidoveproject.showdown.client.ShowdownClient
 import io.github.pidoveproject.showdown.protocol.URL
 import io.github.iltotore.iron.autoRefine
 import tyrian.websocket.{WebSocket, WebSocketConnect}

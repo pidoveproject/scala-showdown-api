@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.client
+package io.github.pidoveproject.showdown.example
 
 import cats.effect.IO
 import io.github.pidoveproject.showdown.protocol.{LoginResponse, ProtocolError}
