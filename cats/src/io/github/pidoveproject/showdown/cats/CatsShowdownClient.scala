@@ -3,7 +3,7 @@ package io.github.pidoveproject.showdown.cats
 import cats.syntax.all.*
 import cats.effect.{Concurrent, Resource}
 import fs2.Stream
-import io.github.pidoveproject.showdown.ShowdownClient
+import io.github.pidoveproject.showdown.client.ShowdownClient
 import org.http4s.Uri
 import org.http4s.client.Client
 import org.http4s.client.websocket.{WSClient, WSFrame, WSRequest}

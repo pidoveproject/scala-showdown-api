@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown
+package io.github.pidoveproject.showdown.client
 
 import io.github.pidoveproject.showdown.protocol.client.{ClientMessage, GlobalCommand, OptionCommand}
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
@@ -7,6 +7,7 @@ import io.github.pidoveproject.showdown.room.{ChatContent, RoomId}
 import io.github.pidoveproject.showdown.user.Username
 import io.github.pidoveproject.showdown.protocol.Assertion
 import io.github.pidoveproject.showdown.protocol.client.AuthCommand
+import io.github.pidoveproject.showdown.FormatName
 
 /**
  * A connection established with a Pokemon Showdown server.

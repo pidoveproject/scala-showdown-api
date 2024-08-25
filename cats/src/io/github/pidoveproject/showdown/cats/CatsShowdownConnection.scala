@@ -4,7 +4,7 @@ import cats.effect.Concurrent
 import cats.syntax.all.*
 import fs2.Stream
 import io.github.iltotore.iron.*
-import io.github.pidoveproject.showdown.ShowdownConnection
+import io.github.pidoveproject.showdown.client.ShowdownConnection
 import io.github.pidoveproject.showdown.protocol.{MessageInput, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.client.ClientMessage
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage

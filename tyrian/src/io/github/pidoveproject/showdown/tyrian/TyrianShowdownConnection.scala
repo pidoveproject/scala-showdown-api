@@ -7,7 +7,7 @@ import io.github.pidoveproject.showdown.protocol.{MessageInput, ProtocolError}
 import io.github.pidoveproject.showdown.protocol.client.ClientMessage
 import io.github.pidoveproject.showdown.protocol.server.ServerMessage
 import io.github.pidoveproject.showdown.room.RoomId
-import io.github.pidoveproject.showdown.ShowdownConnection
+import io.github.pidoveproject.showdown.client.ShowdownConnection
 import tyrian.{Cmd, Sub}
 import tyrian.websocket.{WebSocket, WebSocketEvent}
 

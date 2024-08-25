@@ -1,7 +1,7 @@
 package io.github.pidoveproject.showdown.client.sync
 
 import io.github.pidoveproject.showdown.client.zio.ZIOShowdownClient
-import io.github.pidoveproject.showdown.ShowdownClient
+import io.github.pidoveproject.showdown.client.ShowdownClient
 import io.github.pidoveproject.showdown.protocol.URL
 import io.github.pidoveproject.showdown.ChallStr
 import io.github.pidoveproject.showdown.protocol.LoginResponse

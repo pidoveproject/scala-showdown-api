@@ -1,9 +1,10 @@
-package io.github.pidoveproject.showdown
+package io.github.pidoveproject.showdown.client
 
 import io.github.pidoveproject.showdown.protocol.URL
 import io.github.iltotore.iron.autoRefine
 import io.github.pidoveproject.showdown.user.Username
 import io.github.pidoveproject.showdown.protocol.{Assertion, ProtocolError, LoginResponse}
+import io.github.pidoveproject.showdown.ChallStr
 
 /**
  * A client to communicate with a Pokemon Showdown server. This is the main entry point of the API.

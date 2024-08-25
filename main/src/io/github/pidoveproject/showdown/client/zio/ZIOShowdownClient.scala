@@ -12,7 +12,7 @@ import io.github.pidoveproject.showdown.user.Username
 import io.github.pidoveproject.showdown.protocol.LoginResponse
 import io.github.pidoveproject.showdown.protocol.Assertion
 import io.github.pidoveproject.showdown.ChallStr
-import io.github.pidoveproject.showdown.ShowdownClient
+import io.github.pidoveproject.showdown.client.ShowdownClient
 
 class ZIOShowdownClient(client: Client)
     extends ShowdownClient[WebSocketFrame, IO, [r] =>> Stream[Throwable, r], [x] =>> ZIO[Scope, ProtocolError, x]]:

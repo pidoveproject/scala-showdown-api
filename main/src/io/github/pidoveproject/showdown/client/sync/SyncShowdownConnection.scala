@@ -1,6 +1,6 @@
 package io.github.pidoveproject.showdown.client.sync
 
-import io.github.pidoveproject.showdown.ShowdownConnection
+import io.github.pidoveproject.showdown.client.ShowdownConnection
 import io.github.pidoveproject.showdown.client.zio.ZIOShowdownConnection
 import io.github.pidoveproject.showdown.protocol.ProtocolError
 import io.github.pidoveproject.showdown.protocol.client.ClientMessage

@@ -3,7 +3,6 @@ package io.github.pidoveproject.showdown.client
 import _root_.zio.{IO, ZIO}
 import _root_.zio.http.WebSocketFrame
 import _root_.zio.stream.Stream
-import io.github.pidoveproject.showdown.ShowdownConnection
 import io.github.pidoveproject.showdown.protocol.ProtocolError
 import io.github.pidoveproject.showdown.client.zio.{ZIOShowdownClient, ZIOShowdownConnection}
 

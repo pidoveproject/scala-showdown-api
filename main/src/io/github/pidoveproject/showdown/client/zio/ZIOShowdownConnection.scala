@@ -9,7 +9,7 @@ import zio.*
 import zio.http.*
 import zio.stream.*
 import io.github.pidoveproject.showdown.user.Username
-import io.github.pidoveproject.showdown.ShowdownConnection
+import io.github.pidoveproject.showdown.client.ShowdownConnection
 
 class ZIOShowdownConnection(
     client: Client,
