@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.zio
+package io.github.pidoveproject.showdown.client.zio
 
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.protocol.*
@@ -33,7 +33,7 @@ class ZIOShowdownConnection(
       _ <- sendRawMessage(WebSocketFrame.text(command))
     yield ()
 
-  override def disconnect(): IO[ProtocolError, Unit] = sendRawMessage(WebSocketFrame.close(Status.Ok.code))
+  override def disconnect(): IO[ProtocolError, Unit] = sendRawMessage(WebSocketFrame.close(1000))
 
   override val serverMessages: Stream[Throwable, Either[ProtocolError, ServerMessage]] =
     ZStream

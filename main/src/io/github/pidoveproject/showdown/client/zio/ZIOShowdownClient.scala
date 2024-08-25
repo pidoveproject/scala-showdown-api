@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.zio
+package io.github.pidoveproject.showdown.client.zio
 
 import io.github.pidoveproject.showdown.protocol.ProtocolError
 import zio.*
@@ -48,17 +48,17 @@ class ZIOShowdownClient(client: Client)
 
   override def loginGuest(challStr: ChallStr)(name: Username): IO[ProtocolError, Assertion] =
     for
-      response <-
-        client
-          .post(
-            pathSuffix = "https://play.pokemonshowdown.com/action.php",
-            body = Body.fromURLEncodedForm(Form(
-              FormField.simpleField("act", "getassertion"),
-              FormField.simpleField("userid", name.value),
-              FormField.simpleField("challstr", challStr.value)
-            ))
-          )
-          .toProtocolZIO
+      response <- Client
+        .request(
+          url = "https://play.pokemonshowdown.com/action.php",
+          method = Method.POST,
+          content = Body.fromURLEncodedForm(Form(
+            FormField.simpleField("act", "getassertion"),
+            FormField.simpleField("userid", name.value),
+            FormField.simpleField("challstr", challStr.value)
+          ))
+        ).provide(ZLayer.succeed(client))
+        .toProtocolZIO
       assertionString <- response.body.asString.toProtocolZIO
       assertion <- Assertion.applyZIO(assertionString)
     yield assertion
