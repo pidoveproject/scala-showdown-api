@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.client
+package io.github.pidoveproject.showdown.example
 
 import io.github.iltotore.iron.*
 import io.github.pidoveproject.showdown.battle.*

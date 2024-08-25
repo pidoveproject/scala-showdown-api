@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.client
+package io.github.pidoveproject.showdown.example
 
 import io.github.pidoveproject.showdown.ShowdownData
 import io.github.pidoveproject.showdown.protocol.server.{GlobalMessage, RoomBoundMessage, RoomMessage, ServerMessage}

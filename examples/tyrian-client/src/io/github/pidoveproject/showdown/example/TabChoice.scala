@@ -1,4 +1,4 @@
-package io.github.pidoveproject.showdown.client
+package io.github.pidoveproject.showdown.example
 
 import io.github.pidoveproject.showdown.room.{ChatContent, RoomChat, RoomId}
 import io.github.pidoveproject.showdown.user.Username
