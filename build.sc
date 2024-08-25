@@ -117,8 +117,7 @@ object cats extends ProjectModule {
     ivy"co.fs2::fs2-core::3.10.2",
     ivy"org.typelevel::cats-core::2.12.0",
     ivy"org.typelevel::cats-effect::3.5.4",
-    ivy"org.http4s::http4s-core::0.23.27",
-    ivy"org.http4s::http4s-client::0.23.27"
+    ivy"dev.zio::zio-interop-cats:23.1.0.3"
   )
 
   object js extends JSCrossModule
