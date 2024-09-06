@@ -1,0 +1,12 @@
+index: index.md
+subsection:
+  - page: getting-started.md
+  - page: authentication.md
+  - title: "Clients"
+    directory: clients
+    index: clients/index.md
+    subsection:
+      - page: clients/cats.md
+      - page: clients/synchronized.md
+      - page: clients/tyrian.md
+      - page: clients/zio.md
