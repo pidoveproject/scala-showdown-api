@@ -73,8 +73,8 @@ The documentation's target directory is `out/docs/docJar.dest/`
 
 ## Useful links
 
-- [Documentation](https://pidove-project.github.io/scala-showdown-api/docs)
-- [API Reference](https://pidove-project.github.io/scala-showdown-api)
+- [Documentation](https://pidoveproject.github.io/scala-showdown-api/docs)
+- [API Reference](https://pidoveproject.github.io/scala-showdown-api)
 - [Pokemon Showdown's protocol](https://github.com/smogon/pokemon-showdown/blob/master/PROTOCOL.md)
 - [Pokemon Showdown's simulator protocol](https://github.com/smogon/pokemon-showdown/blob/master/sim/SIM-PROTOCOL.md)
 - [Showdown's coding Discord server](https://discord.gg/Cbs4dKz)
