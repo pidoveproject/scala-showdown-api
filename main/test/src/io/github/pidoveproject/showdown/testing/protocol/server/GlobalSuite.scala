@@ -50,7 +50,7 @@ object GlobalSuite extends TestSuite:
       GlobalMessage.NameTaken("Il_totore", "Name already taken")
     )
     test("challstr"):
-      inline val challstr =
+      transparent inline def challstr =
         "4|38c34d953aa819f57405006c102b13e480c07ad9c87245228dc23be2f22b403050f989ca5c65aac92326d185547f4154be9e7f6c79b233a8e933fbcd98728bb349942fb0d2c4faee5fe88581d25906885a1d5006831b84a6672134d72c689883a4d071a2454a5aab2a39aaf34933060c439438e4443887ffcce6d69fbe5f9deb"
       assertDecodeString(decoder, s"|challstr|$challstr", GlobalMessage.ChallStr(ChallStr(challstr)))
 

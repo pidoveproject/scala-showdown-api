@@ -1,7 +1,5 @@
 package io.github.pidoveproject.showdown.user
 
-import io.github.iltotore.iron.*
-import io.github.iltotore.iron.constraint.all.*
 import io.github.pidoveproject.showdown.protocol.MessageDecoder
 import MessageDecoder.*
 import io.github.pidoveproject.showdown.protocol.ProtocolError

@@ -4,43 +4,43 @@ import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 
 opaque type Surname = String :| Not[Blank]
-object Surname extends RefinedTypeOpsImpl[String, Not[Blank], Surname]
+object Surname extends RefinedTypeOps[String, Not[Blank], Surname]
 
 opaque type SpeciesName = String :| Not[Blank]
-object SpeciesName extends RefinedTypeOpsImpl[String, Not[Blank], SpeciesName]
+object SpeciesName extends RefinedTypeOps[String, Not[Blank], SpeciesName]
 
 opaque type AbilityName = String :| Not[Blank]
-object AbilityName extends RefinedTypeOpsImpl[String, Not[Blank], AbilityName]
+object AbilityName extends RefinedTypeOps[String, Not[Blank], AbilityName]
 
 opaque type MoveName = String :| Not[Blank]
-object MoveName extends RefinedTypeOpsImpl[String, Not[Blank], MoveName]
+object MoveName extends RefinedTypeOps[String, Not[Blank], MoveName]
 
 opaque type ItemName = String :| Not[Blank]
-object ItemName extends RefinedTypeOpsImpl[String, Not[Blank], ItemName]
+object ItemName extends RefinedTypeOps[String, Not[Blank], ItemName]
 
 opaque type Level = Int :| Interval.Closed[0, 100]
-object Level extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 100], Level]
+object Level extends RefinedTypeOps[Int, Interval.Closed[0, 100], Level]
 
 opaque type DynamaxLevel = Int :| Interval.Closed[0, 10]
-object DynamaxLevel extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 10], DynamaxLevel]
+object DynamaxLevel extends RefinedTypeOps[Int, Interval.Closed[0, 10], DynamaxLevel]
 
 opaque type Happiness = Int :| Interval.Closed[0, 255]
-object Happiness extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 255], Happiness]
+object Happiness extends RefinedTypeOps[Int, Interval.Closed[0, 255], Happiness]
 
 opaque type IV = Int :| Interval.Closed[0, 31]
-object IV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 31], IV]
+object IV extends RefinedTypeOps[Int, Interval.Closed[0, 31], IV]
 
 opaque type EV = Int :| Interval.Closed[0, 255]
-object EV extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 255], EV]
+object EV extends RefinedTypeOps[Int, Interval.Closed[0, 255], EV]
 
 opaque type Tier = String :| Not[Blank]
-object Tier extends RefinedTypeOpsImpl[String, Not[Blank], Tier]
+object Tier extends RefinedTypeOps[String, Not[Blank], Tier]
 
 opaque type TeamName = String :| Not[Blank]
-object TeamName extends RefinedTypeOpsImpl[String, Not[Blank], TeamName]
+object TeamName extends RefinedTypeOps[String, Not[Blank], TeamName]
 
 opaque type Stat = Int :| Positive
-object Stat extends RefinedTypeOpsImpl[Int, Positive, Stat]
+object Stat extends RefinedTypeOps[Int, Positive, Stat]
 
 type IVS = Map[StatType, IV]
 type EVS = Map[StatType, EV]
