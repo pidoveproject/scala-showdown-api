@@ -33,10 +33,7 @@ ivy"io.github.projectpidove::scala-showdown-api:version"
 
 ## Usage
 
-The way to connect to Showdown depends on the module you are using:
-
-- [ZIO](/zio)
-- [Tyrian](/tyrian)
+The way to connect to Showdown depends on the module you are using. Check yours [here](https://pidoveproject.github.io/scala-showdown-api/docs/clients/index.html).
 
 Information about methods and data types can be found in the [API Reference](https://pidove-project.github.io/scala-showdown-api)
 
@@ -58,8 +55,8 @@ mill <module>.compile
 
 Where `<module>` is either:
 - `main`: API's core logic and datatypes
+- `cats`: Cats integration
 - `tyrian`: Tyrian integration
-- `zio`: ZIO integration
 
 ### Building the documentation
 
