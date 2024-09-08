@@ -1,6 +1,6 @@
 # ZIO Client example
 
-This is a minimalist CLI client for Pokémon Showdown using the ZIO module.
+This is a minimalist CLI client for Pokémon Showdown using the ZIO client.
 
 ## Run the project
 
