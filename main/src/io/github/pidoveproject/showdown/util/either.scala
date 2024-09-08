@@ -1,6 +1,6 @@
 package io.github.pidoveproject.showdown.util
 
-import io.github.iltotore.iron.{Constraint, RefinedTypeOpsImpl}
+import io.github.iltotore.iron.{Constraint, RefinedTypeOps}
 import io.github.pidoveproject.showdown.protocol.ProtocolError
 import io.github.pidoveproject.showdown.protocol.MessageDecoder.toInvalidInput
 
@@ -18,7 +18,7 @@ object either:
       case Right(right) => right
       case Left(left)   => break(Left(left))
 
-  extension [A, C, T](ops: RefinedTypeOpsImpl[A, C, T])
+  extension [A, C, T](ops: RefinedTypeOps[A, C, T])
     inline def refineOrBreak(value: A)(using Constraint[A, C], Label[Either[ProtocolError, Nothing]]): T =
       ops
         .either(value)

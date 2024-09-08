@@ -6,4 +6,4 @@ import io.github.iltotore.iron.constraint.string.Blank
 
 private type AssertionConstraint = Not[Blank]
 opaque type Assertion <: String = String :| AssertionConstraint
-object Assertion extends RefinedTypeOpsImpl[String, AssertionConstraint, Assertion]
+object Assertion extends RefinedTypeOps[String, AssertionConstraint, Assertion]

@@ -15,7 +15,7 @@ extension [Err, In, Out, Value](syntax: Syntax[Err, In, Out, Value])
    * @tparam T the refined type
    * @return a new syntax converting `In` to `T`
    */
-  private inline def refined[C, T](companion: RefinedTypeOpsImpl[Value, C, T])(using
+  private inline def refined[C, T](companion: RefinedTypeOps[Value, C, T])(using
       inline constraint: Constraint[Value, C]
   ): Syntax[Err | String, In, Out, T] =
     syntax.transformEither(

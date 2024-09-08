@@ -26,7 +26,7 @@ opaque type TurnNumber = Int :| Positive
 object TurnNumber extends NumericTypeOps[Int, Positive, TurnNumber]
 
 opaque type PokemonSlot = Int :| Interval.Closed[0, 2]
-object PokemonSlot extends RefinedTypeOpsImpl[Int, Interval.Closed[0, 2], PokemonSlot]:
+object PokemonSlot extends RefinedTypeOps[Int, Interval.Closed[0, 2], PokemonSlot]:
 
   def fromCode(value: Char): Either[ProtocolError, PokemonSlot] = value match
     case 'a' => Right(0)
@@ -41,7 +41,7 @@ opaque type MoveSlot = Int :| Interval.Closed[1, 4]
 object MoveSlot extends NumericTypeOps[Int, Interval.Closed[1, 4], MoveSlot]
 
 opaque type StatusEffect = String :| Not[Blank]
-object StatusEffect extends RefinedTypeOpsImpl[String, Not[Blank], StatusEffect]:
+object StatusEffect extends RefinedTypeOps[String, Not[Blank], StatusEffect]:
 
   val Fainted: StatusEffect = "fnt"
   val Burn: StatusEffect = "brn"
@@ -54,7 +54,7 @@ opaque type StatBoost = Int :| Interval.Closed[-6, 6]
 object StatBoost extends NumericTypeOps[Int, Interval.Closed[-6, 6], StatBoost]
 
 opaque type Weather = String :| Not[Blank]
-object Weather extends RefinedTypeOpsImpl[String, Not[Blank], Weather]:
+object Weather extends RefinedTypeOps[String, Not[Blank], Weather]:
 
   val DesolateLand: Weather = "desolate land"
   val Hail: Weather = "hail"
@@ -65,13 +65,13 @@ object Weather extends RefinedTypeOpsImpl[String, Not[Blank], Weather]:
   val Sun: Weather = "sun"
 
 opaque type FieldEffect = String :| Not[Blank]
-object FieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], FieldEffect]
+object FieldEffect extends RefinedTypeOps[String, Not[Blank], FieldEffect]
 
 opaque type SideFieldEffect = String :| Not[Blank]
-object SideFieldEffect extends RefinedTypeOpsImpl[String, Not[Blank], SideFieldEffect]
+object SideFieldEffect extends RefinedTypeOps[String, Not[Blank], SideFieldEffect]
 
 opaque type VolatileStatus = String :| Not[Blank]
-object VolatileStatus extends RefinedTypeOpsImpl[String, Not[Blank], VolatileStatus]:
+object VolatileStatus extends RefinedTypeOps[String, Not[Blank], VolatileStatus]:
 
   def fromMove(move: MoveName): VolatileStatus = VolatileStatus.assume(move.toString)
 
